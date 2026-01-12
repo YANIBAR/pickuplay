@@ -1,45 +1,60 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { FC, useEffect, useState } from 'react';
+//import SplashScreen from 'react-native-splash-screen';
+import { NavigationContainer } from '@react-navigation/native';
+import { AppStack } from '@navigation';
+import { withProviders } from '@hocs';
+import AuthProvider from './src/shared/contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from '@services/localisation';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+const App: FC = () => {
+  const [isReady, setIsReady] = useState(false);
+  const [initialRoute, setInitialRoute] = useState<string>('login'); // Default route
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  useEffect(() => {
+    const initializeApp = async () => {
+        console.log("Initial token:", initialRoute);
+      try {
+        //SplashScreen.hide();
+        // Initialize i18n first
+        await i18n.init();
+        
+        // Get stored language preference if any
+        const storedLanguage = await AsyncStorage.getItem('selectedLanguage');
+        if (storedLanguage && i18n.isInitialized) {
+          await i18n.changeLanguage(storedLanguage);
+        }
+        const token = await AsyncStorage.getItem('access_token');
+        const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+        console.log("Initial token:", initialRoute);
+        if (token) {
+          if(hasLaunched === 'false') {
+           setInitialRoute('onboarding');
+          } else {
+            setInitialRoute('welcome');
+          }
+        } 
+      } catch (error) {
+        console.error('Initialization error:', error);
+        setInitialRoute('onboarding'); // Fallback
+      } finally {
+        setIsReady(true);
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  if (!isReady) {
+    return null; // Or a loading screen
+  }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <AuthProvider>
+        <AppStack initialRouteName={initialRoute} />
+      </AuthProvider>
+    </NavigationContainer>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
+};
+export default withProviders(App);

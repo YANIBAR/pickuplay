@@ -1,0 +1,566 @@
+{
+  "AvailableLanguages": "Available Languages",
+  "CustomerService": "Customer Survice",
+  "EnterMessage": "Enter Your message...",
+  "welcome": {
+    "title": "Welcome back!",
+    "subtitle": " Hello there, personalize your deal peace of mind on pickuplay.",
+    "alreadyHasAccount": "Already have account?",
+    "login": "login",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "logout": {
+    "title": "Logout",
+    "confirmation": "Are you sure you want to log out?",
+    "confirm_button": "Yes, Logout"
+  },
+  "login": {
+    "invalidCredentialsTitle": "Invalid credentials",
+    "invalidCredentialsMessage": "Please check your username or password and try again.",
+    "limitReachedTitle": "Login Limit Reached",
+    "limitReachedMessage": "Too many login attempts. Please try again in 5 minutes. 😅",
+    "unexpectedErrorTitle": "Login failed",
+    "unexpectedErrorMessage": "An unexpected error occurred. Please try again later.",
+    "connectionErrorTitle": "Login failed",
+    "connectionErrorMessage": "An error occurred. Please check your internet connection and try again.",
+    "tokenStorageError": "Error storing the token",
+    "userStorageError": "Error storing the user details"
+  },
+  "c": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "username": "Username",
+    "phone": "Phone",
+    "email": "Email",
+    "password": "Password",
+    "passwordPlaceholder": "Password (8 or more characters)",
+    "confirmPasswordPlaceholder": "Confirm Password",
+    "country": "Country",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "send": "Send",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "and": "and",
+    "reset": "reset",
+    "login": "Login",
+    "logout": "Logout",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "skip": "Skip",
+    "continue": "Continue",
+    "biography": "Biography",
+    "emailAddress": "Email address",
+    "phoneNumber": "Phone number",
+    "emailPlaceholder": "example@gmail.com",
+    "loading": "Loading..."
+  },
+  "signUp": {
+    "headerTitle": "Sign Up",
+    "createAccount": "Create an account to get started",
+    "termsAcceptance": "By creating an account you agree to our",
+    "createMyAccount": "Create my account",
+    "alreadyHaveAccount": "Already have an account ?"
+  },
+  "signIn": {
+    "forgotPassword": "Forgot password ?",
+    "emailOrPhone": "Email or Phone Number",
+    "usernameOrEmail": "Username or Email",
+    "dontHaveAccount": "Don't have an account ?",
+    "signUp.roleCustomer": "Customer",
+    "signUp.rolePartner": "Partner"
+  },
+  "otpVerification": {
+    "headerTitle": "OTP Verification",
+    "codeSent": "Code has been sent to",
+    "resendCodeIn": "Resend code in",
+    "verify": "Verify",
+    "resend": "Resend",
+    "successTitle": "Success",
+    "tokenVerifiedMessage": "Token verified successfully.",
+    "errorTitle": "Error",
+    "tokenFailedWithStatus": "Token verification failed with status: {{status}}.",
+    "tokenVerificationFailed": "Failed to verify the token. {{message}}",
+    "genericError": "Please try again.",
+    "timeExpiredMessage": "Time has expired. Please request a new token.",
+    "otpResentMessage": "OTP code has been resent to {{email}}.",
+    "resendErrorLog": "Error resending OTP:",
+    "serverError": "Server error: {{message}}",
+    "noResponseError": "No response from server. Please check your internet connection.",
+    "unexpectedResendError": "An error occurred while resending the OTP. Please try again."
+  },
+  "forgotPwd": {
+    "title": "Forgot password",
+    "subtitle": "Please enter your email address to receive an OTP code for password reset"
+  },
+  "onboarding": {
+    "onboarding1": {
+      "title": "Welcome to M’go Pass!",
+      "description": "🎉 Discover Morocco’s first all-in-one activity pass!\nWith M’go Pass, you can enjoy top venues — from playgrounds to museums to surf classes — all with one smart membership.\nWhether you're a family, a young explorer, or a tourist, M’go Pass makes fun easy and affordable."
+    },
+    "onboarding2": {
+      "title": "How M’go Pass Works",
+      "description": "🎟️ 1. Choose your membership (Kids, Adult, or Tourist)\n📍 2. Explore included venues nearby\n📲 3. Show your QR pass at the venue to redeem\n✅ 4. Enjoy the activity — 100% cash-free and easy!"
+    },
+    "onboarding3": {
+      "title": "Smart Access, Real Savings",
+      "description": "💰 Save hundreds of dirhams with just a few visits\n📆 You can use each venue once or twice per year\n🕒 Partners set their valid times (like weekdays or mornings)\n📍 Everything is managed digitally — no paper tickets!"
+    },
+    "onboarding4": {
+      "title": "Trusted by Top Venues",
+      "description": "🏅 Our partners are verified & approved\n📸 You can preview every activity before visiting\n🔒 Your QR code is secure and unique\n🎁 Some venues may offer special perks for members!"
+    },
+    "previousButton": "Previous",
+    "nextButton": "Next",
+    "finishButton": "Finish"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "networkError": "A network error has occurred. Please try again later.",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "emailAddressRequired": "Email address is required",
+    "countryRequired": "Country is required",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "phoneRequired": "Phone is required",
+    "confirmPassword": "Confirm password is required",
+    "usernameOrEmailRequired": "Username or Email is required",
+    "phoneNumberRequired": "Phone is required",
+    "passwordMinLength": "Too short, Use at least 8 characters",
+    "passwordSpecialCharacter": "Password must contain at least one letter and one special character.",
+    "passwordMatch": "Passwords must match"
+  },
+  "cnp": {
+      "modal": {
+        "congratulations": "Congratulations",
+        "accountReady": "Your account is ready to use. You will be redirected to the Home page in a few seconds.",
+        "continue": "Continue"
+      },
+      "header": {
+        "createNewPassword": "Create New Password"
+      },
+      "form": {
+        "createYourNewPassword": "Create Your New Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password",
+        "rememberMe": "Remember me",
+        "continue": "Continue"
+      }
+  },
+  "forgotPwdEmail": {
+    "title": "Forgot Your Password?",
+    "subtitle": "Enter your registered email address below and we'll send you instructions on how to reset your password.",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "Enter your email",
+    "send": "Send",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign Up"
+  },
+  "passwordMethods": {
+    "title": "Forgot Password",
+    "subtitle": "Select which contact details we should use to reset your password.",
+    "viaSMS": "via SMS:",
+    "viaEmail": "via Email:",
+    "continue": "Continue"
+  },
+  "forgotPwdPhone": {
+    "title": "Forgot Password",
+    "enterPhone": "Enter Your Phone Number",
+    "placeholder": "Enter your phone number",
+    "rememberMe": "Remember me",
+    "resetPassword": "Reset Password",
+    "rememberPassword": "Remember the password?",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up"
+  },
+  "verifyIdentity": {
+    "title": "Let’s Verify Your Identity",
+    "subtitle": "We want to confirm your identity before you can use our service.",
+    "buttonText": "Verify Identity"
+  },
+  "editProfile": {
+    "title": "Personal Profile",
+    "phoneNumber": "Enter your phone number",
+    "streetAddress": "Street address",
+    "city": "City",
+    "state": "State",
+    "zipCode": "Zip code",
+    "updateButton": "Update",
+    "saveChanges": "Save Changes",
+    "deleteMyAccount": "Delete My Account",
+    "updating": "Updating..."
+
+  },
+  "settings": {
+    "invite": "Join me on this amazing app! Use my referral link:",
+    "editProfile": "Edit Profile",
+    "verifyProfile": "Verify Profile",
+    "payment": "Payment",
+    "languageRegion": "Language & Region",
+    "inviteFriends": "Invite Friends",
+    "privacyPolicy": "Privacy Policy",
+    "termsConditions": "Terms and Conditions",
+    "helpCenter": "Help Center",
+    "logout": "Logout"
+  },
+  "writeReview": {
+    "deliveryCompleted": "Delivery Completed!",
+    "leaveReview": "Please leave a review for others.",
+    "placeholderReview": "The shipping is so fast 🔥",
+    "writeReview": "Write Review",
+    "cancel": "Cancel",
+    "errorIncompleteReview": "Please provide a rating and a review.",
+    "accessibilityInput": "Write your review here"
+  },
+  "terms": {
+    "headerTitle": "Terms a d conditions",
+    "introduction": "By using this website and/or purchasing from this app, you ('you' 'your' or 'purchaser') are agreeing to the following binding agreement: 'Us' or 'We' shall refer to pickuplay Inc., its board of directors, employees, officers, agents, parent company, shareholders, managers, members and affiliates.",
+    "sections": {
+      "description": {
+        "title": "Description of pickuplay Service",
+        "content": "Mgo Pass is Morocco's first membership program giving users access to multiple entertainment venues for one flat price. Members pay once for a yearly pass and get into dozens of attractions for free or with huge discounts."
+      },
+      "purchase": {
+        "title": "Purchase Requirements",
+        "content": "Users must be 18 or older to register. Parents may create accounts for minor children but assume full responsibility for their compliance with these terms."
+      },
+      "membership": {
+        "title": "Membership Terms",
+        "content": "Accounts remain active unless terminated. pickuplay reserves the right to suspend accounts violating these terms."      },
+      "venues": {
+        "title": "Service Providers",
+        "content": "Participating venues and service providers may change without notice. Current members gain access to new providers automatically."
+      },
+      "transferability": {
+        "title": "Account Transfer",
+        "content": "Accounts are non-transferable except for parent-managed minor accounts. Each account has unique identification."
+      },
+      "disclaimers": {
+        "title": "Service Disclaimers",
+        "content": "pickuplay makes no warranties regarding service accuracy or suitability. Users assume all risks when using connected services."
+      },
+      "liability": {
+        "title": "Liability Limitations",
+        "content": "Users release pickuplay from liability for injuries, damages or losses occurring during service use. This includes family members and heirs."
+      },
+      "indemnification": {
+        "title": "User Responsibilities",
+        "content": "You agree to indemnify pickuplay against claims arising from your service use, including venue incidents and website reliance."
+      },
+      "privacy": {
+        "title": "Data Practices",
+        "content": "While transaction data is secured, general website use carries no privacy expectation. See our Privacy Policy for details."
+      },
+      "content": {
+        "title": "Website Content",
+        "content": "Third-party links don't imply endorsement. pickuplay isn't responsible for external content accuracy or availability."
+      },
+      "property": {
+        "title": "Intellectual Property",
+        "content": "All website content is pickuplay property. Unauthorized reproduction or distribution is prohibited."
+      },
+      "communications": {
+        "title": "Contact Consent",
+        "content": "You consent to service-related communications via email/text. Opt-out options are available for promotional messages."
+      },
+      "governance": {
+        "title": "Legal Governance",
+        "content": "Utah law governs these terms. Claims must be filed within one year in Salt Lake County courts."
+      }
+    },
+    "prohibitedItems": {
+      "title": "Prohibited Items",
+      "items": [
+        "Weapons and sharp objects",
+        "Flammable materials",
+        "Illegal substances",
+        "Counterfeit goods",
+        "Perishable items",
+        "Live animals",
+        "Hazardous materials"
+      ]
+    },
+    "customs": {
+      "title": "Customs Compliance",
+      "content": "Users must comply with all customs regulations. pickuplay provides no guidance on duties/taxes and assumes no liability for violations."
+    },
+    "modifications": {
+      "title": "Policy Changes",
+      "content": "pickuplay may modify these terms with updated effective dates. Continued use constitutes acceptance of changes."
+    }
+  },
+  "PrivacyPolicy": {
+    "EffectiveDate": "Effective Date",
+    "InformationWeCollect": "1. Information We Collect",
+    "InformationWeCollectDescription": "We collect various types of information to provide and improve our service, including:",
+    "PersonalData": "Personal Data: Your email address, name, phone number, and physical address.",
+    "UsageData": "Usage Data: Information about how you use our service, such as IP address, browser type, and device identifiers.",
+    "UseOfPersonalData": "2. Use of Your Personal Data",
+    "UseOfPersonalDataDescription": "We may use your personal data for the following purposes:",
+    "ServiceDelivery": "Service Delivery: To provide and maintain our services, including personalized content and features.",
+    "Communication": "Communication: To communicate with you, respond to your inquiries, and provide important information about our services.",
+    "Analytics": "Analytics: To analyze usage patterns, improve our services, and customize content based on user preferences.",
+    "TrackingAndCookies": "3. Tracking & Cookies",
+    "TrackingAndCookiesDescription": "We use cookies and similar tracking technologies to enhance your experience and gather usage data. You can disable cookies via your browser, but this may affect your ability to use some features of our service.",
+    "DataSecurity": "4. Data Security",
+    "DataSecurityDescription": "We prioritize the security of your personal data but cannot guarantee 100% protection. We use commercially reasonable safeguards to protect your information.",
+    "DataDeletionRequests": "5. Data Deletion Requests",
+    "DataDeletionRequestsDescription": "You may request the deletion of your personal data by contacting us at [Insert Support Email]. Interactions with other users will be anonymized to maintain service integrity.",
+    "ChangesToPrivacyPolicy": "6. Changes to This Privacy Policy",
+    "ChangesToPrivacyPolicyDescription": "We may update this Privacy Policy periodically. Any changes will be communicated via email or a prominent notice in our service.",
+    "ContactUs": "7. Contact Us",
+    "ContactUsDescription": "If you have any questions, feel free to contact us at hello@pickuplay.com."
+  },
+  "menu": {
+    "events": "Events",
+    "memberships": "Memberships",
+    "charts": "Charts",
+    "scan_qr": "Scan QR",
+    "menu": "Menu"
+  },
+  "faq": {
+    "categories": {
+      "general": "General",
+      "account": "Account",
+      "security": "Security",
+      "shopper": "Shopper",
+      "traveler": "Traveler",
+      "issues": "Issues",
+      "tracking": "Tracking"
+    },
+    "question1": "How long is my pass valid for?",
+    "answer1": "M'go Passes are valid 1 year from the date of purchase, not for a calendar year. If you purchase your pass in the middle of the year and events are past or out of season, they will be available to you the following season until your pass expires.",
+    "question2": "What happens when I renew my M'go Pass membership early?",
+    "answer2": "Renewing your M'go Pass membership early simply extends your original expiration date one year. Any visits to venues prior to your original pass expiring will count towards your original pass.  If it exceeds the allowed limit, it will count towards the renewed pass.  Once your original pass expires, your pass usages will reset to zero.",
+    "question3": "How do I reserve my tickets to a sporting event?",
+    "answer3": "The calandar icon on the M'go Pass app displays all upcoming 'Events' available to you as a M'go Pass member.  Choose the event to register your passes.  If your on www.M'gopass.com, click on the venue you would like to reserve tickets for and proceed to the 'Events' tab at the top of the page slideout. Event registration links appear next to that event 2 weeks prior to game day, and disappears 48 hours prior to event start. Tickets will either be at 'Will Call' the day of event, or will be emailed electronically depending on how the venue dispurses tickets.  Instructions for getting tickets will arrive in your event registration confirmation email.",
+    "question4": "How do I change my contact information for my M'go Pass?",
+    "answer4": "Simply login to your account and you will be able to edit your account information.",
+    "question5": "Is the M'go Pass transferable?",
+    "answer5": "M'go Pass memberships are not transferrable.  Each pass comes with the owner`s name and individualized bar code that can only be used by the pass owner.",
+    "question6": "Will the current Venues always be available on the M'go Pass?",
+    "answer6": "We anticipate that current venues will remain on the M'go Pass. However, participating venues are subject to change.  New venues are often added at no additional charge to current M'go Pass members.",
+    "question7": "At what age do I need M'go Pass?",
+    "answer7": "We recommend that children ages 2 years old and up have their own M'go Pass with their own name on it. Most venues begin charging admission at this age. Some venues do require admission for children who have had a birthday.  Please check specific venue pages for details.",
+    "question8": "Will any new Venues be added?",
+    "answer8": "Yes. We are always looking at adding additional venues to the M'go Pass. When done, existing pass holders are automatically included.",
+    "question9": "How do refunds work?",
+    "answer9": "M'go Pass will refund orders within 30 days of purchase.  Refunds will not be issued on memberships that have been used at participating venues."
+  },
+  "payment": {
+    "cardHolderName": "Card holder name",
+    "cardNumber": "Card number",
+    "expireDate": "Expire date",
+    "CVV": "CVV"
+  },
+  "statistics": {
+    "venueAnalytics": {
+      "title": "Venue Analytics"
+    },
+    "timeFrame": {
+      "hour": "H$our",
+      "day": "Day",
+      "month": "Month"
+    },
+    "stats": {
+      "totalVisitors": "Total Visitors",
+      "peakTime": "Peak {{timeFrame}}",
+      "primaryAge": "Primary Age"
+    },
+    "charts": {
+      "visitorsOverTime": "Visitors Over Time",
+      "genderDistribution": "Gender Distribution",
+      "ageDistribution": "Age Distribution"
+    },
+    "common": {
+      "loading": "Loading data..."
+    }
+  },
+  "scanQRCode": {
+    "scan": {
+      "instructionsTop": "Please scan a QR code to continue",
+      "instructionsBottom": "Position the QR code within the frame",
+      "tapToScan": "Tap to scan QR code"
+    },
+    "common": {
+      "ok": "OK",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    }
+  },
+  "membership": {
+    "memberships": {
+      "header": "My Memberships",
+      "emptyState": {
+        "title": "No Memberships Found",
+        "subtitle": "You don't have any active memberships yet. Get started by adding your first membership.",
+        "button": "Add Membership"
+      }
+    },
+    "city": "City",
+    "type": "Type",
+    "valid_until": "Valid until",
+    "status": "Status",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "code": "Code",
+    "types": {
+      "kids": "Kid",
+      "adults": "Adult",
+      "golden": "Golden",
+      "tourists": "Tourist"
+    },
+    "common": {
+      "loading": "Loading memberships..."
+    },
+    "addMembership": "Add New Membership"
+  },
+  "event": {
+    "eventTitle":"Events",
+    "occurrence": "{{count}} time",
+    "occurrence_plural": "{{count}} times",
+    "eventsPerYear": "{{count}} Event/year",
+    "eventsPerYear_plural": "{{count}} Events/year"
+  },
+  "activities_header": "activities list",
+  "activity": {
+    "location": "Location",
+    "activeDays": "Active Days",
+    "allowedVisits": "Allowed Visits",
+    "visitCount_one": " visit",
+    "visitCount_plural": " visits",
+    "membershipTypes": "Membership Types",
+    "scanButton": "Scan QR to Check-in",
+    "activity_details": "activity Details",
+    "qrModal": {
+      "title": "Your Membership QR Code",
+      "instructions": "Show this QR code at the entrance"
+    },
+    "activityTypes": {
+      "fitness": "Fitness",
+      "sports": "Sports",
+      "wellness": "Wellness",
+      "pool": "Pool",
+      "museum": "Museum",
+      "cinema": "Cinema",
+      "park": "Park",
+      "theater": "Theater",
+      "restaurant": "Restaurant"
+    }
+  },
+  "edit_activity" : {
+    "edit_activity": "Edit Activity",
+    "activity_name": "Activity Name",
+    "enter_activity_name": "Enter activity name",
+    "type": "Type",
+    "fitness": "Fitness",
+    "sports": "Sports",
+    "wellness": "Wellness",
+    "pool": "Pool",
+    "museum": "Museum",
+    "cinema": "Cinema",
+    "park": "Park",
+    "theater": "Theater",
+    "restaurant": "Restaurant",
+    "city": "City",
+    "casablanca": "Casablanca",
+    "marrakesh": "Marrakesh",
+    "tanger": "Tanger",
+    "fes": "Fes",
+    "agadir": "Agadir",
+    "rabat": "Rabat",
+    "location": "Location",
+    "enter_location": "Enter location",
+    "allowed_visits": "Allowed Visits",
+    "active_days_hours": "Active Days & Hours",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "to": "to",
+    "description": "Description",
+    "enter_description": "Enter description",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "add_membership": {
+    "addMembership": "Add Membership",
+    "memberName": "Member Name *",
+    "enterFullName": "Enter full name",
+    "gender": "Gender *",
+    "male": "Male",
+    "female": "Female",
+    "birthDate": "Birth Date",
+    "city": "City *",
+    "selectCity": "Select a city...",
+    "membershipType": "Membership Type *",
+    "adult": "Adult",
+    "kids": "Kids",
+    "startDate": "Membership Start Date",
+    "submitButton": "Add Membership"
+  },
+  "scanQRCode": {
+    "scan": {
+      "instructionsTop": "Please scan a QR code to continue",
+      "instructionsBottom": "Position the QR code within the frame",
+      "tapToScan": "Tap to scan QR code"
+    },
+    "manualInput": {
+      "title": "Enter Membership ID Manually",
+      "subtitle": "If QR code scanning isn't working, you can enter the membership ID manually",
+      "placeholder": "Enter Membership ID",
+      "submit": "Check Membership",
+      "backToScanner": "Back to Scanner"
+    },
+    "buttons": {
+      "manualInput": "Enter Membership ID Manually",
+      "manualInputSubtext": "Use this if QR scanning isn't working",
+      "closeScanner": "Close Scanner"
+    },
+    "errors": {
+      "wrongQR": "This QR code is not for the correct activity.\nPlease scan the right QR code.",
+      "invalidQR": "The QR code format is not valid. Please try again.",
+      "invalidInput": "Invalid Input",
+      "membershipNotFound": "No membership found with this code. Please check and try again."
+    },
+    "modals": {
+      "confirmRedemption": "Confirm Redemption",
+      "success": "Success",
+      "error": "Error"
+    },
+    "divider": "OR"
+  },
+  "event": {
+    "eventTitle": "Events",
+    "eventDetails": "Event Details",
+    "occurrence": "Registered: {{count}}",
+    "eventsPerYear": "Max Visits: {{count}}",
+    "eventsAvailable": "events available",
+    "noEventsAvailable": "No events available at the moment",
+    "registered": "Registered",
+    "maxVisits": "Max Visits",
+    "available": "Available",
+    "full": "Full",
+    "registrationOpen": "Registration Open",
+    "registrationClosed": "Registration Closed",
+    "registerBefore": "Register within {{days}} days (Before {{date}})",
+    "eventDate": "Event Date",
+    "eventTime": "Event Time",
+    "location": "Location",
+    "availableSlots": "Available Slots",
+    "of": "of",
+    "membershipTypes": "Membership Types",
+    "howItWorks": "How It Works",
+    "registerNow": "Register Now",
+    "eventFull": "Event is Full",
+    "qrModal": {
+      "title": "Event Registration QR Code",
+      "instructions": "Show this QR code at the event entrance"
+    }
+  }
+}

@@ -1,4 +1,27 @@
 {
   "name": "pickuplay",
-  "displayName": "pickuplay"
+  "displayName": "pickuplay",
+  "expo": {
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ]
+    ],
+    "android": {
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes."
+      }
+    }
+  }
 }

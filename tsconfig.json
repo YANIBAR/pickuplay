@@ -1,8 +1,35 @@
 {
   "extends": "@react-native/typescript-config",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "src/**/*",
+    "env.d.ts" 
+  ],
+  "exclude": ["**/node_modules", "**/Pods"],
   "compilerOptions": {
-    "types": ["jest"],
-  },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/node_modules", "**/Pods"]
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": ["./src/assets/*"],
+      "@constants": ["./src/constants"],
+      "@components": ["./src/shared/components"],
+      "@components/*": ["./src/shared/components/*"],
+      "@services/*": ["./src/services/*"],
+      "@navigation": ["./src/navigation"],
+      "@navigation/*": ["./src/navigation/*"],
+      "@screens": ["./src/screens"],
+      "@screens/*": ["./src/screens/*"],
+      "@hooks": ["./src/shared/hooks"],
+      "@hooks/*": ["./src/shared/hooks/*"],
+      "@styles/*": ["./src/styles"],
+      "@data/*": ["./src/shared/data/*"],
+      "@data": ["./src/shared/data"],
+      "@hocs": ["./src/shared/hocs"],
+      "@hocs/*": ["./src/shared/hocs/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@types": ["./src/types"],
+      "@types/*": ["./src/types/*"]
+    }
+  }
 }

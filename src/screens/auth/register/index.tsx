@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, ScrollView, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import  { useState, useEffect } from 'react';
+import { View, Image, SafeAreaView } from 'react-native';
 import { Text, Header, TextInput, Button, Row, Column, Phone } from '@components';
 import { Controller, useForm } from 'react-hook-form';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {  useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { authSelector, userRegister } from '../../../app/slices/auth';
 import { COLORS, icons, images, screens  } from '@constants';

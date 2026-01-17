@@ -63,8 +63,10 @@ const Login = () => {
         identifier: formData.identifier,
         password: formData.password
       });
+      
       const userData = response.data._doc;
       const accessToken = response.data.access_token;
+      console.log("Login response:", response.data);
       
       if (!userData) {
         throw new Error("No user data received from the server");
@@ -74,11 +76,9 @@ const Login = () => {
         throw new Error('No access token received');
       }
 
-      // Store data and WAIT for it to complete
       await storeToken(accessToken);
       await storeUser(userData);
       
-      // Verify critical data is stored before navigation
       const storedRole = await AsyncStorage.getItem('role');
       const storedId = await AsyncStorage.getItem('id');
       
@@ -87,13 +87,9 @@ const Login = () => {
       }
       
       console.log('User data stored successfully, role:', storedRole);
-      
-      // Add a small delay to ensure all async operations complete
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Navigate only after verification
       navigation.navigate("welcome");
-
+      
   };
 
   // On successful login

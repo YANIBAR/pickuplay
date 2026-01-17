@@ -8,7 +8,8 @@ import {
   ChartScreen,
   ScanQRCodeScreen,
   PhotoIdScreen,
-  MembershipScreen
+  MembershipScreen,
+  ActivitiesScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -81,56 +82,48 @@ const TabNavigator = () => {
       tabBar={props => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}>
 
-      {!isPartner && (
         <Tab.Screen
           name="Memberships"
           component={MembershipScreen}
           options={{
-            tabBarLabel: t('menu.memberships'),
+            tabBarLabel: t('Bookings'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="qrcode" type="antDesign" color={color} size={size} />
+              <Icon name="calendar" type="antDesign" color={color} size={size} />
             ),
           }}
         />
-      )}
       
-      {isPartner && (
-        <>
-          <Tab.Screen
-            name="Charts"
-            component={ChartScreen}
-            options={{
-              tabBarLabel: t('menu.charts'),
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="pie-chart" type="feather" color={color} size={size} />
-              ),
-            }}
-          /> 
-          <Tab.Screen
-            name="ScanQRCode"
-            component={ScanQRCodeScreen}
-            options={{
-              tabBarLabel: t('menu.scan_qr'),
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="qrcode-scan" type="materialCommunityIcons" color={color} size={size} />
-              ),
-            }}
-          />
-        </>
-      )}
+        <Tab.Screen
+          name="Charts"
+          component={ChartScreen}
+          options={{
+            tabBarLabel: t('menu.charts'),
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="trophy-outline" type="ionicons" color={color} size={size} />
+            ),
+          }}
+        /> 
+        <Tab.Screen
+          name="ScanQRCode"
+          component={ActivitiesScreen}
+          options={{
+            tabBarLabel: t('Games'),
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="whistle-outline" type="materialCommunityIcons" color={color} size={size} />
+            ),
+          }}
+        />
 
-      {!isPartner && (
         <Tab.Screen
           name="Events"
           component={EventsScreen}
           options={{
-            tabBarLabel: t('menu.events'),
+            tabBarLabel: t('menu.chat'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="calendar" type="feather" color={color} size={size} />
+              <Icon name="chatbubbles-outline" type="ionicons" color={color} size={size} />
             ),
           }}
         />
-      )}
 
       <Tab.Screen
         name="Setting"

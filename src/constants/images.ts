@@ -12,6 +12,7 @@ const scanCard = require('@assets/images/scan_card.png');
 const elipseCard = require('@assets/images/elipse-card.png');
 const rectangleCard = require('@assets/images/rectangle-card.png');
 const orderSuccess = require('@assets/images/order_success.png');
+const icon = require('@assets/images/icon.png');
 
 const images = {
   logo,
@@ -26,6 +27,7 @@ const images = {
   elipseCard,
   rectangleCard,
   orderSuccess,
+  icon
 };
 
 export default images;

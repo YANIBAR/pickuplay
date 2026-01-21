@@ -7,6 +7,7 @@ import {
   FlatList,
   Image,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Header, Checkbox, Button, TextInput, View, Text, Phone } from '@components';
@@ -65,20 +66,18 @@ const ForgotPasswordPhoneNumber = () => {
     const phoneValue = control._formValues.phone || '';
     const fullPhoneNumber = `${callingCode}${phoneValue}`;
 
-    console.log(`${API_BACKEND_URL}/auth/send-otp/`, fullPhoneNumber);
-
     // Call NestJS backend endpoint
-    const response = await axios.post(
+    /*const response = await axios.post(
       `${API_BACKEND_URL}/auth/send-otp/`, {
         phone: fullPhoneNumber
       }
-    );
+    );*/
+    console.log(phone);
 
-    console.log('OTP sent successfully:', response.data);
-    alert('OTP sent successfully via SMS!');
+    Alert.alert('OTP sent successfully via SMS!');
     
     // Navigate to OTP verification screen
-    navigate(screens.otpverification, { fullPhoneNumber, action: 'resetPassword' });
+    navigate(screens.otpverification, { phone : fullPhoneNumber, action: 'resetPassword' });
   } catch (error) {
     console.error('Error sending OTP:', error.response?.data || error.message);
     
@@ -86,7 +85,7 @@ const ForgotPasswordPhoneNumber = () => {
     const errorMessage = error.response?.data?.message || 
                         error.response?.data?.error || 
                         'Failed to send OTP. Please try again.';
-    alert(errorMessage);
+    Alert.alert(errorMessage);
   } finally {
     setLoading(false);
   }

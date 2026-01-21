@@ -2,7 +2,8 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from 'src/app/store';
 import api from '@services/api';
 import { User } from '@types';
-import { API_BACKEND_URL } from '@env';
+import { JAVA_API } from '@env';
+import axios from 'axios';
 
 // Define proper payload types
 interface RegisterPayload {
@@ -55,16 +56,9 @@ const initialState: AuthState = {
 export const userRegister = createAsyncThunk(
   'auth/register',
   async (payload: RegisterPayload, { rejectWithValue }) => {
-    try {
-      const { data } = await api.post(`${API_BACKEND_URL}/user/register`, payload);
-      return data;
-    } catch (error: any) {
-      console.log(error);
-      if (!error.response) {
-        return rejectWithValue('Network error');
-      }
-      return rejectWithValue(error.response.data || 'An error occurred');
-    }
+    console.log("Register Payload:");
+      const response = await axios.post(JAVA_API + `auth/register`, payload);
+
   }
 );
 

@@ -118,7 +118,7 @@ const Profile = () => {
         'role',
         'preferredLanguage',
         'profileImage',
-        'activityId',
+        'gameId',
       ];
   
       await AsyncStorage.multiRemove(keysToRemove);
@@ -146,9 +146,9 @@ const Profile = () => {
     });
 
     if (result.action === Share.sharedAction) {
-      if (result.activityType) {
-        // Handle specific share activity
-        console.log('Shared via:', result.activityType);
+      if (result.gameType) {
+        // Handle specific share game
+        console.log('Shared via:', result.gameType);
       } else {
         // Shared successfully
         console.log('Success', 'Referral link shared successfully!');

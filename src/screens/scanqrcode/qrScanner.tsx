@@ -18,7 +18,7 @@ const QRScanner = (props) => {
   const [hasPermission, setHasPermission] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const device = useCameraDevice("back");
-  const [activityId, setActivityId] = useState('6835ecc1e17e7ae06700a26f');
+  const [gameId, setgameId] = useState('6835ecc1e17e7ae06700a26f');
   const [scannerActive, setScannerActive] = useState(false);
   const [membershipId, setMembershipId] = useState('');
 
@@ -35,10 +35,10 @@ const QRScanner = (props) => {
     cancelText: 'Cancel'
   });
 
-  const checkActivity = async (membershipIdToCheck = membershipId) => {
+  const checkgame = async (membershipIdToCheck = membershipId) => {
   try {
     const response = await axios.get(`${API_BACKEND_URL}/redemptions/check`, {
-      params: { membershipId: membershipIdToCheck, activityId }
+      params: { membershipId: membershipIdToCheck, gameId }
     });
     
     const redemptionCountInfo = response.data.redemptionCount;
@@ -65,7 +65,7 @@ const QRScanner = (props) => {
   } catch (error) {
     setModalContent({
       title: 'Error',
-      message: 'Failed to check activity eligibility',
+      message: 'Failed to check game eligibility',
       confirmText: 'OK'
     });
     // Use functional update here
@@ -78,28 +78,28 @@ const QRScanner = (props) => {
       try {
         
       const scannedData = JSON.parse(codes[0].value);
-        // Compare activity IDs - show error if they DON'T match
-        if (scannedData.activityId !== activityId) {
+        // Compare game IDs - show error if they DON'T match
+        if (scannedData.gameId !== gameId) {
             // Close scanner and return to default view
             setScannerActive(false);
             
-            // Show error message for incorrect activity QR code
+            // Show error message for incorrect game QR code
             setModalContent({
                 title: 'Wrong QR Code',
-                message: 'This QR code is not for the correct activity.\nPlease scan the right QR code.',
+                message: 'This QR code is not for the correct game.\nPlease scan the right QR code.',
                 confirmText: 'OK'
             });
             setModalVisible({ ...modalVisible, error: true });
             return;
         }
         
-        // If activity ID matches, proceed with the original logic
+        // If game ID matches, proceed with the original logic
         setMembershipId(scannedData.membershipId);
         setScannerActive(false);
         
-        // Automatically check the activity after successful scan
+        // Automatically check the game after successful scan
         setTimeout(() => {
-            checkActivity(scannedData.membershipId);
+            checkgame(scannedData.membershipId);
         }, 300);
         
     } catch (error) {

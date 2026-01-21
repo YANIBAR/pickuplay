@@ -18,7 +18,7 @@ import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 const ScanQrCode = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const [activityId, setActivityId] = useState('');
+  const [gameId, setgameId] = useState('');
   const [membershipId, setMembershipId] = useState('');
   const [scannerActive, setScannerActive] = useState(false);
   const [showManualInput, setShowManualInput] = useState(false);
@@ -39,8 +39,8 @@ const ScanQrCode = () => {
   });
 
   const fetchRequests = async () => {
-    const activity_Id = await AsyncStorage.getItem('activityId');
-    setActivityId(activity_Id);
+    const game_Id = await AsyncStorage.getItem('gameId');
+    setgameId(game_Id);
   }
 
   useEffect(() => {
@@ -147,10 +147,10 @@ const ScanQrCode = () => {
   };
 
   // API Calls
-  const checkActivity = async (membershipIdToCheck = membershipId) => {
+  const checkgame = async (membershipIdToCheck = membershipId) => {
     try {
       const response = await axios.get(`${API_BACKEND_URL}/redemptions/check`, {
-        params: { membershipId: membershipIdToCheck, activityId }
+        params: { membershipId: membershipIdToCheck, gameId }
       });
       
       const redemptionCountInfo = response.data.redemptionCount;
@@ -176,10 +176,10 @@ const ScanQrCode = () => {
         });
       }
     } catch (error) {
-      console.error('Error checking activity:', error);
+      console.error('Error checking game:', error);
       setModalContent({
         title: 'Error',
-        message: 'Failed to check activity eligibility',
+        message: 'Failed to check game eligibility',
         confirmText: 'OK'
       });
       setModalVisible({ ...modalVisible, error: true });
@@ -205,7 +205,7 @@ const ScanQrCode = () => {
     try {
       const response = await axios.post(`${API_BACKEND_URL}/redemptions/create`, {
         membershipId,
-        activityId
+        gameId
       });
       
       setModalContent({
@@ -300,8 +300,8 @@ const ScanQrCode = () => {
       // Set the membership ID for later use
       setMembershipId(membershipId);
       
-      // Now check the activity with the membership ID
-      checkActivity(membershipId);
+      // Now check the game with the membership ID
+      checkgame(membershipId);
       
     } catch (error) {
       console.error('Error getting membership by code:', error);
@@ -344,28 +344,28 @@ useEffect(() => {
         try {
           
         const scannedData = JSON.parse(codes[0].value);
-          // Compare activity IDs - show error if they DON'T match
-          if (scannedData.activityId !== activityId) {
+          // Compare game IDs - show error if they DON'T match
+          if (scannedData.gameId !== gameId) {
               // Close scanner and return to default view
               setScannerActive(false);
               
-              // Show error message for incorrect activity QR code
+              // Show error message for incorrect game QR code
               setModalContent({
                   title: 'Wrong QR Code',
-                  message: 'This QR code is not for the correct activity.\nPlease scan the right QR code.',
+                  message: 'This QR code is not for the correct game.\nPlease scan the right QR code.',
                   confirmText: 'OK'
               });
               setModalVisible({ ...modalVisible, error: true });
               return;
           }
           
-          // If activity ID matches, proceed with the original logic
+          // If game ID matches, proceed with the original logic
           setMembershipId(scannedData.membershipId);
           setScannerActive(false);
           
-          // Automatically check the activity after successful scan
+          // Automatically check the game after successful scan
           setTimeout(() => {
-              checkActivity(scannedData.membershipId);
+              checkgame(scannedData.membershipId);
           }, 300);
           
       } catch (error) {

@@ -52,7 +52,7 @@ const App: FC = () => {
   return (
     <NavigationContainer>
       <AuthProvider>
-        <AppStack initialRouteName={initialRoute} />
+        <AppStack initialRouteName={'welcome'} />
       </AuthProvider>
     </NavigationContainer>
   );

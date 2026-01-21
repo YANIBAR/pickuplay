@@ -11,7 +11,7 @@
 		21E55E162254E64A68ED46F9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		75398A0C9056A32B24C86D8D /* libPods-pickuplay.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD157747C2207C447A5631F1 /* libPods-pickuplay.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
-		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		E86D06572F20042700059C87 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = E86D06562F20042700059C87 /* splash.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +24,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = pickuplay/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BD157747C2207C447A5631F1 /* libPods-pickuplay.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pickuplay.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7411147502DD3BE2ABAA6F6 /* Pods-pickuplay.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pickuplay.release.xcconfig"; path = "Target Support Files/Pods-pickuplay/Pods-pickuplay.release.xcconfig"; sourceTree = "<group>"; };
+		E86D06562F20042700059C87 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -47,6 +48,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				E86D06562F20042700059C87 /* splash.png */,
 			);
 			name = pickuplay;
 			sourceTree = "<group>";
@@ -158,7 +160,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				E86D06572F20042700059C87 /* splash.png in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				21E55E162254E64A68ED46F9 /* PrivacyInfo.xcprivacy in Resources */,
 			);

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, ScrollView, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import  { useState, useEffect } from 'react';
+import { View, Image, SafeAreaView } from 'react-native';
 import { Text, Header, TextInput, Button, Row, Column, Phone } from '@components';
 import { Controller, useForm } from 'react-hook-form';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {  useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { authSelector, userRegister } from '../../../app/slices/auth';
 import { COLORS, icons, images, screens  } from '@constants';
@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@utils/validators';
 import styles from './styles';
+import axios from 'axios';
+import { JAVA_API } from '@env';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -37,7 +39,8 @@ const SignUp = () => {
       ...formData, 
       phone: `${callingCode}${formData.phone}`,
     };
-    dispatch(userRegister(dataWithRole) as any);
+    const response = await axios.post(JAVA_API + `auth/register`, dataWithRole);
+    console.log("Registration Response:", response.data);
     let email = dataWithRole.email;
     let phone = dataWithRole.phone;
     navigate(screens.otpverification, { email, action: 'login', phone});

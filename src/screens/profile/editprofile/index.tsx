@@ -16,13 +16,13 @@ import { COLORS, icons, images, screens } from '@constants';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { userRegister } from '../../app/slices/auth';
+import { userRegister } from '../../../app/slices/auth';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BACKEND_URL } from '@env';
 import axios from 'axios';        
 import EditProfileForm from './EditProfileForm';
-import ActivityModal from './ActivityModal';
+import gameModal from './gameModal';
 
 interface FormData {
   firstname?: string;
@@ -40,7 +40,7 @@ type Nav = {
 const EditProfile = () => {
   const { t } = useTranslation();
   const [user, setUser] = useState('');
-  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [showgameModal, setShowgameModal] = useState(false);
 
 
   useEffect(() => {
@@ -52,17 +52,17 @@ const EditProfile = () => {
     getUser();
   }, []);
   
-    const handleActivityUpdate = (data) => {
-      console.log('Activity updated:', data);
-      setShowActivityModal(false);
-      //toast.success('Activity updated successfully!');
+    const handlegameUpdate = (data) => {
+      console.log('game updated:', data);
+      setShowgameModal(false);
+      //toast.success('game updated successfully!');
     };  
 
   return (
     <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
       <View style={{ flex: 1, backgroundColor: COLORS.white }}>
         <Header title={t('editProfile.title')} />
-        <EditProfileForm onShowActivity={() => setShowActivityModal(true)}/>
+        <EditProfileForm onShowgame={() => setShowgameModal(true)}/>
       </View>
     </SafeAreaView>
   );

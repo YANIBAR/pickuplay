@@ -4,13 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
 import { Header, Icon } from '@components';
-import { COLORS, icons } from '@constants';
+import { COLORS, FONTS, icons } from '@constants';
 import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
 
-export default function ActivityDetailsScreen({ route }) {
+export default function gameDetailsScreen({ route }) {
   const { t } = useTranslation();
-  const { activity, membershipId} = route.params || {};
+  const { game, membershipId} = route.params || {};
   const [modalVisible, setModalVisible] = useState(false);
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -18,155 +18,112 @@ export default function ActivityDetailsScreen({ route }) {
   const toggleDay = (day: string) => {
     setExpandedDay(expandedDay === day ? null : day);
   };
-const venueData = {
-    name: "Central Park",
-    type: "Park",
-    description: "A sprawling urban oasis with lush lawns, scenic lakes, and winding paths perfect for relaxation and recreation in the heart of the city.",
-    address: "59th to 110th St., Manhattan, New York, NY",
-    activeDays: [
-      { day: "Monday", isOpen: true, hours: "9am to 19pm" },
-      { day: "Tuesday", isOpen: true, hours: "9am to 19pm" },
-      { day: "Wednesday", isOpen: false, hours: "" },
-      { day: "Thursday", isOpen: false, hours: "" },
-      { day: "Friday", isOpen: false, hours: "" },
-      { day: "Saturday", isOpen: true, hours: "11am to 22pm" },
-      { day: "Sunday", isOpen: false, hours: "" },
-    ],
-    allowedVisits: 2,
-    imageUrl: "https://api.a0.dev/assets/image?text=Central%20Park&aspect=16:9&seed=123"
-  };
-  // Filter to show only open days for the summary view
-  const openDays = venueData.activeDays
-    .filter(day => day.isOpen)
-    .map(day => day.day)
-    .join(', ');
-  
-  const activityData = {
-    name: activity.name,
-    type: activity.type,
-    description: activity.description,
-    city: activity.city,
-    location: activity.location,
-    allowedVisits: activity.allowedVisits,
-    activeDays: activity.activeDays,
-    MemberShipType: activity.MemberShipType,
-    isActive: activity.isActive
+  const playersData = [
+  { name: "alloudi", image: "https://pbs.twimg.com/media/F8-YPTEWIAEtdou.jpg" },
+  { name: "zidan", image: "https://cdn.artphotolimited.com/images/59888232b0ba742a2efde168/1000x1000/zinedine-zidane-france-ukraine.jpg"},
+  { name: "Maradona", image: "https://fcb-abj-pre.s3.amazonaws.com/img/jugadors/501_maradona.jpg" },
+  { name: "Messi", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrrZKlZldiLM3-HD7SkznJ3TUpdF5AqiDOkQ&s" },
+  { name: "Ronaldinho", image: "https://assets.goal.com/images/v3/blt4df7329019456080/b5216132b85c9f8120a989382bc204ebdc69067e.jpg?auto=webp&format=pjpg&width=3840&quality=60" },
+  { name: "Ronaldo", image: "https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-2234200789.jpg?c=original" },
+  { name: "jwi3a", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXt1UN6HL4_qlijjO-6jcBgA72g12giqFpGg&s" },
+  { name: "yasser zabiri", image: "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/670ff2f1-261d-4378-b23c-9d1e85e8c59a/2025-10-20T023019Z_262015936_UP1ELAK06YI9L_RTRMADP_3_SOCCER-WORLDCUPU-20-ARG-MRC-REPORT.JPG?ver=03-06-2025?w=3840&q=75" },
+];
+  const gameData = {
+    name: game.name,
+    type: game.type,
+    description: game.description,
+    city: game.city,
+    location: game.location,
+    allowedVisits: game.allowedVisits,
+    activeDays: game.activeDays,
+    MemberShipType: game.MemberShipType,
+    isActive: game.isActive
   };
 
   useEffect(() => {
-    console.log(activityData);
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={t('activity.activity_details')} />
+      <Header title={t('game.game_details')} />
       <ScrollView bounces={false}>
-        <ImageSlider images={activity.cover_images} />
+        <ImageSlider images={game.cover_images} />
         
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title}>{activityData.name}</Text>
+            <Text style={styles.title}>{gameData.name}</Text>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{t(`${activityData.type.toLowerCase()}`)}</Text>
+              <Text style={styles.badgeText}>{t(`${gameData.type.toLowerCase()}`)}</Text>
             </View>
           </View>
 
-          <Text style={styles.description}>{activityData.description}</Text>
+          <View style={styles.priceContainer}>
+            <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
+              <Text style={styles.originalPrice}>$12.99</Text>
+              {' '}
+              <Text style={styles.discountPrice}>$8.99</Text>
+            </Text>
+          </View>
 
           <View style={styles.infoContainer}>
             <InfoRow 
               icon="map-marker" 
-              label={t('activity.location')} 
-              value={activityData.location} 
+              label={t('game.location')} 
+              value={gameData.location} 
             />
-            {/* Active Days */}
+
+            <InfoRow 
+              icon="clock" 
+              label={t('game.allowedVisits')} 
+              value="Wed Nov 9, 2pm - 3pm"
+            />
+          </View>
+            
+            {/* Players Section */}
             <View style={styles.section}>
-              <Icon type="materialCommunityIcons" name="calendar-range" size={24} color="#666" />
+              <Icon type="materialCommunityIcons" name="account-multiple" size={24} color="#666" />
               <View style={styles.textContainer}>
-                <Text style={styles.label}>Active Days</Text>
-                <View style={styles.activeDaysRow}>
-                  <Text style={styles.openDaysText}>
-                    {Object.entries(activityData.activeDays || {})
-                      .filter(([day, info]) => {
-                        // Skip the _id field and only process day objects
-                        if (day === '_id') return false;
-                        return info.active; // Changed from info.isOpen to info.active
-                      })
-                      .map(([day, info]) => day.charAt(0).toUpperCase() + day.slice(1))
-                      .join(', ') || 'No active days'}
-                  </Text>
-                  <TouchableOpacity 
-                    onPress={() => setExpandedDay(expandedDay ? null : 'all')}
-                    style={styles.expandAllButton}
-                  >
-                    <Icon
-                      type="feather" 
-                      name={expandedDay ? "chevron-up" : "chevron-down"} 
-                      size={22} 
-                      color="#1976D2"
-                    />
-                  </TouchableOpacity>
-                </View>
+                <Text style={styles.label}>Players 10/12</Text>
+                <TouchableOpacity 
+                  onPress={() => setExpandedDay(expandedDay ? null : 'all')}
+                  style={styles.expandAllButton}
+                >
+                  <Icon
+                    type="feather" 
+                    name={expandedDay ? "chevron-down" : "chevron-up"} 
+                    size={22} 
+                    color="#1976D2"
+                  />
+                </TouchableOpacity>
               </View>
             </View>
 
-            {/* Expandable schedule details */}
+            {/* Players Grid */}
             {expandedDay && (
-              <View style={styles.daysContainer}>
-                {Object.entries(activityData.activeDays || {})
-                  .filter(([day, info]) => {
-                    // Skip the _id field and only process day objects
-                    if (day === '_id') return false;
-                    return info.active; // Changed from info.isOpen to info.active
-                  })
-                  .map(([day, info]) => {
-                    // Format the time display
-                    const formatTime = (timeString) => {
-                      if (!timeString) return 'Not specified';
-                      const date = new Date(timeString);
-                      return date.toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit',
-                        hour12: true 
-                      });
-                    };
-
-                    const startTime = formatTime(info.startTime);
-                    const endTime = formatTime(info.endTime);
-                    const hours = `${startTime} - ${endTime}`;
-
-                    return (
-                      <View key={day} style={styles.daySchedule}>
-                        <View style={styles.dayNameContainer}>
-                          <View style={[styles.dayDot, {backgroundColor: '#4CAF50'}]} />
-                          <Text style={styles.dayName}>
-                            {day.charAt(0).toUpperCase() + day.slice(1)}
-                          </Text>
-                        </View>
-                        <Text style={styles.hoursText}>{hours}</Text>
-                      </View>
-                    );
-                  })}
+              <View style={styles.playersContainer}>
+                <View style={styles.playersGrid}>
+                  {playersData.map((player, index) => (
+                    <View key={index} style={styles.playerCard}>
+                      <Image
+                        source={{ uri: player.image || 'https://via.placeholder.com/150' }}
+                        style={styles.playerImage}
+                      />
+                      <Text style={styles.playerName} numberOfLines={2}>
+                        {player.name}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             )}
-            <InfoRow 
-              icon="ticket-confirmation" 
-              label={t('activity.allowedVisits')} 
-              value={activityData.allowedVisits + t(activityData.allowedVisits == 1 ? 'activity.visitCount_one' : 'activity.visitCount_plural')} 
-            />
-            <InfoRow 
-              icon="account-group" 
-              label={t('activity.membershipTypes')} 
-              value={activityData.MemberShipType.join(", ")} 
-            />
-          </View>
-          {activity.remainingVisits > 0 && (
+
+          {game.remainingVisits > 0 && (
             <TouchableOpacity 
               style={styles.button}
               onPress={() => setModalVisible(true)}
             >
               <Icon type="materialCommunityIcons" name="qrcode-scan" size={24} color="white" />
-              <Text style={styles.buttonText}>{t('activity.scanButton')}</Text>
+              <Text style={styles.buttonText}>{t('game.scanButton')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -182,7 +139,7 @@ const venueData = {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('activity.qrModal.title')}</Text>
+              <Text style={styles.modalTitle}>{t('game.qrModal.title')}</Text>
               <Pressable 
                 onPress={() => setModalVisible(false)}
                 style={styles.closeButton}
@@ -195,17 +152,17 @@ const venueData = {
               <QRCode
                 value={JSON.stringify({
                   membershipId: membershipId,
-                  activityId: activity._id
+                  gameId: game._id
                 })}
                 size={200}
               />
             </View>
             
             <Text style={styles.qrInstructions}>
-              {t('activity.qrModal.instructions')}
+              {t('game.qrModal.instructions')}
             </Text>
             
-            <Text style={styles.activityName}>{activityData.name}</Text>
+            <Text style={styles.gameName}>{gameData.name}</Text>
           </View>
         </View>
       </Modal>
@@ -321,7 +278,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
   },
-  activityName: {
+  gameName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.primary,
@@ -341,7 +298,21 @@ const styles = StyleSheet.create({
     color: '#000',
     marginTop: 2,
   },
-  
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+    originalPrice: {
+      textDecorationLine: 'line-through',
+      color: COLORS.error,
+      fontSize: FONTS.h4.fontSize,
+    },
+    discountPrice: {
+      color: '#999',
+      fontWeight: 'bold',
+      fontSize: FONTS.h3.fontSize,
+    },
   section: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -398,5 +369,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
     fontWeight: '400',
-  }
+  },
+  playersContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  playersGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  playerCard: {
+    width: '48%',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+  },
+  playerImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 40,
+    marginBottom: 8,
+    backgroundColor: '#e0e0e0',
+  },
+  playerName: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    color: '#333',
+  },
 });

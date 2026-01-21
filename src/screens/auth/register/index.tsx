@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@utils/validators';
 import styles from './styles';
+import axios from 'axios';
+import { JAVA_API } from '@env';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -37,7 +39,8 @@ const SignUp = () => {
       ...formData, 
       phone: `${callingCode}${formData.phone}`,
     };
-    dispatch(userRegister(dataWithRole) as any);
+    const response = await axios.post(JAVA_API + `auth/register`, dataWithRole);
+    console.log("Registration Response:", response.data);
     let email = dataWithRole.email;
     let phone = dataWithRole.phone;
     navigate(screens.otpverification, { email, action: 'login', phone});

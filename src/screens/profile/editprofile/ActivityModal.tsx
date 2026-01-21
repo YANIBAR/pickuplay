@@ -7,7 +7,7 @@ import { API_BACKEND_URL } from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
+const gameModal = ({ visible, onClose, onSave, initialData }) => {
   const [formData, setFormData] = useState(initialData || {
     name: '',
     type: '',
@@ -16,22 +16,22 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
     description: '',
     location: '',
   });
-  const [activity, setActivity] = useState(false);
+  const [game, setgame] = useState(false);
 
   useEffect(() => {
-    const getActivity = async () => {
+    const getgame = async () => {
       try {
-        const activityId = await AsyncStorage.getItem('activityId');
-        const response = await axios.get(API_BACKEND_URL + '/activities/' + activityId);
-        console.log(API_BACKEND_URL + '/activities/' + activityId);
-        setActivity(response.data);
+        const gameId = await AsyncStorage.getItem('gameId');
+        const response = await axios.get(API_BACKEND_URL + '/games/' + gameId);
+        console.log(API_BACKEND_URL + '/games/' + gameId);
+        setgame(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
         Alert.alert('Error', 'Failed to load user profile data');
       }
     };
 
-    getActivity();
+    getgame();
   }, []);
   // Active days state with time ranges
   const [activeDays, setActiveDays] = useState({
@@ -177,15 +177,15 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Save the activity
+  // Save the game
   const handleSave = () => {
-    const activityData = {
+    const gameData = {
       ...formData,
       allowedVisits: parseInt(formData.allowedVisits, 10) || 0,
       activeDays: activeDays,
     };
     
-    onSave(activityData);
+    onSave(gameData);
   };
 
   return (
@@ -197,15 +197,15 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <ScrollView>
-            <Text style={styles.modalTitle}>Edit Activity</Text>
+            <Text style={styles.modalTitle}>Edit game</Text>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Activity Name</Text>
+              <Text style={styles.label}>game Name</Text>
               <TextInput
                 style={styles.input}
                 value={formData.name}
                 onChangeText={(text) => handleChange('name', text)}
-                placeholder="Enter activity name"
+                placeholder="Enter game name"
               />
             </View>
 
@@ -499,4 +499,4 @@ const pickerSelectStyles = {
   }
 };
 
-export default ActivityModal;
+export default gameModal;

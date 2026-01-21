@@ -14,7 +14,7 @@ export type Event = {
 
 type EventCardProps = {
   event: Event;
-  onPress: (event: Event) => void;
+  onPress: (event: Event) => void; 
 };
 
 export default function EventCard({ event, onPress }: EventCardProps) {
@@ -36,7 +36,7 @@ export default function EventCard({ event, onPress }: EventCardProps) {
         <Text style={styles.description} numberOfLines={2}>
           {event.description}
         </Text>
-        <View style={styles.activitiesContainer}>
+        <View style={styles.gamesContainer}>
           <Text style={styles.eventCount}>
             {t('event.occurrence', { count: event.eventCount })}
           </Text>
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
-  activitiesContainer: {
+  gamesContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },

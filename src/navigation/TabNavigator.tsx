@@ -4,12 +4,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import {
   WelcomeScreen,
   SettingScreen,
-  EventsScreen,
-  ChartScreen,
-  ScanQRCodeScreen,
-  PhotoIdScreen,
-  MembershipScreen,
-  ActivitiesScreen
+  ChatScreen,
+  LeaguesScreen,
+  BookingScreen,
+  GamesScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -78,15 +76,15 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName={isPartner ? "Charts" : "Memberships"}
+      initialRouteName={isPartner ? "Charts" : "Booking"}
       tabBar={props => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}>
 
         <Tab.Screen
-          name="Memberships"
-          component={MembershipScreen}
+          name="Booking"
+          component={BookingScreen}
           options={{
-            tabBarLabel: t('Bookings'),
+            tabBarLabel: t('menu.booking'),
             tabBarIcon: ({ color, size }) => (
               <Icon name="calendar" type="antDesign" color={color} size={size} />
             ),
@@ -94,20 +92,20 @@ const TabNavigator = () => {
         />
       
         <Tab.Screen
-          name="Charts"
-          component={ChartScreen}
+          name="Leagues"
+          component={LeaguesScreen}
           options={{
-            tabBarLabel: t('menu.charts'),
+            tabBarLabel: t('menu.leagues'),
             tabBarIcon: ({ color, size }) => (
               <Icon name="trophy-outline" type="ionicons" color={color} size={size} />
             ),
           }}
         /> 
         <Tab.Screen
-          name="ScanQRCode"
-          component={ActivitiesScreen}
+          name="Games"
+          component={GamesScreen}
           options={{
-            tabBarLabel: t('Games'),
+            tabBarLabel: t('menu.games'),
             tabBarIcon: ({ color, size }) => (
               <Icon name="whistle-outline" type="materialCommunityIcons" color={color} size={size} />
             ),
@@ -115,8 +113,8 @@ const TabNavigator = () => {
         />
 
         <Tab.Screen
-          name="Events"
-          component={EventsScreen}
+          name="Chat"
+          component={ChatScreen}
           options={{
             tabBarLabel: t('menu.chat'),
             tabBarIcon: ({ color, size }) => (

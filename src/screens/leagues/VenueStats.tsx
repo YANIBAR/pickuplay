@@ -65,12 +65,12 @@ export default function VenueStats() {
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const activityId = await AsyncStorage.getItem('activityId');
-        const response = await axios.get(`${API_BACKEND_URL}/statistics/dashboard/${activityId}`);
+        const gameId = await AsyncStorage.getItem('gameId');
+        const response = await axios.get(`${API_BACKEND_URL}/statistics/dashboard/${gameId}`);
         const data = response.data;
-        const resp = await axios.get(`${API_BACKEND_URL}/statistics/forecast/${activityId}`);
+        const resp = await axios.get(`${API_BACKEND_URL}/statistics/forecast/${gameId}`);
               setForecast(resp.data);
-        const respions = await axios.get(`${API_BACKEND_URL}/statistics/insights/${activityId}`);
+        const respions = await axios.get(`${API_BACKEND_URL}/statistics/insights/${gameId}`);
         setInsights(respions.data.insights);
                
         console.log(insights); 

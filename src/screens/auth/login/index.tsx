@@ -113,7 +113,7 @@ const Login = () => {
         ['preferredLanguage', user.preferredLanguage || ''],
         ['role', user.role || ''],
         ['profileImage', user.profileImage || ''],
-        ['activityId', user.role === "Partner" ? user.activityId || '' : ''],
+        ['gameId', user.role === "Partner" ? user.gameId || '' : ''],
       ]);
       
       // Change language

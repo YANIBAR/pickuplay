@@ -14,7 +14,7 @@ interface FormData {
   ageGroup: string;
   respondingAs: string;
   numberOfChildren: number;
-  activities: string[];
+  games: string[];
   barriers: string[];
   attractiveFeatures: string[];
   suggestions: string;
@@ -30,7 +30,7 @@ const OnBoardingForm = () => {
     ageGroup: '',
     respondingAs: '',
     numberOfChildren: 0,
-    activities: [],
+    games: [],
     barriers: [],
     attractiveFeatures: [],
     suggestions: ''
@@ -51,8 +51,8 @@ const OnBoardingForm = () => {
     { key: 'young_without_kids', label: 'Jeune sans enfants', labelAr: 'شاب بدون أطفال' }
   ];
 
-  // Question 4: Activities
-  const activities = [
+  // Question 4: games
+  const games = [
     { key: 'zoos', label: 'Zoos & aquariums', labelAr: 'حدائق الحيوان' },
     { key: 'museums', label: 'Musées', labelAr: 'المتاحف' },
     { key: 'fairs', label: 'Foires', labelAr: 'معارض' },
@@ -113,7 +113,7 @@ const OnBoardingForm = () => {
       titleFr: "Quels types d'activités appréciez-vous le plus ?",
       titleAr: "ما هي أنواع الأنشطة التي تستمتع بها أكثر؟",
       type: 'multiple_choice',
-      options: activities,
+      options: games,
       required: true
     },
     {
@@ -170,10 +170,10 @@ const OnBoardingForm = () => {
     
     switch (questionId) {
       case 4:
-        updatedArray = formData.activities.includes(value)
-          ? formData.activities.filter(item => item !== value)
-          : [...formData.activities, value];
-        setFormData({ ...formData, activities: updatedArray });
+        updatedArray = formData.games.includes(value)
+          ? formData.games.filter(item => item !== value)
+          : [...formData.games, value];
+        setFormData({ ...formData, games: updatedArray });
         break;
       case 5:
         updatedArray = formData.barriers.includes(value)
@@ -212,7 +212,7 @@ const OnBoardingForm = () => {
       case 3:
         return formData.numberOfChildren > 0;
       case 4:
-        return formData.activities.length > 0;
+        return formData.games.length > 0;
       case 5:
         return formData.barriers.length > 0;
       case 6:
@@ -234,10 +234,10 @@ const OnBoardingForm = () => {
         await AsyncStorage.setItem('onboardingData', JSON.stringify(formData));
         await AsyncStorage.setItem('hasLaunched', 'true');
         console.log('Onboarding completed with data:', formData);
-        navigate('prize');
+        navigate('welcome');
       } catch (error) {
         console.error('Error saving onboarding data:', error);
-        navigate('prize');
+        navigate('welcome');
       }
     }
   };
@@ -298,7 +298,7 @@ const OnBoardingForm = () => {
               let isSelected = false;
               switch (question.id) {
                 case 4:
-                  isSelected = formData.activities.includes(option.key);
+                  isSelected = formData.games.includes(option.key);
                   break;
                 case 5:
                   isSelected = formData.barriers.includes(option.key);

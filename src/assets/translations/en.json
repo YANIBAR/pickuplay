@@ -314,10 +314,10 @@
     "ContactUsDescription": "If you have any questions, feel free to contact us at hello@pickuplay.com."
   },
   "menu": {
-    "events": "Events",
-    "memberships": "Memberships",
-    "charts": "Charts",
-    "scan_qr": "Scan QR",
+    "chat": "Chat",
+    "leagues": "Leagues",
+    "booking": "Booking",
+    "games": "Games",
     "menu": "Menu"
   },
   "faq": {

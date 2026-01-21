@@ -24,6 +24,7 @@ import ModalBase from './ModalBase';
 import NoHistory from './NoHistory';
 import ErrorModal from './ErrorModal';
 import OrSeparator from './OrSeparator';
+import OtpInput from './OtpInput';
 import LogoutModal from './LogoutModal';
 import SocialButton from './SocialButton';
 import SuccessModal from './SuccessModal';
@@ -61,6 +62,7 @@ export {
   NoHistory,
   ErrorModal,
   OrSeparator,
+  OtpInput,
   LogoutModal,
   SocialButton,
   SuccessModal,

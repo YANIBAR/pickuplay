@@ -9,8 +9,7 @@ import {
   ForgotPasswordMethodsScreen,
   ForgotPasswordPhoneScreen,
   ForgotPasswordEmailScreen,
-  CreateNewPasswordScreen,
-  VerifyIdentityScreen,
+  CreateNewPasswordScreen
 } from '@screens';
 
 const Stack = createStackNavigator();

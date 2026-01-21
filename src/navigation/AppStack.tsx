@@ -16,16 +16,13 @@ import {
   ForgotPasswordPhoneScreen,
   ForgotPasswordEmailScreen,
   CreateNewPasswordScreen,
-  EventsScreen,
+  ChatScreen,
   EventDetailsScreen,
-  PrizeScreen,
   ScanQRCodeScreen,
-  ChartScreen,
-  PhotoIdScreen,
-  MembershipScreen,
+  LeaguesScreen,
+  BookingScreen,
   AddMembershipScreen,
-  ActivitiesScreen,
-  EditActivityScreen,
+  GamesScreen,
   DetailScreen,
   LoginScreen
 
@@ -37,11 +34,7 @@ const Stack = createStackNavigator();
 const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
 
   return (
-    <Stack.Navigator
-      initialRouteName={initialRouteName}
-      screenOptions={{
-        headerShown: false,
-      }}>
+    <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="welcome" component={TabNavigator} /> 
       <Stack.Screen name="onboarding" component={OnboardingScreen} />
       <Stack.Screen name="login" component={LoginScreen} />
@@ -52,34 +45,20 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
       <Stack.Screen name="customerservice" component={CustomerServiceScreen} />
       <Stack.Screen name="terms" component={TermsScreen} />
-      <Stack.Screen name="events" component={EventsScreen} />
+      <Stack.Screen name="chat" component={ChatScreen} />
       <Stack.Screen name="eventDetail" component={EventDetailsScreen} />
-      <Stack.Screen name="prize" component={PrizeScreen} />
-      <Stack.Screen name="chart" component={ChartScreen} />
+      <Stack.Screen name="leagues" component={LeaguesScreen} />
       <Stack.Screen name="scanqrcode" component={ScanQRCodeScreen} />
-      <Stack.Screen name="membership" component={MembershipScreen} />
+      <Stack.Screen name="membership" component={BookingScreen} />
       <Stack.Screen name="addMembership" component={AddMembershipScreen} />
-      <Stack.Screen name="activities" component={ActivitiesScreen} />
-      <Stack.Screen name="editActivity" component={EditActivityScreen} />
+      <Stack.Screen name="games" component={GamesScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
-      <Stack.Screen name="photoid" component={PhotoIdScreen} />
       <Stack.Screen name="detail" component={DetailScreen} /><Stack.Screen name="register" component={RegisterScreen} />
-      <Stack.Screen
-        name="forgotpasswordmethods"
-        component={ForgotPasswordMethodsScreen}
-      />
-      <Stack.Screen
-        name="forgotpasswordemail"
-        component={ForgotPasswordEmailScreen}
-      />
-      <Stack.Screen
-        name="forgotpasswordphone"
-        component={ForgotPasswordPhoneScreen}
-      />
+      <Stack.Screen name="forgotpasswordmethods"component={ForgotPasswordMethodsScreen}/>
+      <Stack.Screen name="forgotpasswordemail"component={ForgotPasswordEmailScreen}/>
+      <Stack.Screen name="forgotpasswordphone"component={ForgotPasswordPhoneScreen}/>
       <Stack.Screen name="otpverification" component={OTPVerificationScreen} />
       <Stack.Screen name="createnewpassword" component={CreateNewPasswordScreen} />
-      
-
     </Stack.Navigator>
   );
 };

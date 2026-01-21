@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { logout } from 'src/app/slices/auth';
 import { useTranslation } from 'react-i18next';
 
-const EditProfileForm = ({ onShowActivity }) => {
+const EditProfileForm = ({ onShowgame }) => {
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -67,7 +67,7 @@ const handleDeleteAccount = async () => {
               'role',
               'preferredLanguage',
               'profileImage',
-              'activityId',
+              'gameId',
             ];
             await AsyncStorage.multiRemove(keysToRemove);
             //setUser(null); // Reset user state
@@ -226,9 +226,9 @@ const handleDeleteAccount = async () => {
         {user.role === 'Partner' && (
           <TouchableOpacity 
             style={[styles.button, { marginTop: 12, backgroundColor: COLORS.secondary }]}
-            onPress={() => navigate("editActivity")}
+            onPress={() => navigate("editgame")}
           >
-            <Text style={styles.buttonText}> t('edit_activity.edit_activity')</Text>
+            <Text style={styles.buttonText}> t('edit_game.edit_game')</Text>
           </TouchableOpacity>
         )}
 

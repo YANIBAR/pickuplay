@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@components';
 import { useTranslation } from 'react-i18next';
 
-const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
+const GameModal = ({ visible, onClose, onSave, initialData }) => {
   const [formData, setFormData] = useState(initialData || {
     name: '',
     type: '',
@@ -132,42 +132,42 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Save the activity
+  // Save the game
   const handleSave = async () => {
     try {
-      const activityData = {
+      const gameData = {
         ...formData,
         allowedVisits: parseInt(formData.allowedVisits, 10) || 0,
         activeDays: activeDays,
       };
       
-      const activityId = await AsyncStorage.getItem('activityId');
+      const gameId = await AsyncStorage.getItem('gameId');
       
-      if (activityId) {
-        // Edit existing activity
-        const response = await axios.put(`${API_BACKEND_URL}/activities/${activityId}`, activityData);
-        console.log('Activity updated:', response.data);
+      if (gameId) {
+        // Edit existing game
+        const response = await axios.put(`${API_BACKEND_URL}/games/${gameId}`, gameData);
+        console.log('Game updated:', response.data);
       } else {
-        // Create new activity
-        const response = await axios.post(`${API_BACKEND_URL}/activities`, activityData);
-        console.log('Activity created:', response.data);
+        // Create new game
+        const response = await axios.post(`${API_BACKEND_URL}/games`, gameData);
+        console.log('Game created:', response.data);
       }
       
     } catch (error) {
-      console.error('Error saving activity:', error);
-      // Alert.alert('edit_activity.Error', 'Failed to save activity');
+      console.error('Error saving game:', error);
+      // Alert.alert('edit_game.Error', 'Failed to save game');
     }
   }; 
   
 
   useEffect(() => {
-    const getActivity = async () => {
+    const getGame = async () => {
       try {
-        const activityId = await AsyncStorage.getItem('activityId');
-        if (activityId && !initialData) { // Only fetch if no initialData provided
-          const response = await axios.get(`${API_BACKEND_URL}/activities/${activityId}`);
+        const gameId = await AsyncStorage.getItem('gameId');
+        if (gameId && !initialData) { // Only fetch if no initialData provided
+          const response = await axios.get(`${API_BACKEND_URL}/games/${gameId}`);
 
-          // Set form data from fetched activity
+          // Set form data from fetched game
           setFormData({
             name: response.data.name || '',
             type: response.data.type || '',
@@ -202,79 +202,79 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
           }
         }
       } catch (error) {
-        console.error('Error fetching activity data:', error);
+        console.error('Error fetching game data:', error);
         // You'll need to import Alert
-        // Alert.alert('edit_activity.Error', 'Failed to load activity data');
+        // Alert.alert('edit_game.Error', 'Failed to load game data');
       }
     };
   
-      getActivity();
+      getGame();
   }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.white }}>
-      <Header title={t('edit_activity.edit_activity')} />
+      <Header title={t('edit_game.edit_game')} />
       <ScrollView style={styles.container}>
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.activity_name')}</Text>
+            <Text style={styles.label}>{t('edit_game.game_name')}</Text>
             <TextInput
               style={styles.input}
               value={formData.name}
               onChangeText={(text) => handleChange('name', text)}
-              placeholder={t('edit_activity.enter_activity_name')}
+              placeholder={t('edit_game.enter_game_name')}
             />
           </View>
   
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.type')}</Text>
+            <Text style={styles.label}>{t('edit_game.type')}</Text>
             <RNPickerSelect
               onValueChange={(value) => handleChange('type', value)}
               value={formData.type}
               items={[
-                { label: t('edit_activity.fitness'), value: 'fitness' },
-                { label: t('edit_activity.sports'), value: 'sports' },
-                { label: t('edit_activity.wellness'), value: 'wellness' },
-                { label: t('edit_activity.pool'), value: 'pool' },
-                { label: t('edit_activity.museum'), value: 'museum' },
-                { label: t('edit_activity.cinema'), value: 'cinema' },
-                { label: t('edit_activity.park'), value: 'park' },
-                { label: t('edit_activity.theater'), value: 'theater' },
-                { label: t('edit_activity.restaurant'), value: 'restaurant' },
+                { label: t('edit_game.fitness'), value: 'fitness' },
+                { label: t('edit_game.sports'), value: 'sports' },
+                { label: t('edit_game.wellness'), value: 'wellness' },
+                { label: t('edit_game.pool'), value: 'pool' },
+                { label: t('edit_game.museum'), value: 'museum' },
+                { label: t('edit_game.cinema'), value: 'cinema' },
+                { label: t('edit_game.park'), value: 'park' },
+                { label: t('edit_game.theater'), value: 'theater' },
+                { label: t('edit_game.restaurant'), value: 'restaurant' },
               ]}
               style={pickerSelectStyles}
             />
           </View>
   
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.city')}</Text>
+            <Text style={styles.label}>{t('edit_game.city')}</Text>
             <RNPickerSelect
               onValueChange={(value) => handleChange('city', value)}
               value={formData.city}
               items={[
-                { label: t('edit_activity.casablanca'), value: 'casablanca' },
-                { label: t('edit_activity.marrakesh'), value: 'marrakesh' },
-                { label: t('edit_activity.tanger'), value: 'tanger' },
-                { label: t('edit_activity.fes'), value: 'fes' },
-                { label: t('edit_activity.agadir'), value: 'agadir' },
-                { label: t('edit_activity.rabat'), value: 'rabat' },
+                { label: t('edit_game.casablanca'), value: 'casablanca' },
+                { label: t('edit_game.marrakesh'), value: 'marrakesh' },
+                { label: t('edit_game.tanger'), value: 'tanger' },
+                { label: t('edit_game.fes'), value: 'fes' },
+                { label: t('edit_game.agadir'), value: 'agadir' },
+                { label: t('edit_game.rabat'), value: 'rabat' },
               ]}
               style={pickerSelectStyles}
             />
           </View>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.location')}</Text>
+            <Text style={styles.label}>{t('edit_game.location')}</Text>
             <TextInput
               style={styles.input}
               value={formData.location}
               onChangeText={(text) => handleChange('location', text)}
-              placeholder={t('edit_activity.enter_location')}
+              placeholder={t('edit_game.enter_location')}
             />
           </View>
   
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.allowed_visits')}</Text>
+            <Text style={styles.label}>{t('edit_game.allowed_visits')}</Text>
             <RNPickerSelect
               onValueChange={(value) => handleChange('allowedVisits', value)}
               value={formData.allowedVisits}
@@ -290,7 +290,7 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
   
           {/* Active Days with Time Ranges */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.active_days_hours')}</Text>
+            <Text style={styles.label}>{t('edit_game.active_days_hours')}</Text>
             
             {Object.keys(activeDays).map((day) => (
               <View key={day} style={styles.dayTimeContainer}>
@@ -315,7 +315,7 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
                       <Text>{formatTime(activeDays[day].startTime)}</Text>
                     </TouchableOpacity>
                     
-                    <Text style={styles.toText}>{t('edit_activity.to')}</Text>
+                    <Text style={styles.toText}>{t('edit_game.to')}</Text>
                     
                     <TouchableOpacity
                       style={styles.timeButton}
@@ -342,12 +342,12 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
           </View>
   
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_activity.description')}</Text>
+            <Text style={styles.label}>{t('edit_game.description')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={formData.description}
               onChangeText={(text) => handleChange('description', text)}
-              placeholder={t('edit_activity.enter_description')}
+              placeholder={t('edit_game.enter_description')}
               multiline
               numberOfLines={4}
             />
@@ -358,13 +358,13 @@ const ActivityModal = ({ visible, onClose, onSave, initialData }) => {
               style={[styles.button, styles.saveButton]} 
               onPress={handleSave}
             >
-              <Text style={styles.buttonText}>{t('edit_activity.save')}</Text>
+              <Text style={styles.buttonText}>{t('edit_game.save')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.button, styles.cancelButton]} 
               onPress={onClose}
             >
-              <Text style={[styles.buttonText, styles.cancelText]}>{t('edit_activity.cancel')}</Text>
+              <Text style={[styles.buttonText, styles.cancelText]}>{t('edit_game.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -502,4 +502,4 @@ const pickerSelectStyles = {
   }
 };
 
-export default ActivityModal;
+export default GameModal;

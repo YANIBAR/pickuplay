@@ -7,7 +7,7 @@ export default StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 5,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -17,7 +17,7 @@ export default StyleSheet.create({
     marginRight: 16,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     //fontFamily: 'bold',
     color: COLORS.black,
   },

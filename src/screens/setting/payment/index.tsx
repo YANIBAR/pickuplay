@@ -30,7 +30,7 @@ const Payment = () => {
     };
     dispatch(userRegister(formData) as any);
     let email = dataWithRole.email;
-    navigate(screens.activities);
+    navigate(screens.games);
   };
 
 

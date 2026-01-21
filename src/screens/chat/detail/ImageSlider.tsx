@@ -6,7 +6,7 @@ const { width } = Dimensions.get('window');
 
 interface ImageSliderProps {
   images: string[];
-  folder?: 'events' | 'partners' | 'activities'; // Add flexibility for different folders
+  folder?: 'events' | 'partners' | 'games'; // Add flexibility for different folders
 }
 
 export default function ImageSlider({ images, folder = 'events' }: ImageSliderProps) {

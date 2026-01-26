@@ -83,7 +83,7 @@
     "tokenVerificationFailed": "Failed to verify the token. {{message}}",
     "genericError": "Please try again.",
     "timeExpiredMessage": "Time has expired. Please request a new token.",
-    "otpResentMessage": "OTP code has been resent to {{email}}.",
+    "otpResentMessage": "OTP code has been resent to {{phone}}.",
     "resendErrorLog": "Error resending OTP:",
     "serverError": "Server error: {{message}}",
     "noResponseError": "No response from server. Please check your internet connection.",
@@ -96,11 +96,11 @@
   "onboarding": {
     "onboarding1": {
       "title": "Welcome to M’go Pass!",
-      "description": "🎉 Discover Morocco’s first all-in-one activity pass!\nWith M’go Pass, you can enjoy top venues — from playgrounds to museums to surf classes — all with one smart membership.\nWhether you're a family, a young explorer, or a tourist, M’go Pass makes fun easy and affordable."
+      "description": "🎉 Discover Morocco’s first all-in-one game pass!\nWith M’go Pass, you can enjoy top venues — from playgrounds to museums to surf classes — all with one smart membership.\nWhether you're a family, a young explorer, or a tourist, M’go Pass makes fun easy and affordable."
     },
     "onboarding2": {
       "title": "How M’go Pass Works",
-      "description": "🎟️ 1. Choose your membership (Kids, Adult, or Tourist)\n📍 2. Explore included venues nearby\n📲 3. Show your QR pass at the venue to redeem\n✅ 4. Enjoy the activity — 100% cash-free and easy!"
+      "description": "🎟️ 1. Choose your membership (Kids, Adult, or Tourist)\n📍 2. Explore included venues nearby\n📲 3. Show your QR pass at the venue to redeem\n✅ 4. Enjoy the game — 100% cash-free and easy!"
     },
     "onboarding3": {
       "title": "Smart Access, Real Savings",
@@ -108,7 +108,7 @@
     },
     "onboarding4": {
       "title": "Trusted by Top Venues",
-      "description": "🏅 Our partners are verified & approved\n📸 You can preview every activity before visiting\n🔒 Your QR code is secure and unique\n🎁 Some venues may offer special perks for members!"
+      "description": "🏅 Our partners are verified & approved\n📸 You can preview every game before visiting\n🔒 Your QR code is secure and unique\n🎁 Some venues may offer special perks for members!"
     },
     "previousButton": "Previous",
     "nextButton": "Next",
@@ -125,6 +125,7 @@
     "usernameRequired": "Username is required",
     "passwordRequired": "Password is required",
     "phoneRequired": "Phone is required",
+    "phoneNumberDigits": "Phone number must be only number 000000000 ",
     "confirmPassword": "Confirm password is required",
     "usernameOrEmailRequired": "Username or Email is required",
     "phoneNumberRequired": "Phone is required",
@@ -198,6 +199,7 @@
     "editProfile": "Edit Profile",
     "verifyProfile": "Verify Profile",
     "payment": "Payment",
+    "paymentMethods": "Payment Methods",
     "languageRegion": "Language & Region",
     "inviteFriends": "Invite Friends",
     "privacyPolicy": "Privacy Policy",
@@ -424,21 +426,21 @@
     "eventsPerYear": "{{count}} Event/year",
     "eventsPerYear_plural": "{{count}} Events/year"
   },
-  "activities_header": "activities list",
-  "activity": {
+  "games_header": "games list",
+  "game": {
     "location": "Location",
     "activeDays": "Active Days",
-    "allowedVisits": "Allowed Visits",
+    "allowedVisits": "Time",
     "visitCount_one": " visit",
     "visitCount_plural": " visits",
     "membershipTypes": "Membership Types",
     "scanButton": "Scan QR to Check-in",
-    "activity_details": "activity Details",
+    "game_details": "game Details",
     "qrModal": {
       "title": "Your Membership QR Code",
       "instructions": "Show this QR code at the entrance"
     },
-    "activityTypes": {
+    "gameTypes": {
       "fitness": "Fitness",
       "sports": "Sports",
       "wellness": "Wellness",
@@ -450,10 +452,10 @@
       "restaurant": "Restaurant"
     }
   },
-  "edit_activity" : {
-    "edit_activity": "Edit Activity",
-    "activity_name": "Activity Name",
-    "enter_activity_name": "Enter activity name",
+  "edit_game" : {
+    "edit_game": "Edit game",
+    "game_name": "game Name",
+    "enter_game_name": "Enter game name",
     "type": "Type",
     "fitness": "Fitness",
     "sports": "Sports",
@@ -523,7 +525,7 @@
       "closeScanner": "Close Scanner"
     },
     "errors": {
-      "wrongQR": "This QR code is not for the correct activity.\nPlease scan the right QR code.",
+      "wrongQR": "This QR code is not for the correct game.\nPlease scan the right QR code.",
       "invalidQR": "The QR code format is not valid. Please try again.",
       "invalidInput": "Invalid Input",
       "membershipNotFound": "No membership found with this code. Please check and try again."

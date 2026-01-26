@@ -76,7 +76,7 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName={isPartner ? "Charts" : "Booking"}
+      initialRouteName={isPartner ? "Games" : "Booking"}
       tabBar={props => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}>
 

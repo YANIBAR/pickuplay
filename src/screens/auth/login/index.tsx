@@ -57,7 +57,18 @@ const Login = () => {
   }, []);
 
   const handleLogin = async (formData: loginFormData) => {
+    try {
       setIsLoading(true);
+      
+      // Check if fields are empty
+      if (!formData.identifier || !formData.password) {
+        setTitle(t('login.error') || 'Error');
+        setMessage(t('login.fieldsRequired') || 'Email and password are required');
+        setModalVisible(true);
+        setIsLoading(false);
+        return;
+      }
+
       const response = await axios.post(JAVA_API + 'auth/login', {
         username: formData.identifier,
         password: formData.password
@@ -87,6 +98,59 @@ const Login = () => {
       await new Promise(resolve => setTimeout(resolve, 100));
       navigation.navigate("welcome");
       
+    } catch (error: any) {
+      setIsLoading(false);
+      
+      // Handle specific error responses from backend
+      if (error.response?.status === 400) {
+        const errorData = error.response.data;
+        
+        // Handle unverified account
+        if (errorData.message?.includes('not verified') || errorData.code === 'ACCOUNT_NOT_VERIFIED') {
+          setTitle(t('login.accountNotVerified') || 'Account Not Verified');
+          setMessage(t('login.accountNotVerifiedMsg') || 'Please verify your email before logging in.');
+          setModalVisible(true);
+          return;
+        }
+        
+        // Handle invalid credentials
+        if (errorData.message?.includes('Invalid') || errorData.message?.includes('wrong') || errorData.code === 'INVALID_CREDENTIALS') {
+          setTitle(t('login.error') || 'Error');
+          setMessage(t('login.invalidCredentials') || 'Email or password is incorrect');
+          setModalVisible(true);
+          return;
+        }
+      }
+      
+      // Handle 401 Unauthorized (wrong credentials)
+      if (error.response?.status === 401) {
+        setTitle(t('login.error') || 'Error');
+        setMessage(t('login.invalidCredentials') || 'Email or password is incorrect');
+        setModalVisible(true);
+        return;
+      }
+      
+      // Handle 404 Not Found (user doesn't exist)
+      if (error.response?.status === 404) {
+        setTitle(t('login.error') || 'Error');
+        setMessage(t('login.userNotFound') || 'Email or password is incorrect');
+        setModalVisible(true);
+        return;
+      }
+      
+      // Handle network errors
+      if (error.message === 'Network Error' || !error.response) {
+        setTitle(t('login.networkError') || 'Network Error');
+        setMessage(t('login.networkErrorMsg') || 'Unable to connect to the server. Please try again.');
+        setModalVisible(true);
+        return;
+      }
+      
+      // Default error
+      setTitle(t('login.error') || 'Error');
+      setMessage(error.response?.data?.message || t('login.loginFailed') || 'Login failed. Please try again.');
+      setModalVisible(true);
+    }
   };
 
   // On successful login
@@ -167,6 +231,7 @@ const Login = () => {
               autoCapitalize="none"
               keyboardType="identifier"
               placeholder={t('signIn.usernameOrEmail')}
+              errorText={errors?.identifier?.message}
             />
           )}
         />

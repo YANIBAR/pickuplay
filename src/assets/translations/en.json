@@ -15,16 +15,17 @@
     "confirm_button": "Yes, Logout"
   },
   "login": {
-    "invalidCredentialsTitle": "Invalid credentials",
-    "invalidCredentialsMessage": "Please check your username or password and try again.",
-    "limitReachedTitle": "Login Limit Reached",
-    "limitReachedMessage": "Too many login attempts. Please try again in 5 minutes. 😅",
-    "unexpectedErrorTitle": "Login failed",
-    "unexpectedErrorMessage": "An unexpected error occurred. Please try again later.",
-    "connectionErrorTitle": "Login failed",
-    "connectionErrorMessage": "An error occurred. Please check your internet connection and try again.",
-    "tokenStorageError": "Error storing the token",
-    "userStorageError": "Error storing the user details"
+    "error": "Error",
+    "fieldsRequired": "Email and password are required",
+    "invalidCredentials": "Email or password is incorrect",
+    "emailFormatInvalid": "Please enter a valid email format",
+    "accountNotVerified": "Account Not Verified",
+    "accountNotVerifiedMsg": "Please verify your email before logging in",
+    "userNotFound": "Email or password is incorrect",
+    "networkError": "Network Error",
+    "networkErrorMsg": "Unable to connect to the server. Please try again.",
+    "loginFailed": "Login failed. Please try again.",
+    "tokenStorageError": "Error storing authentication token"
   },
   "c": {
     "firstName": "First Name",

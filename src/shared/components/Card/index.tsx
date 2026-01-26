@@ -34,7 +34,7 @@ const Card: FC<CardProps> = ({
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Payment Card</Text>
         <Image
-          source={images.logo as ImageSourcePropType}
+          source={images.cardIcon as ImageSourcePropType}
           style={styles.icon}
         />
       </View>

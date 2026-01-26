@@ -8,6 +8,8 @@ import { authSelector, userRegister } from '../../../app/slices/auth';
 import { COLORS, screens  } from '@constants';
 import { useTranslation } from 'react-i18next';
 import styles from './styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Input from '@components/Input';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -35,8 +37,8 @@ const Payment = () => {
 
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-      <Header title={t('payment')} />
+    <SafeAreaView style={[styles.container, { backgroundColor: COLORS.white }]}>
+      <Header title={'Payment'} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <Card
             containerStyle={styles.card}
@@ -45,62 +47,44 @@ const Payment = () => {
             date="11/2029"
         />
         <Text style={styles.title}>{t('payment')}</Text>
-        
-        <Controller
-          name="cardHolderName"
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              keyboardType="card-holder-name"
-              placeholder={t('payment.cardHolderName')}
-            />
-          )}
+
+        <Input
+          id="cardHolderName"
+          onInputChanged={(value) => {
+            // Handle input change if needed
+          }}
+          placeholder={t('payment.cardHolderName')}
+          placeholderTextColor={COLORS.black}
         />
         
-        <Controller
-          name="CardNumber"
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              keyboardType="card-number"
-              placeholder={t('payment.cardNumber')}
-            />
-          )}
+        <Input
+          id="CardNumber"
+          onInputChanged={(value) => {
+            // Handle input change if needed
+          }}
+          placeholder={t('payment.cardNumber')}
+          placeholderTextColor={COLORS.black}
         />
 
         <Row>
           <Column style={{ flex: 0.5, marginRight: 5 }}>
-            <Controller
-              name="ExpireDate"
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder={t('payment.expireDate')}
-                />
-              )}
+            <Input
+              id="ExpireDate"
+              onInputChanged={(value) => {
+                // Handle input change if needed
+              }}
+              placeholder={t('payment.expireDate')}
+              placeholderTextColor={COLORS.black}
             />
           </Column>
           <Column style={{ flex: 0.5, marginLeft: 5 }}>
-            <Controller
-              name="cvv"
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder={t('payment.CVV')}
-                />
-              )}
+            <Input
+              id="cvv"
+              onInputChanged={(value) => {
+                // Handle input change if needed
+              }}
+              placeholder={t('payment.CVV')}
+              placeholderTextColor={COLORS.black}
             />
           </Column>
         </Row>
@@ -112,7 +96,7 @@ const Payment = () => {
           style={styles.button}
         />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

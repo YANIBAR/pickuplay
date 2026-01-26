@@ -11,7 +11,7 @@ import { View, Button, TextInput, Text, ErrorModal } from '@components';
 import { COLORS, icons, images  } from '@constants';
 import { loginFormData } from '@types';
 import styles from './styles';
-import { API_BACKEND_URL } from '@env';
+import { API_BACKEND_URL, JAVA_API } from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
@@ -58,15 +58,13 @@ const Login = () => {
 
   const handleLogin = async (formData: loginFormData) => {
       setIsLoading(true);
-      
-      const response = await axios.post(API_BACKEND_URL + '/auth/login/', {
-        identifier: formData.identifier,
+      const response = await axios.post(JAVA_API + 'auth/login', {
+        username: formData.identifier,
         password: formData.password
       });
       
-      const userData = response.data._doc;
-      const accessToken = response.data.access_token;
-      console.log("Login response:", response.data);
+      const userData = response.data.username;
+      const accessToken = response.data.token;
       
       if (!userData) {
         throw new Error("No user data received from the server");
@@ -77,7 +75,7 @@ const Login = () => {
       }
 
       await storeToken(accessToken);
-      await storeUser(userData);
+      /*await storeUser(userData);
       
       const storedRole = await AsyncStorage.getItem('role');
       const storedId = await AsyncStorage.getItem('id');
@@ -85,8 +83,7 @@ const Login = () => {
       if (!storedRole || !storedId) {
         throw new Error('Failed to store user data properly');
       }
-      
-      console.log('User data stored successfully, role:', storedRole);
+      */
       await new Promise(resolve => setTimeout(resolve, 100));
       navigation.navigate("welcome");
       

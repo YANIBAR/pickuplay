@@ -38,6 +38,8 @@ const SignUp = () => {
     const dataWithRole = { 
       ...formData, 
       phone: `${callingCode}${formData.phone}`,
+      firstname: `youssef`,
+      lastname: `anibar`,
     };
     const response = await axios.post(JAVA_API + `auth/register`, dataWithRole);
     console.log("Registration Response:", response.data);

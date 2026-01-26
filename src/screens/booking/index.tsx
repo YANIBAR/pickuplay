@@ -1,29 +1,43 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  ScrollView,
-  Switch,
-  SafeAreaView,
-  Dimensions,
-  StyleSheet,
-} from 'react-native';
-
-import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
+import { View, ScrollView, SafeAreaView } from 'react-native';
 import styles from './styles';
-import Input from '@components/Input';
-import { COLORS, icons } from '@constants';
+import Header from './components/Header';
+import DayCard from './components/DayCard';
+import GameModal from './components/GameModal';
+
+interface Game {
+  id: number;
+  date: Date;
+  address: string;
+  startTime: string;
+  endTime: string;
+  numPlayers: string;
+  isFree: boolean;
+  pricePerPlayer: string;
+}
+
+interface FormData {
+  address: string;
+  date: Date | null;
+  startTime: string;
+  endTime: string;
+  numPlayers: string;
+  isFree: boolean;
+  pricePerPlayer: string;
+}
+
 export default function HomeScreen({ route }) {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1));
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [games, setGames] = useState([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [games, setGames] = useState<Game[]>([]);
+  const [cancelledGames, setCancelledGames] = useState<number[]>([]);
+  const [startTimeDate, setStartTimeDate] = useState(new Date());
+  const [endTimeDate, setEndTimeDate] = useState(new Date());
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     address: '',
+    date: null,
     startTime: '',
     endTime: '',
     numPlayers: '',
@@ -31,7 +45,7 @@ export default function HomeScreen({ route }) {
     pricePerPlayer: '',
   });
 
-  const getWeekStart = (date) => {
+  const getWeekStart = (date: Date) => {
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -57,16 +71,19 @@ export default function HomeScreen({ route }) {
     setCurrentDate(newDate);
   };
 
-  const openModal = (date) => {
+  const openModal = (date: Date) => {
     setSelectedDate(date);
     setFormData({
       address: '',
+      date,
       startTime: '',
       endTime: '',
       numPlayers: '',
       isFree: true,
       pricePerPlayer: '',
     });
+    setStartTimeDate(new Date());
+    setEndTimeDate(new Date());
     setModalVisible(true);
   };
 
@@ -91,206 +108,67 @@ export default function HomeScreen({ route }) {
       return;
     }
 
-    const newGame = {
+    const newGame: Game = {
       id: Date.now(),
-      date: selectedDate,
-      ...formData,
+      date: selectedDate!,
+      address: formData.address,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      numPlayers: formData.numPlayers,
+      isFree: formData.isFree,
+      pricePerPlayer: formData.pricePerPlayer,
     };
 
     setGames([...games, newGame]);
     closeModal();
   };
 
-  const getGamesForDate = (date) => {
+  const handleCancelGame = (gameId: number) => {
+    setCancelledGames([...cancelledGames, gameId]);
+  };
+
+  const getGamesForDate = (date: Date) => {
     return games.filter(
       (game) => game.date.toDateString() === date.toDateString()
     );
   };
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={goToPreviousWeek} style={styles.headerButton}>
-            <ChevronLeft size={24} color="white" />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>
-            {weekStart.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </Text>
-          <TouchableOpacity onPress={goToNextWeek} style={styles.headerButton}>
-            <ChevronRight size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Header
+        weekStart={weekStart}
+        onPreviousWeek={goToPreviousWeek}
+        onNextWeek={goToNextWeek}
+      />
 
-      {/* Week Grid */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {weekDays.map((date, index) => {
           const dayGames = getGamesForDate(date);
           return (
-            <TouchableOpacity
+            <DayCard
               key={index}
+              date={date}
+              games={dayGames}
+              cancelledGames={cancelledGames}
               onPress={() => openModal(date)}
-              style={styles.dayCard}
-            >
-              <Text style={styles.dayCardTitle}>{formatDate(date)}</Text>
-
-              {dayGames.length === 0 ? (
-                <Text style={styles.emptyText}>No games scheduled</Text>
-              ) : (
-                dayGames.map((game) => (
-                  <View key={game.id} style={styles.gameItem}>
-                    <Text style={styles.gameAddress}>{game.address}</Text>
-                    <Text style={styles.gameTime}>
-                      {game.startTime} - {game.endTime}
-                    </Text>
-                    <Text style={styles.gamePlayers}>
-                      Players: {game.numPlayers}{' '}
-                      {game.isFree
-                        ? '(Free)'
-                        : `($${game.pricePerPlayer}/player)`}
-                    </Text>
-                  </View>
-                ))
-              )}
-
-              <Text style={styles.addGameText}>+ Add Game</Text>
-            </TouchableOpacity>
+              onCancelGame={handleCancelGame}
+            />
           );
         })}
       </ScrollView>
 
-      {/* Modal */}
-      <Modal
+      <GameModal
         visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                Create Game {'\n'}
-                {selectedDate && formatDate(selectedDate)}
-              </Text>
-              <TouchableOpacity onPress={closeModal} style={styles.modalCloseButton}>
-                <X size={24} color="#1f2937" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Address */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Address *</Text>
-                <Input
-                  id="address"
-                  onInputChanged={(text) =>
-                    setFormData({ ...formData, address: text })}
-                  placeholder="Enter address"
-                  placeholderTextColor={COLORS.black}
-                  keyboardType="default"
-                />
-              </View>
-
-              {/* Start Time */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Start Time *</Text>
-                <Input
-                  id="starTime"
-                  placeholder="e.g., 2:00 PM"
-                  placeholderTextColor={COLORS.black}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              {/* End Time */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>End Time *</Text>
-                <Input
-                  id="endTime"
-                  errorText={formData.endTime}
-                  placeholder="e.g., 4:00 PM"
-                  placeholderTextColor={COLORS.black}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              {/* Number of Players */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Number of Players *</Text>
-                <Input
-                  id="numPlayers"
-                  errorText={formData.numPlayers}
-                  placeholder="Number of Players"
-                  placeholderTextColor={COLORS.black}
-                  keyboardType="numeric"
-                />
-
-              </View>
-
-              {/* Free/Paid Toggle */}
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>Free Game</Text>
-                <Switch
-                  value={formData.isFree}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, isFree: value })
-                  }
-                  trackColor={{ false: '#86efac', true: COLORS.primary }}
-                  thumbColor={formData.isFree ? '#86efac' : COLORS.primary}
-                />
-              </View>
-
-              {/* Price Per Player (conditionally shown) */}
-              {!formData.isFree && (
-                <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Price Per Player *</Text>
-                  <View style={styles.priceInputRow}>
-                    <Text style={styles.currencySymbol}>$</Text>
-                    <Input
-                      id="priceInput"
-                      placeholder="0.00"
-                      placeholderTextColor={COLORS.black}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
-              )}
-
-              {/* Action Buttons */}
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  onPress={closeModal}
-                  style={styles.cancelButton}
-                >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleCreateGame}
-                  style={styles.createButton}
-                >
-                  <Text style={styles.createButtonText}>Create Game</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+        selectedDate={selectedDate}
+        formData={formData}
+        startTimeDate={startTimeDate}
+        endTimeDate={endTimeDate}
+        onFormDataChange={setFormData}
+        onStartTimeDateChange={setStartTimeDate}
+        onEndTimeDateChange={setEndTimeDate}
+        onCreateGame={handleCreateGame}
+        onClose={closeModal}
+      />
     </SafeAreaView>
   );
 }

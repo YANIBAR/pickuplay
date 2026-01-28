@@ -9,7 +9,7 @@ export default StyleSheet.create({
   },
   success: {
     width: SIZES.width * 0.8,
-    height: 250,
+    height: 180,
   },
   logoContainer: {
     alignItems: 'center',

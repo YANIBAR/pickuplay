@@ -10,9 +10,10 @@ import { Header, TextInput, Checkbox, Button, View, Text, ErrorModal, SuccessMod
 import { COLORS, icons, illustrations } from '@constants';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import styles from './styles';
-import { API_BACKEND_URL } from '@env';
+import { API_BACKEND_URL, JAVA_API } from '@env';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -23,13 +24,14 @@ const CreateNewPassword = () => {
   const { navigate } = useNavigation<Nav>();
   const [isChecked, setChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const { email } = useRoute().params;
+  const { phone, otp} = useRoute().params;
   const [password, setPassword] = useState('');
   const handleResetPassword = async () => {
-    const response = await axios.post(API_BACKEND_URL + '/auth/reset-password/', {
-      email: email,
-      newPassword: password,
-      confirmPassword: password
+    console.log(phone, otp, password);
+    const response = await axios.post(JAVA_API + 'auth/reset-password', {
+      phone: phone,
+      otp: otp,
+      newPassword: password
     });
     setModalVisible(true);
     Alert.alert('Error', 'Token verification failed');
@@ -84,9 +86,10 @@ const CreateNewPassword = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-      <Header title={t('cnp.header.createNewPassword')} />
-      <ScrollView showsVerticalScrollIndicator={false}>
+    
+    <SafeAreaView style={[styles.container, { backgroundColor: COLORS.white }]}>
+      
+        <Header title={t('cnp.header.createNewPassword')} />
         <View style={styles.logoContainer}>
           <Image
             source={illustrations.newPassword}
@@ -120,28 +123,6 @@ const CreateNewPassword = () => {
           icon={icons.padlock}
           secureTextEntry={true}
         />
-        <View style={styles.checkBoxContainer}>
-          <View style={{ flexDirection: 'row' }}>
-            <Checkbox
-              style={styles.checkbox}
-              value={isChecked}
-              onChange={setChecked}
-            />
-            <View style={{ flex: 1 }}>
-              <Text
-                style={[
-                  styles.privacy,
-                  {
-                    color: COLORS.black,
-                  },
-                ]}>
-                {t('cnp.form.rememberMe')}
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View></View>
-      </ScrollView>
       <Button
         filled
         title={t('cnp.form.continue')}
@@ -153,7 +134,7 @@ const CreateNewPassword = () => {
         onClose={() => setModalVisible(false)}
       >
       </ErrorModal>
-    </View>
+    </SafeAreaView>
   );
 
 };

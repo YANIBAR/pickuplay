@@ -238,6 +238,11 @@ const Profile = () => {
         onPress={() => navigate('HelpCenter')}
       />
       <SettingsItem
+        icon={icons.installment}
+        name={t('settings.paymentMethods')}
+        onPress={() => navigate('Payment')}
+      />
+      <SettingsItem
         icon={icons.lockedComputerOutline}
         name={t('settings.privacyPolicy')}
         onPress={() => navigate('PrivacyPolicy')}

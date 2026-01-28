@@ -51,19 +51,17 @@ export default function gameDetailsScreen({ route }) {
         
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title}>{gameData.name}</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{t(`${gameData.type.toLowerCase()}`)}</Text>
-            </View>
-          </View>
-
-          <View style={styles.priceContainer}>
-            <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
-              <Text style={styles.originalPrice}>$12.99</Text>
-              {' '}
-              <Text style={styles.discountPrice}>$8.99</Text>
+            <Text style={styles.title}>
+              {gameData.name}
+              
             </Text>
+                <Text style={styles.originalPrice}>$12.99</Text>
+                {' '}
+                <Text style={styles.discountPrice}>$8.99</Text>
+
           </View>
+          <Text style={styles.description}>{gameData.description}</Text>
+          
 
           <View style={styles.infoContainer}>
             <InfoRow 
@@ -74,7 +72,7 @@ export default function gameDetailsScreen({ route }) {
 
             <InfoRow 
               icon="clock" 
-              label={t('game.allowedVisits')} 
+              label={t('game.time')} 
               value="Wed Nov 9, 2pm - 3pm"
             />
           </View>
@@ -306,10 +304,10 @@ const styles = StyleSheet.create({
     originalPrice: {
       textDecorationLine: 'line-through',
       color: COLORS.error,
-      fontSize: FONTS.h4.fontSize,
+      fontSize: FONTS.h5.fontSize,
     },
     discountPrice: {
-      color: '#999',
+      color: COLORS.primary,
       fontWeight: 'bold',
       fontSize: FONTS.h3.fontSize,
     },

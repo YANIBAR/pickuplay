@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Header, OtpInput, Button, View, Text, ModalBase } from '@components';
 import { COLORS, screens } from '@constants';
 import styles from './styles';
-import { API_BACKEND_URL } from '@env';
+import { API_BACKEND_URL, JAVA_API } from '@env';
 import axios from 'axios';
 
 type Nav = {
@@ -15,48 +15,42 @@ type Nav = {
 const OTPVerification = () => {
   const { t } = useTranslation();
   const { navigate } = useNavigation<Nav>();
-  const [time, setTime] = useState<number>(50);
+  const [time, setTime] = useState<number>(60);
   const [disabled, setDisabled] = useState<boolean>(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [token, setToken] = useState('');
+  const [otp, setOtp] = useState('');
   const { email, action, phone } = useRoute().params;
   const [modalVisible, setModalVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [title, setTitle] = useState('');
   const next_navigation = action;
-  const handleCheckToken = async () => {
+  const handleCheckOtp = async () => {
     if (time !== 0) {
-      try {
-        const response = await axios.post(`${API_BACKEND_URL}/user/verifyCode/`, {
-          email: email,
-          otpCode: token
-        });
+      console.log("with otp:", otp, "and action:", next_navigation);
+        if (next_navigation === "resetPassword") {
+          const response = await axios.post(`${JAVA_API}otp/verify`, {
+            phone: phone,
+            otp: otp
+          });
+        }
+        else {
+          const response = await axios.post(`${JAVA_API}auth/verify-account`, {
+            phone: phone,
+            otp: otp
+          });
+        }
+        
   
-        if (response.status === 201) {
           showAlert(
             t('otpVerification.successTitle'),
-            t('otpVerification.tokenVerifiedMessage')
+            t('otpVerification.otpVerifiedMessage')
           );
           navigate(
             next_navigation === "resetPassword"
               ? screens.createnewpassword
               : screens.login,
-            { email }
+            { phone, otp }
           );
-        } else {
-          showAlert(
-            t('otpVerification.errorTitle'),
-            t('otpVerification.tokenFailedWithStatus', { status: response.status })
-          );
-        }
-      } catch (error) {
-        showAlert(
-          t('otpVerification.errorTitle'),
-          t('otpVerification.tokenVerificationFailed', {
-            message: error.response?.data?.message || t('otpVerification.genericError')
-          })
-        );
-      }
     } else {
       showAlert(
         t('otpVerification.errorTitle'),
@@ -68,14 +62,14 @@ const OTPVerification = () => {
   const handleResend = async () => {
     try {
       // Send a request to refresh the OTP code for the given email
-      const response = await axios.post(`${API_BACKEND_URL}/user/refreshOtpCode/`, {
-        email,
-      });
+      const response = await axios.post(`${JAVA_API}otp/send`,
+        {["phone"]: phone},
+      );
   
       // Check if the request was successful
       showAlert(
         t('otpVerification.successTitle'),
-        t('otpVerification.otpResentMessage', { email })
+        t('otpVerification.otpResentMessage', { phone })
       );
   
       // Reset timer
@@ -160,9 +154,9 @@ const OTPVerification = () => {
             {t('otpVerification.codeSent')} { phone.slice(0, 3) + '*'.repeat(phone.length - 5) + phone.slice(-2)}
           </Text>
           <OtpInput
-            digits={6}
+            digits={4}
             inputStyles={styles.inputStyles}
-            onChange={code => setToken(code)}
+            onChange={code => setOtp(code)}
           />
           <View style={styles.codeContainer}>
             <Text
@@ -197,7 +191,7 @@ const OTPVerification = () => {
         <Button
           filled
           title={t('otpVerification.verify')}
-          onPress={handleCheckToken}
+          onPress={handleCheckOtp}
         />
         <ModalBase
           visible={modalVisible}

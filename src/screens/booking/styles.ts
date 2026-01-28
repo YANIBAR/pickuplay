@@ -183,5 +183,47 @@ export default StyleSheet.create({
     textAlign: 'center',
     color: 'white',
     fontWeight: '600',
-  }
+  },
+  customButtonContainer: {
+      marginHorizontal: 5,
+  },
+  customButtonGradient: {
+      borderRadius: 15,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+  },
+  customButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+  },
+   container: {
+    width: '100%',
+  },
+  inputContainer: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS. gray,
+    flexDirection: 'row',
+    height: 52,
+    alignItems: 'center',
+    backgroundColor: COLORS.transparentPrimary,
+  },
+
+  input: {
+    color: COLORS.black,
+    flex: 1,
+    fontFamily: 'regular',
+    fontSize: 14,
+    paddingTop: 0,
+  },
+  errorContainer: {
+    marginVertical: 4,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+  },
 });

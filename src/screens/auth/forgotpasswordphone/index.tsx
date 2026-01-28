@@ -10,14 +10,14 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Header, Checkbox, Button, TextInput, View, Text, Phone } from '@components';
+import { Header, Button, View, Text, Phone } from '@components';
 import { COLORS, SIZES, icons, images, screens } from '@constants';
 import styles from './styles';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
 import { Controller, useForm } from 'react-hook-form';
+import { JAVA_API } from '@env';
+import axios from 'axios';
 
-import { API_BACKEND_URL, OTP_API_KEY } from '@env';
 type Nav = {
   navigate: (value: string) => void;
 };
@@ -31,33 +31,10 @@ const ForgotPasswordPhoneNumber = () => {
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [callingCode, setCallingCode] = useState('+1'); // default US
 
-  useEffect(() => {
-    fetch('https://restcountries.com/v2/all')
-      .then(response => response.json())
-      .then(data => {
-        let areaData = data.map((item: any) => {
-          return {
-            code: item.alpha2Code,
-            item: item.name,
-            callingCode: `+${item.callingCodes[0]}`,
-            flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`,
-          };
-        });
 
-        setAreas(areaData);
-        if (areaData.length > 0) {
-          let defaultData = areaData.filter((a: any) => a.code == 'US');
-
-          if (defaultData.length > 0) {
-            setSelectedArea(defaultData[0]);
-          }
-        }
-      });
-  }, []);
  const sendOTP = async () => {
   try {
     setLoading(true);
@@ -66,13 +43,10 @@ const ForgotPasswordPhoneNumber = () => {
     const phoneValue = control._formValues.phone || '';
     const fullPhoneNumber = `${callingCode}${phoneValue}`;
 
-    // Call NestJS backend endpoint
-    /*const response = await axios.post(
-      `${API_BACKEND_URL}/auth/send-otp/`, {
-        phone: fullPhoneNumber
-      }
-    );*/
-    console.log(phone);
+    // Call NestJS backend endpoint to send OTP
+     const response = await axios.post(`${JAVA_API}otp/send`,
+        {["phone"]: fullPhoneNumber},
+      );
 
     Alert.alert('OTP sent successfully via SMS!');
     

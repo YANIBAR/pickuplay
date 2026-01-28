@@ -60,7 +60,7 @@ const Component: FC<InputProps> = ({
               : COLORS.greyscale500,
             backgroundColor:
               isFocused && !errorText
-                ? COLORS.tansparentPrimary
+                ? COLORS.transparentPrimary
                 : COLORS.greyscale500,
           },
         ]}>

@@ -38,12 +38,13 @@ const SignUp = () => {
     const dataWithRole = { 
       ...formData, 
       phone: `${callingCode}${formData.phone}`,
+      firstname: `youssef`,
+      lastname: `anibar`,
     };
     const response = await axios.post(JAVA_API + `auth/register`, dataWithRole);
-    console.log("Registration Response:", response.data);
     let email = dataWithRole.email;
     let phone = dataWithRole.phone;
-    navigate(screens.otpverification, { email, action: 'login', phone});
+    navigate(screens.otpverification, { email, action: 'register', phone});
   };
 
 

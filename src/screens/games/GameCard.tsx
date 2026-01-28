@@ -19,6 +19,8 @@ export type Game = {
   reservations: number;
   allowedVisits: number;
   remainingVisits: number;
+  date?: string; // ISO format date string
+  time?: string; // HH:mm format
 };
 
 type GameCardProps = {
@@ -37,6 +39,12 @@ const getGameIcon = (type: string) => {
   };
   return iconMap[type] || 'sports';
 };
+
+export function extractCity(location: string): string {
+  // Extracts city from full address (e.g., "New York" from "1100 Avenue of the Americas, New York")
+  const parts = location.split(',').map(p => p.trim());
+  return parts[parts.length - 1] || location;
+}
 
 export default function GameCard({ game }: GameCardProps) {
   const navigation = useNavigation();
@@ -100,21 +108,21 @@ export default function GameCard({ game }: GameCardProps) {
           <View style={styles.infoContainer}>
             <Text style={styles.address} numberOfLines={1}>
               <Icon type="materialCommunityIcons" name="map-marker" size={14} color="#666" />
-              {' 1100 Avenue of the Americas, New York'}
+              {' ' + game.location}
             </Text>
             
             <Text style={styles.time}>
               <Icon type="materialCommunityIcons" name="clock" size={14} color="#666" />
-              {' 10pm - 12pm, Saturday'}
+              {' ' + (game.time || '10pm - 12pm') + ', ' + (game.date ? new Date(game.date).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
             </Text>
           </View>
 
           <View style={styles.footer}>
             <View style={styles.priceContainer}>
               <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
-                <Text style={styles.originalPrice}>{game.originalPrice}</Text>
+                <Text style={styles.originalPrice}>${game.originalPrice}</Text>
                 {' '}
-                <Text style={styles.discountPrice}>{game.discountPrice}</Text>
+                <Text style={styles.discountPrice}>${game.discountPrice}</Text>
               </Text>
             </View>
             <View style={game.allowedVisits >= game.reservations ? styles.leftBadge : styles.fullBadge}>
@@ -163,8 +171,6 @@ export default function GameCard({ game }: GameCardProps) {
 
             <View style={styles.divider} />
 
-            
-            {/* Number of Players Field */}
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Number of Players</Text>
               <View style={styles.playerCountContainer}>
@@ -212,7 +218,6 @@ export default function GameCard({ game }: GameCardProps) {
               </View>
             </View>
 
-            {/* Promo Code Field */}
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Promo Code (Optional)</Text>
               <View style={styles.inputWrapper}>
@@ -239,7 +244,7 @@ export default function GameCard({ game }: GameCardProps) {
               </View>
               <View style={styles.priceRow}>
                 <Text style={styles.priceLabel}>Discounted Price:</Text>
-                <Text style={styles.discountedPriceText}>{game.discountPrice}</Text>
+                <Text style={styles.discountedPriceText}>${game.discountPrice}</Text>
               </View>
             </View>
 
@@ -387,7 +392,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -525,7 +529,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: 'white',
-  },playerCountContainer: {
+  },
+  playerCountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

@@ -20,7 +20,7 @@ import {
   EventDetailsScreen,
   ScanQRCodeScreen,
   LeaguesScreen,
-  BookingScreen,
+  ScheduleScreen,
   AddMembershipScreen,
   GamesScreen,
   DetailScreen,
@@ -49,7 +49,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="eventDetail" component={EventDetailsScreen} />
       <Stack.Screen name="leagues" component={LeaguesScreen} />
       <Stack.Screen name="scanqrcode" component={ScanQRCodeScreen} />
-      <Stack.Screen name="membership" component={BookingScreen} />
+      <Stack.Screen name="booking" component={ScheduleScreen} />
       <Stack.Screen name="addMembership" component={AddMembershipScreen} />
       <Stack.Screen name="games" component={GamesScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />

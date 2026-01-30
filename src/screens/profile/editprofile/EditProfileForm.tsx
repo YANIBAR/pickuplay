@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import RNPickerSelect from 'react-native-picker-select';
 import { Button, Icon, Text } from '@components';
 import { COLORS, screens } from '@constants';
@@ -189,19 +188,7 @@ const handleDeleteAccount = async () => {
           />
         </View>
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={user.birthday instanceof Date ? user.birthday : new Date(user.birthday)}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) {
-                handleChange('birthday', selectedDate);
-              }
-            }}
-          />
-        )}
+
         
         <TouchableOpacity 
           style={[styles.button, loading && styles.disabledButton]}

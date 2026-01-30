@@ -2,7 +2,6 @@ import { COLORS } from '@constants';
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Modal, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { API_BACKEND_URL } from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -311,17 +310,6 @@ const gameModal = ({ visible, onClose, onSave, initialData }) => {
                 </View>
               ))}
               
-              {timePickerState.visible && (
-                <DateTimePicker
-                  value={timePickerState.isStartTime 
-                    ? activeDays[timePickerState.day].startTime 
-                    : activeDays[timePickerState.day].endTime
-                  }
-                  mode="time"
-                  display="default"
-                  onChange={onChangeTime}
-                />
-              )}
             </View>
 
             <View style={styles.inputGroup}>

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput } from 'react-native';
 import { Icon } from '@components';
 import { API_BACKEND_URL } from '@env';
 import { COLORS, FONTS, SIZES } from '@constants';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type Game = {
   id: string;
@@ -45,13 +46,23 @@ export function extractCity(location: string): string {
   const parts = location.split(',').map(p => p.trim());
   return parts[parts.length - 1] || location;
 }
-
+const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      return token;
+    } catch (e) {
+      console.error('Failed to fetch the token', e);
+      return null;
+    }
+  };
 export default function GameCard({ game }: GameCardProps) {
   const navigation = useNavigation();
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const [numPlayers, setNumPlayers] = useState('');
   const [promoCode, setPromoCode] = useState('');
-
+  const [token, setToken] = useState('');
+  const { navigate } = useNavigation<Nav>();
+  
   const handleGamePress = (game: Game) => {
     navigation.navigate('detail', { game: game });
   };
@@ -76,12 +87,23 @@ export default function GameCard({ game }: GameCardProps) {
     setPromoCode('');
   };
 
+  const handleRedirectModal = (authType: 'login' | 'register') => {
+    setJoinModalVisible(false);
+    setNumPlayers('');
+    setPromoCode('');
+    navigate(authType)
+  };
+
   const handleCloseModal = () => {
     setJoinModalVisible(false);
     setNumPlayers('');
     setPromoCode('');
   };
-
+   useEffect(() => {
+    const tkn = getToken();
+      setToken(tkn);
+      console.log(token);
+    }, []);
   return (
     <>
       <TouchableOpacity 
@@ -153,122 +175,157 @@ export default function GameCard({ game }: GameCardProps) {
         onRequestClose={handleCloseModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Join Game</Text>
-              <Pressable 
-                onPress={handleCloseModal}
-                style={styles.closeButton}
-              >
-                <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
-              </Pressable>
-            </View>
-
-            <View style={styles.gameInfoSection}>
-              <Text style={styles.gameNameModal}>{game.name}</Text>
-              <Text style={styles.gameType}>{game.type.toUpperCase()}</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.fieldContainer}>
-              <Text style={styles.fieldLabel}>Number of Players</Text>
-              <View style={styles.playerCountContainer}>
-                <TouchableOpacity 
-                  style={styles.counterButton}
-                  onPress={() => {
-                    const current = parseInt(numPlayers) || 0;
-                    if (current > 0) {
-                      setNumPlayers((current - 1).toString());
-                    }
-                  }}
+          {token ? (
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Join Game</Text>
+                <Pressable 
+                  onPress={handleCloseModal}
+                  style={styles.closeButton}
                 >
+                  <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                </Pressable>
+              </View>
+
+              <View style={styles.gameInfoSection}>
+                <Text style={styles.gameNameModal}>{game.name}</Text>
+                <Text style={styles.gameType}>{game.type.toUpperCase()}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.fieldLabel}>Number of Players</Text>
+                <View style={styles.playerCountContainer}>
+                  <TouchableOpacity 
+                    style={styles.counterButton}
+                    onPress={() => {
+                      const current = parseInt(numPlayers) || 0;
+                      if (current > 0) {
+                        setNumPlayers((current - 1).toString());
+                      }
+                    }}
+                  >
+                    <Icon 
+                      type="materialCommunityIcons" 
+                      name="minus" 
+                      size={24} 
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                  <View style={styles.playerCountDisplay}>
+                    <Icon 
+                      type="materialCommunityIcons" 
+                      name="account-multiple" 
+                      size={16} 
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.playerCountText}>
+                      {numPlayers || '0'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.counterButton}
+                    onPress={() => {
+                      const current = parseInt(numPlayers) || 0;
+                      setNumPlayers((current + 1).toString());
+                    }}
+                  >
+                    <Icon 
+                      type="materialCommunityIcons" 
+                      name="plus" 
+                      size={24} 
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.fieldLabel}>Promo Code (Optional)</Text>
+                <View style={styles.inputWrapper}>
                   <Icon 
                     type="materialCommunityIcons" 
-                    name="minus" 
-                    size={24} 
-                    color="white"
-                  />
-                </TouchableOpacity>
-                <View style={styles.playerCountDisplay}>
-                  <Icon 
-                    type="materialCommunityIcons" 
-                    name="account-multiple" 
-                    size={16} 
+                    name="ticket-percent" 
+                    size={20} 
                     color={COLORS.primary}
                   />
-                  <Text style={styles.playerCountText}>
-                    {numPlayers || '0'}
-                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter promo code"
+                    placeholderTextColor="#999"
+                    value={promoCode}
+                    onChangeText={setPromoCode}
+                  />
                 </View>
+              </View>
+
+              <View style={styles.priceInfo}>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>Original Price:</Text>
+                  <Text style={styles.originalPriceText}>${game.originalPrice}</Text>
+                </View>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>Discounted Price:</Text>
+                  <Text style={styles.discountedPriceText}>${game.discountPrice}</Text>
+                </View>
+              </View>
+
+              <View style={styles.buttonContainer}>
                 <TouchableOpacity 
-                  style={styles.counterButton}
-                  onPress={() => {
-                    const current = parseInt(numPlayers) || 0;
-                    setNumPlayers((current + 1).toString());
-                  }}
+                  style={styles.cancelButton}
+                  onPress={handleCloseModal}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.confirmButton}
+                  onPress={handleConfirmJoin}
                 >
                   <Icon 
                     type="materialCommunityIcons" 
-                    name="plus" 
-                    size={24} 
+                    name="check-circle" 
+                    size={20} 
                     color="white"
                   />
+                  <Text style={styles.confirmButtonText}>Confirm</Text>
                 </TouchableOpacity>
               </View>
             </View>
-
-            <View style={styles.fieldContainer}>
-              <Text style={styles.fieldLabel}>Promo Code (Optional)</Text>
-              <View style={styles.inputWrapper}>
-                <Icon 
-                  type="materialCommunityIcons" 
-                  name="ticket-percent" 
-                  size={20} 
-                  color={COLORS.primary}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter promo code"
-                  placeholderTextColor="#999"
-                  value={promoCode}
-                  onChangeText={setPromoCode}
-                />
+          ) : (
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Join Game</Text>
+                <Pressable 
+                  onPress={handleCloseModal}
+                  style={styles.closeButton}
+                >
+                  <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                </Pressable>
               </View>
-            </View>
-
-            <View style={styles.priceInfo}>
-              <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>Original Price:</Text>
-                <Text style={styles.originalPriceText}>${game.originalPrice}</Text>
-              </View>
-              <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>Discounted Price:</Text>
-                <Text style={styles.discountedPriceText}>${game.discountPrice}</Text>
-              </View>
-            </View>
-
+            <Text>Please connect before joining</Text>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={styles.cancelButton}
-                onPress={handleCloseModal}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.confirmButton}
-                onPress={handleConfirmJoin}
-              >
-                <Icon 
-                  type="materialCommunityIcons" 
-                  name="check-circle" 
-                  size={20} 
-                  color="white"
-                />
-                <Text style={styles.confirmButtonText}>Confirm</Text>
-              </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.cancelButton}
+                  onPress={() => handleRedirectModal('register')}
+                >
+                  <Text style={styles.cancelButtonText}>Sign-In</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.confirmButton}
+                  onPress={() => handleRedirectModal('login')}
+                >
+                  <Icon 
+                    type="materialCommunityIcons" 
+                    name="check-circle" 
+                    size={20} 
+                    color="white"
+                  />
+                  <Text style={styles.confirmButtonText}>Login </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          )}
         </View>
       </Modal>
     </>
@@ -505,7 +562,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderWidth: 1.5,
-    borderColor: '#ddd',
+    borderColor: COLORS.primary,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',

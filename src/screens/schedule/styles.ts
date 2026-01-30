@@ -226,4 +226,43 @@ export default StyleSheet.create({
     color: 'red',
     fontSize: 12,
   },
+  selectContainer: {
+    maxHeight: 60,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    overflow: 'hidden',
+    color: COLORS.black
+  },
+    dropdown: {
+      width: '100%',
+      paddingHorizontal: SIZES.padding,
+      paddingVertical: SIZES.padding2,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: COLORS.grayscale400, 
+      flexDirection: 'row',
+      height: 52,
+      alignItems: 'center',
+    },
+    icon: {
+      marginRight: 10,
+      height: 20,
+      width: 20,
+      tintColor: '#BCBCBC',
+    },
+    placeholderStyle: {
+      fontSize: 16,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 30,
+      fontSize: 16,
+    },
 });

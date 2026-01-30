@@ -6,7 +6,7 @@ import {
   SettingScreen,
   ChatScreen,
   LeaguesScreen,
-  BookingScreen,
+  ScheduleScreen,
   GamesScreen
 } from '@screens';
 import Icon from '@components/Icon';
@@ -76,17 +76,27 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName={isPartner ? "Games" : "Booking"}
+      initialRouteName={"Games"}
       tabBar={props => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}>
 
         <Tab.Screen
-          name="Booking"
-          component={BookingScreen}
+          name="Games"
+          component={GamesScreen}
           options={{
-            tabBarLabel: t('menu.booking'),
+            tabBarLabel: t('menu.games'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="calendar" type="antDesign" color={color} size={size} />
+              <Icon name="home" type="feather" color={color} size={size-2} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Schedule"
+          component={ScheduleScreen}
+          options={{
+            tabBarLabel: t('menu.schedule'),
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="calendar" type="feather" color={color} size={size-2} />
             ),
           }}
         />
@@ -97,31 +107,21 @@ const TabNavigator = () => {
           options={{
             tabBarLabel: t('menu.leagues'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="trophy-outline" type="ionicons" color={color} size={size} />
+              <Icon name="trophy-outline" type="ionicons" color={color} size={size-2} />
             ),
           }}
         /> 
-        <Tab.Screen
-          name="Games"
-          component={GamesScreen}
-          options={{
-            tabBarLabel: t('menu.games'),
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="whistle-outline" type="materialCommunityIcons" color={color} size={size} />
-            ),
-          }}
-        />
 
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Chat"
           component={ChatScreen}
           options={{
             tabBarLabel: t('menu.chat'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="chatbubbles-outline" type="ionicons" color={color} size={size} />
+              <Icon name="chatbubbles-outline" type="ionicons" color={color} size={size-2} />
             ),
           }}
-        />
+        /> */}
 
       <Tab.Screen
         name="Setting"
@@ -129,7 +129,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: t('menu.menu'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="menu" type="feather" color={color} size={size} />
+            <Icon name="menu" type="feather" color={color} size={size-2} />
           ),
         }}
       />

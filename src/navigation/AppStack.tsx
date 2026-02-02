@@ -51,7 +51,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="scanqrcode" component={ScanQRCodeScreen} />
       <Stack.Screen name="booking" component={ScheduleScreen} />
       <Stack.Screen name="addMembership" component={AddMembershipScreen} />
-      <Stack.Screen name="games" component={GamesScreen} />
+      <Stack.Screen name="Games" component={GamesScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
       <Stack.Screen name="detail" component={DetailScreen} /><Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="forgotpasswordmethods"component={ForgotPasswordMethodsScreen}/>

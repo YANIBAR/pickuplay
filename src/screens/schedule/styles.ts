@@ -203,13 +203,12 @@ export default StyleSheet.create({
     width: '100%',
   },
   inputContainer: {
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS. gray,
+    borderColor: "#d1d5db",
     flexDirection: 'row',
-    height: 52,
+    height: SIZES.InputHeight,
     alignItems: 'center',
-    backgroundColor: COLORS.transparentPrimary,
   },
 
   input: {
@@ -227,10 +226,10 @@ export default StyleSheet.create({
     fontSize: 12,
   },
   selectContainer: {
-    maxHeight: 60,
+    height: SIZES.InputHeight,
     borderWidth: 1,
     borderRadius: 8,
-    borderColor: '#ccc',
+    borderColor: "#d1d5db",
     overflow: 'hidden',
     color: COLORS.black
   },
@@ -238,11 +237,10 @@ export default StyleSheet.create({
       width: '100%',
       paddingHorizontal: SIZES.padding,
       paddingVertical: SIZES.padding2,
-      borderRadius: 12,
+      borderRadius: 8,
       borderWidth: 1,
-      borderColor: COLORS.grayscale400, 
+      borderColor: "#d1d5db", 
       flexDirection: 'row',
-      height: 52,
       alignItems: 'center',
     },
     icon: {
@@ -252,10 +250,10 @@ export default StyleSheet.create({
       tintColor: '#BCBCBC',
     },
     placeholderStyle: {
-      fontSize: 16,
+      fontSize: 14,
     },
     selectedTextStyle: {
-      fontSize: 16,
+      fontSize: 14,
     },
     iconStyle: {
       width: 20,

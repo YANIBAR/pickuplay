@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,48 +8,44 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
-  Pressable,
+  TextInput as RNTextInput,
 } from 'react-native';
 import { X } from 'lucide-react-native';
+import { useForm, Controller } from 'react-hook-form';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import styles from '../styles';
-import Input from '@components/Input';
-import { COLORS, SIZES } from '@constants';
+import { COLORS } from '@constants';
 import { Button } from '@components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown } from 'react-native-element-dropdown';
 import { JAVA_API } from '@env';
+import { Image } from 'react-native-svg';
 
 
 interface FormData {
   title: string;
+  description: string;
   sportType: string;
   address: string;
-  date: Date | null;
   startTime: string;
   endTime: string;
   numPlayers: string;
   isFree: boolean;
+  isPrivate: boolean
   pricePerPlayer: string;
 }
 
 const SportTypes = [
-    { label: 'Soccer', value: '1' },
-    { label: 'BasketBall', value: '2' },
-    { label: 'VolleyBall', value: '3' },
-    { label: 'Hockey', value: '4' },
-    { label: 'Tennis', value: '5' },
-  ];
+  { label: 'Soccer', value: 'Soccer' },
+  { label: 'Basketball', value: 'Basketball' },
+  { label: 'Volleyball', value: 'Volleyball' },
+  { label: 'Hockey', value: 'Hockey' },
+  { label: 'Tennis', value: 'Tennis' },
+];
 
 interface GameModalProps {
   visible: boolean;
   selectedDate: Date | null;
-  formData: FormData;
-  startTimeDate: Date;
-  endTimeDate: Date;
-  onFormDataChange: (data: FormData) => void;
-  onStartTimeDateChange: (date: Date) => void;
-  onEndTimeDateChange: (date: Date) => void;
   onCreateGame: () => void;
   onClose: () => void;
 }
@@ -57,33 +53,119 @@ interface GameModalProps {
 export default function GameModal({
   visible,
   selectedDate,
-  formData,
-  startTimeDate,
-  endTimeDate,
-  onFormDataChange,
-  onStartTimeDateChange,
-  onEndTimeDateChange,
   onCreateGame,
   onClose,
 }: GameModalProps) {
-  const [isStartTimePickerVisible, setStartTimePickerVisibility] =
-    useState(false);
-  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [sportType, setSportType] = useState('SOCCER');
-  const [value, setValue] = useState(null);
-    const [isFocus, setIsFocus] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    watch,
+    trigger,
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+  } = useForm<FormData>({
+    defaultValues: {
+      title: '',
+      sportType: '',
+      address: '',
+      startTime: '',
+      endTime: '',
+      numPlayers: '',
+      isFree: true,
+      isPrivate: true,
+      pricePerPlayer: '',
+    },
+    mode: 'onBlur',
+  });
 
-    const renderLabel = () => {
-      if (value || isFocus) {
-        return (
-          <Text style={[styles.label, isFocus && { color: 'blue' }]}>
-            Dropdown label
-          </Text>
-        );
+  const isFree = watch('isFree');
+
+  const isPrivate = watch('isPrivate');
+  const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
+  const [token, setToken] = useState('');
+  const [sportTypeFocus, setSportTypeFocus] = useState(false);
+
+  // Fetch token on component mount
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        const stored_token = await AsyncStorage.getItem('access_token');
+        if (stored_token) {
+          setToken(stored_token);
+        } else {
+          console.warn('No access token found in AsyncStorage');
+        }
+      } catch (error) {
+        console.error('Error retrieving token:', error);
       }
-      return null;
     };
+    getToken();
+  }, []);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (visible) {
+      reset();
+    }
+  }, [visible, reset]);
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return '';
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const period = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12 || 12;
+    return `${String(hours).padStart(2, '0')}:${minutes} ${period}`;
+  };
+
+  const formatTimeForAPI = (timeString: string): string => {
+    if (!timeString || !timeString.includes(':')) {
+      console.warn('Invalid time string:', timeString);
+      return '00:00';
+    }
+
+    const [time, period] = timeString.split(' ');
+    if (!time || !period) {
+      console.warn('Time or period missing:', { time, period });
+      return '00:00';
+    }
+
+    let [hours, minutes] = time.split(':');
+    let hoursNum = parseInt(hours, 10);
+
+    if (period === 'pm' && hoursNum !== 12) {
+      hoursNum += 12;
+    } else if (period === 'am' && hoursNum === 12) {
+      hoursNum = 0;
+    }
+
+    return `${String(hoursNum).padStart(2, '0')}:${minutes}`;
+  };
+
+  const formatDateForAPI = (date: Date | null): string => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const extractCityFromAddress = (address: string): string => {
+    if (!address) return '';
+    const parts = address.split(',');
+    return parts[parts.length - 2]?.trim() || parts[0]?.trim() || '';
+  };
+
   const showStartTimePicker = () => {
     setStartTimePickerVisibility(true);
   };
@@ -100,137 +182,77 @@ export default function GameModal({
     setEndTimePickerVisibility(false);
   };
 
-  const handleStartTimeConfirm = (selectedTime: Date) => {
-    onStartTimeDateChange(selectedTime);
-    onFormDataChange({
-      ...formData,
-      startTime: formatTime(selectedTime),
-    });
+  const handleStartTimeConfirm = async (selectedTime: Date) => {
+    const formattedTime = formatTime(selectedTime);
+    setValue('startTime', formattedTime);
+    await trigger('startTime');
     hideStartTimePicker();
   };
 
-  const handleEndTimeConfirm = (selectedTime: Date) => {
-    onEndTimeDateChange(selectedTime);
-    onFormDataChange({
-      ...formData,
-      endTime: formatTime(selectedTime),
-    });
+  const handleEndTimeConfirm = async (selectedTime: Date) => {
+    const formattedTime = formatTime(selectedTime);
+    setValue('endTime', formattedTime);
+    await trigger('endTime');
     hideEndTimePicker();
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-  
-  const formatTime = (date: Date) => {
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const period = hours >= 12 ? 'pm' : 'am';
+  const onSubmit = async (data: FormData) => {
+    console.log('====== FORM DATA RECEIVED ======');
+    console.log(JSON.stringify(data, null, 2));
+    console.log('================================');
 
-    hours = hours % 12 || 12;
-
-    return `${String(hours).padStart(2, '0')}:${minutes} ${period}`;
-  };
-
-  // Format time to HH:MM format (24-hour) for API
-  const formatTimeForAPI = (timeString: string): string => {
-    // timeString format: "02:30 pm"
-    const [time, period] = timeString.split(' ');
-    let [hours, minutes] = time.split(':');
-    let hoursNum = parseInt(hours, 10);
-
-    if (period === 'pm' && hoursNum !== 12) {
-      hoursNum += 12;
-    } else if (period === 'am' && hoursNum === 12) {
-      hoursNum = 0;
-    }
-
-    return `${String(hoursNum).padStart(2, '0')}:${minutes}`;
-  };
-
-  // Format date to YYYY-MM-DD format for API
-  const formatDateForAPI = (date: Date | null): string => {
-    if (!date) return '';
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Validate form data
-  const validateForm = (): boolean => {
-    if (!formData.title.trim()) {
-      Alert.alert('Validation Error', 'Please enter a title');
-      return false;
-    }
-    if (!formData.sportType.trim()) {
-      Alert.alert('Validation Error', 'Please select a sport type');
-      return false;
-    }
-    if (!formData.address.trim()) {
-      Alert.alert('Validation Error', 'Please enter an address');
-      return false;
-    }
-    if (!formData.startTime.trim()) {
-      Alert.alert('Validation Error', 'Please select a start time');
-      return false;
-    }
-    if (!formData.endTime.trim()) {
-      Alert.alert('Validation Error', 'Please select an end time');
-      return false;
-    }
-    if (!formData.numPlayers.trim()) {
-      Alert.alert('Validation Error', 'Please enter number of players');
-      return false;
-    }
     if (!selectedDate) {
       Alert.alert('Validation Error', 'Please select a date');
-      return false;
-    }
-    if (!formData.isFree && !formData.pricePerPlayer.trim()) {
-      Alert.alert('Validation Error', 'Please enter price per player');
-      return false;
-    }
-    return true;
-  };
-
-  // Create game and call API
-  const handleCreateGame = async () => {
-    if (!validateForm()) {
       return;
     }
 
-    try {
-      setIsLoading(true);
-
-      // Get auth token from AsyncStorage
-      const token = await AsyncStorage.getItem('authToken');
       if (!token) {
         Alert.alert('Error', 'Authentication token not found. Please log in again.');
-        setIsLoading(false);
         return;
       }
 
-      // Prepare API payload
-      const payload = {
-        title: formData.title,
-        description: `${formData.numPlayers} players`,
-        sportType: formData.sportType,
-        city: '', // Extract from address or make dynamic
-        address: formData.address,
-        date: formatDateForAPI(selectedDate),
-        startTime: formatTimeForAPI(formData.startTime),
-        endTime: formatTimeForAPI(formData.endTime),
-        nbrSpots: parseInt(formData.numPlayers, 10),
-      };
+      // Validate required fields
+      if (!data.title || !data.title.trim()) {
+        Alert.alert('Validation Error', 'Title is required');
+        return;
+      }
+      if (!data.sportType || !data.sportType.trim()) {
+        Alert.alert('Validation Error', 'Sport type is required');
+        return;
+      }
+      if (!data.address || !data.address.trim()) {
+        Alert.alert('Validation Error', 'Address is required');
+        return;
+      }
+      if (!data.startTime || !data.startTime.trim()) {
+        Alert.alert('Validation Error', 'Start time is required');
+        return;
+      }
+      if (!data.endTime || !data.endTime.trim()) {
+        Alert.alert('Validation Error', 'End time is required');
+        return;
+      }
+      if (!data.numPlayers || !data.numPlayers.trim()) {
+        Alert.alert('Validation Error', 'Number of players is required');
+        return;
+      }
+      if (!data.isFree && (!data.pricePerPlayer || !data.pricePerPlayer.trim())) {
+        Alert.alert('Validation Error', 'Price per player is required');
+        return;
+      }
 
-      // Make API call
-      const response = await fetch(`${JAVA_API}pickups/create`, {
+      const payload = {
+        title: data.title.trim(),
+        description: data.description,
+        sportType: data.sportType.trim(),
+        city: extractCityFromAddress(data.address),
+        address: data.address.trim(),
+        date: formatDateForAPI(selectedDate),
+        startTime: formatTimeForAPI(data.startTime),
+        endTime: formatTimeForAPI(data.endTime),
+        nbrSpots: parseInt(data.numPlayers, 10),
+      };
+      const response = await fetch(`${JAVA_API}games/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -239,32 +261,13 @@ export default function GameModal({
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || `API Error: ${response.status}`
-        );
-      }
+      console.log('Response status:', response);
+      console.log('Response headers:', response.headers);
 
-      const data = await response.json();
-      Alert.alert('Success', 'Game created successfully!');
       
-      // Call the original onCreateGame callback
       onCreateGame();
       onClose();
-    } catch (error) {
-      console.error('Error creating game:', error);
-      Alert.alert(
-        'Error',
-        error instanceof Error
-          ? error.message
-          : 'Failed to create game. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
   };
-  
 
   return (
     <Modal
@@ -278,13 +281,12 @@ export default function GameModal({
           {/* Modal Header */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              Create Game {'\n'}
-              {selectedDate && formatDate(selectedDate)}
+              Create Game {selectedDate && formatDate(selectedDate)}
             </Text>
             <TouchableOpacity
               onPress={onClose}
               style={styles.modalCloseButton}
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
               <X size={24} color="#1f2937" />
             </TouchableOpacity>
@@ -294,143 +296,388 @@ export default function GameModal({
             {/* Title */}
             <View style={styles.formGroup}>
               <Text style={styles.formLabel}>Title *</Text>
-              <Input
-                id="title"
-                onInputChanged={(text) =>
-                  onFormDataChange({ ...formData, title: text })
-                }
-                placeholder="Enter game title"
-                placeholderTextColor={COLORS.black}
-                keyboardType="default"
+              <Controller
+                name="title"
+                control={control}
+                rules={{
+                  required: 'Title is required',
+                  minLength: { value: 3, message: 'Title must be at least 3 characters' },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <RNTextInput
+                      value={value}
+                      onBlur={async (e) => {
+                        onBlur();
+                        await trigger('title');
+                      }}
+                      onChangeText={(text) => {
+                        onChange(text);
+                      }}
+                      placeholder="Enter game title"
+                      placeholderTextColor={COLORS.black}
+                      keyboardType="default"
+                      style={[
+                        styles.textInput,
+                        errors?.title && { borderColor: 'red' },
+                      ]}
+                    />
+                    {errors?.title && (
+                      <Text style={styles.errorText}>{errors.title.message}</Text>
+                    )}
+                  </View>
+                )}
               />
             </View>
 
             {/* Sport Type */}
-           <View style={styles.formGroup}>
-
+            <View style={styles.formGroup}>
               <Text style={styles.formLabel}>Sport type *</Text>
-            <Dropdown
-              style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              inputSearchStyle={styles.inputSearchStyle}
-              iconStyle={styles.iconStyle}
-              data={SportTypes}
-              search
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={!isFocus ? 'Select item' : '...'}
-              searchPlaceholder="Search..."
-              value={value}
-              onFocus={() => setIsFocus(true)}
-              onBlur={() => setIsFocus(false)}
-              onChange={item => {
-                setValue(item.value);
-                setIsFocus(false);
-              }}
-            />
-          </View>
+              <Controller
+                name="sportType"
+                control={control}
+                rules={{ required: 'Please select a sport type' }}
+                render={({ field: { onChange, value } }) => (
+                  <View>
+                    <Dropdown
+                      style={[
+                        styles.dropdown,
+                        sportTypeFocus && { borderColor: 'blue' },
+                        errors?.sportType && { borderColor: 'red' },
+                      ]}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={SportTypes}
+                      search
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!sportTypeFocus ? 'Select sport' : '...'}
+                      searchPlaceholder="Search..."
+                      value={value}
+                      onFocus={() => setSportTypeFocus(true)}
+                      onBlur={async () => {
+                        setSportTypeFocus(false);
+                        await trigger('sportType');
+                      }}
+                      onChange={(item) => {
+                        onChange(item.value);
+                      }}
+                    />
+                    {errors?.sportType && (
+                      <Text style={styles.errorText}>
+                        {errors.sportType.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
 
             {/* Address */}
             <View style={styles.formGroup}>
               <Text style={styles.formLabel}>Address *</Text>
-              <Input
-                id="address"
-                onInputChanged={(text) =>
-                  onFormDataChange({ ...formData, address: text })
-                }
-                placeholder="Enter address"
-                placeholderTextColor={COLORS.black}
-                keyboardType="default"
+              <Controller
+                name="address"
+                control={control}
+                rules={{ required: 'Address is required' }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <RNTextInput
+                      value={value}
+                      onBlur={async (e) => {
+                        onBlur();
+                        await trigger('address');
+                      }}
+                      onChangeText={(text) => {
+                        onChange(text);
+                      }}
+                      placeholder="Enter game address"
+                      placeholderTextColor={COLORS.black}
+                      keyboardType="default"
+                      style={[
+                        styles.textInput,
+                        errors?.address && { borderColor: 'red' },
+                      ]}
+                    />
+                    {errors?.address && (
+                      <Text style={styles.errorText}>{errors.address.message}</Text>
+                    )}
+                  </View>
+                )}
               />
             </View>
-
             {/* Start Time and End Time */}
             <View style={styles.container}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 {/* Start Time */}
                 <View style={{ flex: 1 }}>
                   <Text style={styles.formLabel}>Start Time *</Text>
-                  <Button
-                    title={
-                      formData.startTime || formatTime(startTimeDate)
-                    }
-                    onPress={showStartTimePicker}
-                    style={styles.inputContainer}
-                  />
-                  <DateTimePickerModal
-                    isVisible={isStartTimePickerVisible}
-                    mode="time"
-                    onConfirm={handleStartTimeConfirm}
-                    onCancel={hideStartTimePicker}
+                  <Controller
+                    name="startTime"
+                    control={control}
+                    rules={{ required: 'Start time is required' }}
+                    render={({ field: { value } }) => (
+                      <View>
+                        <Button
+                          title={value || '00:00 AM'}
+                          onPress={showStartTimePicker}
+                          style={[
+                            styles.inputContainer,
+                            errors?.startTime && { borderColor: 'red' },
+                          ]}
+                        />
+                        <DateTimePickerModal
+                          isVisible={isStartTimePickerVisible}
+                          mode="time"
+                          onConfirm={handleStartTimeConfirm}
+                          onCancel={hideStartTimePicker}
+                        />
+                        {errors?.startTime && (
+                          <Text style={styles.errorText}>
+                            {errors.startTime.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
                   />
                 </View>
-
                 {/* End Time */}
-                <View style={{ flex: 1 }}>
+                <View  style={{ flex: 1 }}>
                   <Text style={styles.formLabel}>End Time *</Text>
-                  <Button
-                    title={
-                      formData.endTime || formatTime(endTimeDate)
-                    }
-                    onPress={showEndTimePicker}
-                    style={styles.inputContainer}
-                  />
-                  <DateTimePickerModal
-                    isVisible={isEndTimePickerVisible}
-                    mode="time"
-                    onConfirm={handleEndTimeConfirm}
-                    onCancel={hideEndTimePicker}
+                  <Controller
+                    name="endTime"
+                    control={control}
+                    rules={{ required: 'End time is required' }}
+                    render={({ field: { value } }) => (
+                      <View>
+                        <Button
+                          title={value || '01:00 AM'}
+                          onPress={showEndTimePicker}
+                          style={[
+                            styles.inputContainer,
+                            errors?.endTime && { borderColor: 'red' },
+                          ]}
+                        />
+                        <DateTimePickerModal
+                          isVisible={isEndTimePickerVisible}
+                          mode="time"
+                          onConfirm={handleEndTimeConfirm}
+                          onCancel={hideEndTimePicker}
+                        />
+                        {errors?.endTime && (
+                          <Text style={styles.errorText}>
+                            {errors.endTime.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
                   />
                 </View>
               </View>
             </View>
-
             {/* Number of Players */}
             <View style={styles.formGroup}>
               <Text style={styles.formLabel}>Number of Players *</Text>
-              <Input
-                id="numPlayers"
-                onInputChanged={(text) =>
-                  onFormDataChange({ ...formData, numPlayers: text })
-                }
-                placeholder="Number of Players"
-                placeholderTextColor={COLORS.black}
-                keyboardType="numeric"
+              <Controller
+                name="numPlayers"
+                control={control}
+                rules={{
+                  required: 'Number of players is required',
+                  pattern: { value: /^\d+$/, message: 'Must be a valid number' },
+                  min: { value: 1, message: 'Must be at least 1' },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View>
+                    <RNTextInput
+                      value={value}
+                      onBlur={async (e) => {
+                        onBlur();
+                        await trigger('numPlayers');
+                      }}
+                      onChangeText={(text) => {
+                        onChange(text);
+                      }}
+                      placeholder="Number of players"
+                      placeholderTextColor={COLORS.black}
+                      keyboardType="numeric"
+                      style={[
+                        styles.textInput,
+                        errors?.numPlayers && { borderColor: 'red' },
+                      ]}
+                    />
+                    {errors?.numPlayers && (
+                      <Text style={styles.errorText}>{errors.numPlayers.message}</Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+            {/* Private/Public Toggle */}
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Private</Text>
+              <Controller
+                name="isPrivate"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{ false: '#86efac', true: COLORS.primary }}
+                    thumbColor={value ? '#86efac' : COLORS.primary}
+                  />
+                )}
               />
             </View>
 
+            {/* Description Field (conditionally shown when private) */}
+            {!isPrivate && (
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Description *</Text>
+                <Controller
+                  name="description"
+                  control={control}
+                  rules={{
+                    required: isPrivate ? 'Description is required' : false,
+                    minLength: {
+                      value: 10,
+                      message: 'Description must be at least 10 characters',
+                    },
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View>
+                      <RNTextInput
+                        value={value}
+                        onBlur={async (e) => {
+                          onBlur();
+                          await trigger('description');
+                        }}
+                        onChangeText={(text) => {
+                          onChange(text);
+                        }}
+                        placeholder="Enter description..."
+                        placeholderTextColor={COLORS.black}
+                        multiline
+                        numberOfLines={4}
+                        style={[
+                          styles.textInput,
+                          errors?.description && { borderColor: 'red' },
+                        ]}
+                      />
+                      {errors?.description && (
+                        <Text style={styles.errorText}>
+                          {errors.description.message}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                />
+              </View>
+            )}
+
+            {/* Image Selection (conditionally shown when private) */}
+            {!isPrivate && (
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Select Image *</Text>
+                <Controller
+                  name="image"
+                  control={control}
+                  rules={{
+                    required: isPrivate ? 'Image is required' : false,
+                  }}
+                  render={({ field: { onChange, value } }) => (
+                    <View>
+                      <TouchableOpacity
+                        style={[
+                          styles.imageButton,
+                          errors?.image && { borderColor: 'red' },
+                        ]}
+                        onPress={() => {
+                          // Add image picker logic here
+                          // e.g., launchImageLibrary or launchCamera
+                        }}
+                      >
+                        <Text style={styles.imageButtonText}>
+                          {value ? 'Change Image' : 'Select Image'}
+                        </Text>
+                      </TouchableOpacity>
+                      {value && (
+                        <Image
+                          source={{ uri: value }}
+                          style={styles.imagePreview}
+                        />
+                      )}
+                      {errors?.image && (
+                        <Text style={styles.errorText}>
+                          {errors.image.message}
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                />
+              </View>
+            )}
             {/* Free/Paid Toggle */}
             <View style={styles.toggleRow}>
               <Text style={styles.toggleLabel}>Free Game</Text>
-              <Switch
-                value={formData.isFree}
-                onValueChange={(value) =>
-                  onFormDataChange({ ...formData, isFree: value })
-                }
-                trackColor={{ false: '#86efac', true: COLORS.primary }}
-                thumbColor={formData.isFree ? '#86efac' : COLORS.primary}
+              <Controller
+                name="isFree"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{ false: '#86efac', true: COLORS.primary }}
+                    thumbColor={value ? '#86efac' : COLORS.primary}
+                  />
+                )}
               />
             </View>
 
             {/* Price Per Player (conditionally shown) */}
-            {!formData.isFree && (
+            {!isFree && (
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Price Per Player *</Text>
                 <View style={styles.priceInputRow}>
                   <Text style={styles.currencySymbol}>$</Text>
-                  <Input
-                    id="priceInput"
-                    onInputChanged={(text) =>
-                      onFormDataChange({
-                        ...formData,
-                        pricePerPlayer: text,
-                      })
-                    }
-                    placeholder="0.00"
-                    placeholderTextColor={COLORS.black}
-                    keyboardType="numeric"
+                  <Controller
+                    name="pricePerPlayer"
+                    control={control}
+                    rules={{
+                      required: !isFree ? 'Price is required' : false,
+                      pattern: {
+                        value: /^\d+(\.\d{1,2})?$/,
+                        message: 'Invalid price format',
+                      },
+                    }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <View style={{ flex: 1 }}>
+                        <RNTextInput
+                          value={value}
+                          onBlur={async (e) => {
+                            onBlur();
+                            await trigger('pricePerPlayer');
+                          }}
+                          onChangeText={(text) => {
+                            onChange(text);
+                          }}
+                          placeholder="0.00"
+                          placeholderTextColor={COLORS.black}
+                          keyboardType="decimal-pad"
+                          style={[
+                            styles.textInput,
+                            errors?.pricePerPlayer && { borderColor: 'red' },
+                          ]}
+                        />
+                        {errors?.pricePerPlayer && (
+                          <Text style={styles.errorText}>
+                            {errors.pricePerPlayer.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
                   />
                 </View>
               </View>
@@ -441,16 +688,16 @@ export default function GameModal({
               <TouchableOpacity
                 onPress={onClose}
                 style={styles.cancelButton}
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleCreateGame}
-                style={[styles.createButton, isLoading && { opacity: 0.5 }]}
-                disabled={isLoading}
+                onPress={handleSubmit(onSubmit)}
+                style={[styles.createButton, isSubmitting && { opacity: 0.5 }]}
+                disabled={isSubmitting}
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.createButtonText}>Create Game</Text>
@@ -463,22 +710,3 @@ export default function GameModal({
     </Modal>
   );
 }
-
-const pickerSelectStyles = {
-  viewContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: 'white',
-  },
-  inputIOS: {
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
-  },
-  inputAndroid: {
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
-  }
-};

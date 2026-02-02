@@ -27,7 +27,7 @@ interface FormData {
 }
 
 export default function HomeScreen({ route }) {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [games, setGames] = useState<Game[]>([]);
@@ -93,15 +93,6 @@ export default function HomeScreen({ route }) {
   };
 
   const handleCreateGame = () => {
-    if (
-      !formData.address ||
-      !formData.startTime ||
-      !formData.endTime ||
-      !formData.numPlayers
-    ) {
-      alert('Please fill in all required fields');
-      return;
-    }
 
     if (!formData.isFree && !formData.pricePerPlayer) {
       alert('Please enter price per player');

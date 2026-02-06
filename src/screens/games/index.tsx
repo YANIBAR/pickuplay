@@ -1,13 +1,14 @@
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Game, extractCity } from './GameCard';
 import GameGrid from './GamesGrid';
-import { API_BACKEND_URL } from '@env';
-import axios from 'axios';
+import { JAVA_API } from '@env';
 import { useEffect, useState } from 'react';
 import { Header, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '@constants';
+import { publicApi } from '@services/api';
+
 
 const mockGames: Game[] = [];
 
@@ -36,18 +37,20 @@ export default function HomeScreen({route}) {
 
   const fetchRequests = async () => {
     try {
-      const response = await axios.get(`${API_BACKEND_URL}/activities/`);
+      const response = await publicApi.get(`games`);
       
-      const data = response.data;
+      const data = response.result.data;
       let newItems = [];
-      if (Array.isArray(data.data)) {
-        newItems = data.data;
-      } else if (Array.isArray(data)) {
-        newItems = data;
+      if (Array.isArray(response.result.data)) {
+        newItems = response.result.data;
+      } else if (Array.isArray(response.result)) {
+        newItems = response.result;
       }
       setGames(newItems);
     } catch (error) {
-      console.error('Error fetching requests:', error);
+      const errorMessage = error.response?.data?.message;
+      Alert.alert('Error', errorMessage);
+      console.error('Game creation failed:', error);
       setGames(mockGames);
     }
   };
@@ -128,7 +131,6 @@ export default function HomeScreen({route}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={t('games_header')} />
       
       {/* Filters Bar */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>

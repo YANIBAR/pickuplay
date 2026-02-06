@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
 import { Icon } from '@components';
 import { API_BACKEND_URL } from '@env';
 import { COLORS, FONTS, SIZES } from '@constants';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authenticatedApi } from '@services/api';
+
 
 export type Game = {
   id: string;
-  name: string;
+  title: string;
   description: string;
-  location: string;
-  imageUrl: string;
-  isUsed: boolean;
-  partnerId: string;
-  type: 'soccer' | 'basketball' | 'volleyball' | 'tennis';
-  originalPrice: number;
-  discountPrice: number;
-  reservations: number;
-  allowedVisits: number;
-  remainingVisits: number;
-  date?: string; // ISO format date string
-  time?: string; // HH:mm format
+  city: string;
+  //imageUrl: string;
+  isPrivate: boolean;
+  creatorId: string;
+  sportType: 'Soccer' | 'basketball' | 'volleyball' | 'tennis' | 'hockey-sticks' | 'table-tennis' | 'football';
+  //originalPrice: number;
+  //discountPrice: number;
+  maxPlayers: number;
+  currentParticipants: number;
+  endTime?: string; // ISO format date string
+  startTime?: string; // HH:mm format
 };
 
 type GameCardProps = {
@@ -37,6 +38,10 @@ const getGameIcon = (type: string) => {
     basketball: 'basketball',
     volleyball: 'volleyball',
     tennis: 'tennis',
+    hockey: 'hockey-sticks',
+    pingPong: 'table-tennis',
+    football: 'football'
+
   };
   return iconMap[type] || 'sports';
 };
@@ -72,20 +77,37 @@ export default function GameCard({ game }: GameCardProps) {
     setJoinModalVisible(true);
   };
 
-  const handleConfirmJoin = () => {
-    if (!numPlayers.trim()) {
-      alert('Please enter number of players');
-      return;
-    }
-    console.log('Join game:', {
-      gameId: game.id,
+  const handleConfirmJoin = async () => {
+  if (!numPlayers.trim()) {
+    Alert.alert('Please enter number of players');
+    return;
+  }
+
+  try {
+    
+    const response = await authenticatedApi.post(`games/${game.id}/join`, {
       numPlayers: parseInt(numPlayers),
-      promoCode: promoCode || 'none',
+      promoCode: promoCode || null,
     });
-    setJoinModalVisible(false);
-    setNumPlayers('');
-    setPromoCode('');
-  };
+
+    if (response.status === 200) {
+      // Success - clear form and close modal
+      setJoinModalVisible(false);
+      setNumPlayers('');
+      setPromoCode('');
+      
+      // Optional: show success message or navigate
+      Alert.alert('Successfully joined game!');
+      
+      // Optional: refresh game state or navigate
+      // await fetchGameDetails(game.id);
+    }
+  } catch (error) {
+    console.error('Failed to join game:', error);
+    const errorMessage = error?.response?.data?.message || 'Failed to join game. Please try again.';
+    Alert.alert(errorMessage);
+  } 
+};
 
   const handleRedirectModal = (authType: 'login' | 'register') => {
     setJoinModalVisible(false);
@@ -102,26 +124,25 @@ export default function GameCard({ game }: GameCardProps) {
    useEffect(() => {
     const tkn = getToken();
       setToken(tkn);
-      console.log(token);
     }, []);
   return (
     <>
       <TouchableOpacity 
-        style={[styles.card, (game.remainingVisits < 0 ? styles.usedCard : {})]} 
+        style={[styles.card, (game.currentParticipants < 0 ? styles.usedCard : {})]} 
         onPress={() => handleGamePress(game)}
       >
         <Image 
-          source={{ uri: `${API_BACKEND_URL}` + (`/matches/` + game.image || 'placeholder.png') }}
+          source={{ uri: `${API_BACKEND_URL}` + (`/matches/` + (game.imageUrl ? game.imageUrl : 'private.jpg')) }}
           style={styles.image}
         />
         <View style={styles.content}>
           <View style={styles.titleRow}>
             <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-              {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
+              {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
             </Text>
             <Icon 
               type="materialCommunityIcons" 
-              name={getGameIcon(game.type)} 
+              name={getGameIcon(game.sportType)} 
               size={24} 
               color={COLORS.primary}
             />
@@ -130,25 +151,30 @@ export default function GameCard({ game }: GameCardProps) {
           <View style={styles.infoContainer}>
             <Text style={styles.address} numberOfLines={1}>
               <Icon type="materialCommunityIcons" name="map-marker" size={14} color="#666" />
-              {' ' + game.location}
+              {' ' + game.city}
             </Text>
             
             <Text style={styles.time}>
               <Icon type="materialCommunityIcons" name="clock" size={14} color="#666" />
-              {' ' + (game.time || '10pm - 12pm') + ', ' + (game.date ? new Date(game.date).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
+              {' ' + (
+                new Date(game.startTime).toLocaleTimeString('en-US', 
+                { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm') 
+                + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US', 
+                { hour: 'numeric', minute: '2-digit', hour12: true  })
+                + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
             </Text>
           </View>
 
           <View style={styles.footer}>
             <View style={styles.priceContainer}>
               <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
-                <Text style={styles.originalPrice}>${game.originalPrice}</Text>
+                <Text style={styles.originalPrice}>$12</Text>
                 {' '}
-                <Text style={styles.discountPrice}>${game.discountPrice}</Text>
+                <Text style={styles.discountPrice}>$7</Text>
               </Text>
             </View>
-            <View style={game.allowedVisits >= game.reservations ? styles.leftBadge : styles.fullBadge}>
-              <Text style={styles.usedText}>{game.reservations}/{game.allowedVisits}</Text>
+            <View style={game.nbrSpots >= game.participants.length ? styles.leftBadge : styles.fullBadge}>
+              <Text style={styles.usedText}>{game.participants.length}/{game.nbrSpots}</Text>
             </View>
           </View>
 
@@ -189,7 +215,7 @@ export default function GameCard({ game }: GameCardProps) {
 
               <View style={styles.gameInfoSection}>
                 <Text style={styles.gameNameModal}>{game.name}</Text>
-                <Text style={styles.gameType}>{game.type.toUpperCase()}</Text>
+                <Text style={styles.gameType}>{game.sportType.toUpperCase()}</Text>
               </View>
 
               <View style={styles.divider} />

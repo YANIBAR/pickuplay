@@ -34,7 +34,6 @@ const TabNavigator = () => {
         }
       });
       
-      console.log("Parsed user data:", userData);
       return userData;
     } catch (error) {
       console.error('Error retrieving user data:', error);

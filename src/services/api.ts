@@ -1,35 +1,51 @@
-import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from 'axios';
-import { API_BASE_URL } from '@env';
-import storage from '@utils/storage';
+import { JAVA_API } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios, { AxiosResponse } from "axios";
+import { Alert } from "react-native";
 
-const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 5000,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+const createApi = (requiresAuth: boolean) => {
+  const instance = axios.create({
+    baseURL: JAVA_API,
+    timeout: 5000,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
+  if (requiresAuth) {
+    instance.interceptors.request.use(
+      async (config) => {
+        try {
+          const token = await AsyncStorage.getItem('access_token');
+          console.log("ddď",token);
+          if (!token) {
+            // Token missing on protected endpoint - redirect to login
+            throw new Error('No authentication token found');
+          }
+          config.headers.Authorization = `Bearer ${token}`;
+        } catch (error) {
+          console.error('Auth error:', error);
+          Alert.alert('Warning','To see your schedule you should to be auth');
+          // Handle redirect to login here
+          return Promise.reject(error);
+        }
+        return config;
+      }
+    );
+  }
 
-api.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig<any>) => {
-    const token = await storage.getItem('access_token');
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.common['Authorization'];
-    }
-    return config;
-  },
-);
+  // Common response interceptor for both
+  instance.interceptors.response.use((response: AxiosResponse) => {
 
-api.interceptors.response.use((response: AxiosResponse) => response);
+    return {
+      ...response,
+      result: response.data,
+    };
 
+  });
+  return instance;
+};
 
-
-export default api;
+export const authenticatedApi = createApi(true);
+export const publicApi = createApi(false);

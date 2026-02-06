@@ -108,6 +108,9 @@ const Profile = () => {
   const handleLogout = async () => {
     // Unstore token and navigate to the next screen
     try {
+
+      const token = await AsyncStorage.getItem('access_token');
+      console.log("beffore :" , token);
       const keysToRemove = [
         'access_token',
         'id',
@@ -120,8 +123,10 @@ const Profile = () => {
         'profileImage',
         'gameId',
       ];
-  
       await AsyncStorage.multiRemove(keysToRemove);
+
+      const atoken = await AsyncStorage.getItem('access_token');
+      console.log("after :" , atoken);
       setUser(null); // Reset user state
       setIsLogged(false); // Reset logged in state
       setLogoutModalVisible(false);
@@ -229,6 +234,12 @@ const Profile = () => {
         icon={icons.shareOutline}
         name={t('settings.inviteFriends')}
         onPress={() => handleInvite()}
+      />
+
+      <SettingsItem
+        icon={icons.shareOutline}
+        name={t('settings.myGames')}
+        onPress={() => navigate('myGames')}
       />
 
       {/* helpCenter */}

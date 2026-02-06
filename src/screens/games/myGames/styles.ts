@@ -1,0 +1,181 @@
+import { StyleSheet } from 'react-native';
+import { COLORS, SIZES } from '@constants';
+
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  viewRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bellIcon: {
+    height: 28,
+    width: 28,
+    tintColor: COLORS.black,
+    marginRight: 8,
+  },
+  dividerContainer: {
+    borderBottomColor: COLORS.grayscale400,
+    borderBottomWidth: 1,
+    marginVertical: 12,
+    flexDirection: 'row',
+    paddingBottom: 4,
+  },
+  logo: {
+    width: 128,
+    height: 128,
+    marginBottom: 22,
+    marginTop: -22,
+  },
+  title: {
+    fontSize: 28,
+    color: COLORS.black,
+    marginVertical: 12,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: 'black',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+  },
+  loginTitle: {
+    fontSize: 14,
+    color: 'black',
+  },
+  loginSubtitle: {
+    fontSize: 14,
+    color: COLORS.primary,
+  },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 32,
+    right: 0,
+    left: 0,
+    alignItems: 'center',
+  },
+  bottomTitle: {
+    fontSize: 12,
+    color: COLORS.black,
+  },
+  bottomSubtitle: {
+    fontSize: 12,
+    color: COLORS.black,
+    textDecorationLine: 'underline',
+    marginTop: 2,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  // Game Card Styles
+  gameCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  gameCardUsed: {
+    backgroundColor: '#f5f5f5',
+    opacity: 0.7,
+  },
+  gameHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  gameTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 4,
+  },
+  gameDescription: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 12,
+  },
+  gameDetails: {
+    fontSize: 13,
+    color: '#666',
+    marginVertical: 4,
+  },
+  gameFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  participantsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  participantsText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2196F3',
+    marginLeft: 6,
+  },
+  statusBadgeAvailable: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  statusBadgeFull: {
+    backgroundColor: '#FFEBEE',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  statusTextAvailable: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4CAF50',
+  },
+  statusTextFull: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#F44336',
+  },
+  privateBadge: {
+    backgroundColor: '#FFB74D',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  privateBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#fff',
+  },
+});

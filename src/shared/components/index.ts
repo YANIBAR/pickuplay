@@ -12,7 +12,6 @@ import Select from './Select';
 import Switch from './Switch';
 import Button from './Button';
 import NoData from './NoData';
-import DatePicker from './DatePicker';
 import DatePickerModal from './DatePickerModal';
 import Header from './Header';
 import Column from './Column';
@@ -55,7 +54,6 @@ export {
   Switch,
   Button,
   NoData,
-  DatePicker,
   DatePickerModal,
   Country,
   Divider,

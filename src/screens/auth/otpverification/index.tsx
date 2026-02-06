@@ -26,25 +26,17 @@ const OTPVerification = () => {
   const next_navigation = action;
   const handleCheckOtp = async () => {
     if (time !== 0) {
-      console.log("with otp:", otp, "and action:", next_navigation);
-        if (next_navigation === "resetPassword") {
-          const response = await axios.post(`${JAVA_API}otp/verify`, {
-            phone: phone,
-            otp: otp
-          });
-        }
-        else {
+        if (next_navigation === "register") {
           const response = await axios.post(`${JAVA_API}auth/verify-account`, {
             phone: phone,
             otp: otp
           });
-        }
-        
   
           showAlert(
             t('otpVerification.successTitle'),
             t('otpVerification.otpVerifiedMessage')
           );
+        }
           navigate(
             next_navigation === "resetPassword"
               ? screens.createnewpassword

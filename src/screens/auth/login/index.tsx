@@ -51,9 +51,8 @@ const Login = () => {
     }, [reset]),
   );
   useEffect(() => {
-    const keys = ['id', 'firstName', 'lastName', 'email', 'phone', 'role'];
+    const keys = ['id', 'firstName', 'lastName', 'email', 'phone'];
     const result = AsyncStorage.multiGet(keys);
-    console.log("result", result);
   }, []);
 
   const handleLogin = async (formData: loginFormData) => {
@@ -84,19 +83,18 @@ const Login = () => {
       if (!accessToken) {
         throw new Error('No access token received');
       }
-
       await storeToken(accessToken);
-      /*await storeUser(userData);
+      await storeUser(userData);
+      //const storedRole = await AsyncStorage.getItem('role');
+      /*const storedId = await AsyncStorage.getItem('id');
       
-      const storedRole = await AsyncStorage.getItem('role');
-      const storedId = await AsyncStorage.getItem('id');
-      
-      if (!storedRole || !storedId) {
+      if (!storedId) {
         throw new Error('Failed to store user data properly');
-      }
-      */
+      }*/
       await new Promise(resolve => setTimeout(resolve, 100));
-      navigation.navigate("games");
+      navigation.navigate("welcome", {
+        screen: "Games"  // Specify which tab to show
+      });
       
     } catch (error: any) {
       setIsLoading(false);
@@ -167,14 +165,14 @@ const Login = () => {
     try {
       await AsyncStorage.multiSet([
         ['id', user._id || ''],
-        ['firstName', user.firstName || ''],
-        ['lastName', user.lastName || ''],
+        ['firstName', user.firstname || ''],
+        ['lastName', user.lastname || ''],
         ['email', user.email || ''],
         ['phone', user.phone || ''],
-        ['preferredLanguage', user.preferredLanguage || ''],
-        ['role', user.role || ''],
-        ['profileImage', user.profileImage || ''],
-        ['gameId', user.role === "Partner" ? user.gameId || '' : ''],
+        //['preferredLanguage', user.preferredLanguage || ''],
+        //['role', user.role || ''],
+        //['profileImage', user.profileImage || ''],
+        //['gameId', user.role === "Partner" ? user.gameId || '' : ''],
       ]);
       
       // Change language

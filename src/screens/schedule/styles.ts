@@ -203,13 +203,12 @@ export default StyleSheet.create({
     width: '100%',
   },
   inputContainer: {
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS. gray,
+    borderColor: "#d1d5db",
     flexDirection: 'row',
-    height: 52,
+    height: SIZES.InputHeight,
     alignItems: 'center',
-    backgroundColor: COLORS.transparentPrimary,
   },
 
   input: {
@@ -226,4 +225,42 @@ export default StyleSheet.create({
     color: 'red',
     fontSize: 12,
   },
+  selectContainer: {
+    height: SIZES.InputHeight,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: "#d1d5db",
+    overflow: 'hidden',
+    color: COLORS.black
+  },
+    dropdown: {
+      width: '100%',
+      paddingHorizontal: SIZES.padding,
+      paddingVertical: SIZES.padding2,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: "#d1d5db", 
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    icon: {
+      marginRight: 10,
+      height: 20,
+      width: 20,
+      tintColor: '#BCBCBC',
+    },
+    placeholderStyle: {
+      fontSize: 14,
+    },
+    selectedTextStyle: {
+      fontSize: 14,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 30,
+      fontSize: 16,
+    },
 });

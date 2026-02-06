@@ -27,17 +27,32 @@ const CreateNewPassword = () => {
   const { phone, otp} = useRoute().params;
   const [password, setPassword] = useState('');
   const handleResetPassword = async () => {
-    console.log(phone, otp, password);
-    const response = await axios.post(JAVA_API + 'auth/reset-password', {
-      phone: phone,
-      otp: otp,
+  if (!phone || !otp || !password) {
+    Alert.alert('Error', 'Please fill in all fields');
+    return;
+  }
+
+
+  try {
+    const response = await axios.post(`${JAVA_API}auth/reset-password`, {
+      phone,
+      otp,
       newPassword: password
     });
-    setModalVisible(true);
-    Alert.alert('Error', 'Token verification failed');
-    // Store token and navigate to the next screen
-    //navigate('login');
-  };
+    if (response.status == 200) {
+      // Navigate to login after a short delay
+      navigate('login');
+      Alert.alert('Success', 'Password reset successfully');
+      
+    } else {
+      Alert.alert('Error', response.data.message || 'Password reset failed');
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Token verification failed';
+    navigate('login');
+    Alert.alert('Error', errorMessage);
+  } 
+};
   // Render modal
   const renderModal = () => {
     return (

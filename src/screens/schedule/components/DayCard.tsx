@@ -23,6 +23,7 @@ interface DayCardProps {
   date: Date;
   games: Game[];
   cancelledGames: number[]; // Array of cancelled game IDs
+  isPastDay: boolean; // New prop to check if day is in the past
   onPress: () => void;
   onCancelGame: (gameId: number) => void;
 }
@@ -31,6 +32,7 @@ export default function DayCard({
   date,
   games,
   cancelledGames,
+  isPastDay,
   onPress,
   onCancelGame,
 }: DayCardProps) {
@@ -63,7 +65,13 @@ export default function DayCard({
     setSelectedGame(null);
   };
 
-  const isCancelled = (gameId: number) => cancelledGames.includes(gameId);
+  const isCancelled = (gameId: number) => cancelledGames.includes(gameId) || gameId==1;
+
+  const handleAddGamePress = () => {
+    if (!isPastDay) {
+      onPress();
+    }
+  };
 
   return (
     <View style={styles.dayCard}>
@@ -117,8 +125,8 @@ export default function DayCard({
                 },
               ]}
             >
-              Players: {game.numPlayers}{' '}
-              {game.isFree ? '(Free)' : `($${game.pricePerPlayer}/player)`}
+              Players: {game.participants.length}{' '}
+              {game.isFree ? '(Free)' : `($${game.price}/player)`}
             </Text>
             {isCancelled(game.id) && (
               <Text style={{ color: '#dc2626', fontWeight: 'bold', marginTop: 8 }}>
@@ -128,108 +136,12 @@ export default function DayCard({
           </TouchableOpacity>
         ))
       )}
-      <TouchableOpacity onPress={onPress}>
-        <Text style={styles.addGameText}>+ Add Game</Text>
-      </TouchableOpacity>
-
-      {/* Cancel Game Modal */}
-      <Modal
-        visible={cancelModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={handleCancelModalClose}
-      >
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modalContent,
-              { paddingVertical: 24, paddingHorizontal: 20 },
-            ]}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: '600',
-                marginBottom: 16,
-                color: '#1f2937',
-              }}
-            >
-              Cancel Game?
-            </Text>
-
-            {selectedGame && (
-              <View style={{ marginBottom: 20, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
-                <Text style={{ color: '#6b7280', marginBottom: 8 }}>
-                  {selectedGame.address}
-                </Text>
-                <Text style={{ color: '#6b7280' }}>
-                  {selectedGame.startTime} - {selectedGame.endTime}
-                </Text>
-              </View>
-            )}
-
-            <Text
-              style={{
-                fontSize: 14,
-                color: '#6b7280',
-                marginBottom: 24,
-                lineHeight: 20,
-              }}
-            >
-              Are you sure you want to cancel this game? This action cannot be
-              undone.
-            </Text>
-
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <TouchableOpacity
-                onPress={handleCancelModalClose}
-                style={[
-                  styles.cancelButton,
-                  {
-                    flex: 1,
-                    backgroundColor: '#f3f4f6',
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    alignItems: 'center',
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.cancelButtonText,
-                    { color: '#1f2937' },
-                  ]}
-                >
-                  Keep Game
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleConfirmCancel}
-                style={[
-                  styles.createButton,
-                  {
-                    flex: 1,
-                    backgroundColor: '#dc2626',
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    alignItems: 'center',
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.createButtonText,
-                    { color: '#fff' },
-                  ]}
-                >
-                  Cancel Game
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      
+      {!isPastDay && (
+        <TouchableOpacity onPress={handleAddGamePress}>
+          <Text style={styles.addGameText}>+ Add Game</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

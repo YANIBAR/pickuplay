@@ -52,7 +52,7 @@ export default StyleSheet.create({
     fontSize: 14,
   },
   gameItem: {
-    backgroundColor: '#f0f9ff',
+    backgroundColor: COLORS.transparentPrimary,
     borderRadius: 6,
     padding: 8,
     marginBottom: 8,
@@ -263,4 +263,53 @@ export default StyleSheet.create({
       height: 30,
       fontSize: 16,
     },
+  imageButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    marginVertical: 8,
+  },
+
+  imageButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  imagePreviewContainer: {
+    marginTop: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+
+  removeImageButton: {
+    backgroundColor: '#ef4444',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+
+  removeImageButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
 });

@@ -28,7 +28,7 @@ export default function NoLeaguePage() {
             Join a league to start playing with your friends, track stats, and compete in organized games.
           </Text>
 
-          {/* Action Buttons */}
+          {/* Action Buttons 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.primaryButton}>
               <Text style={styles.primaryButtonText}>Join a League</Text>
@@ -37,7 +37,7 @@ export default function NoLeaguePage() {
             <TouchableOpacity style={styles.secondaryButton}>
               <Text style={styles.secondaryButtonText}>Create a League</Text>
             </TouchableOpacity>
-          </View>
+          </View>*/}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -7,7 +7,7 @@ export const useUserData = () => {
 
   const fetchUserData = async () => {
     try {
-      const keys = ['id', 'firstName', 'lastName', 'email', 'phone', 'role', 'profileImage', 'membership', 'activityId'];
+      const keys = ['id', 'firstName', 'lastName', 'email', 'phone'];
       const result = await AsyncStorage.multiGet(keys);
       
       const data = {};

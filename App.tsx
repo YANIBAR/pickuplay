@@ -6,6 +6,7 @@ import { withProviders } from '@hocs';
 import AuthProvider from './src/shared/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
+import { Text } from 'react-native-gesture-handler';
 
 const App: FC = () => {
   const [isReady, setIsReady] = useState(false);
@@ -13,7 +14,6 @@ const App: FC = () => {
 
   useEffect(() => {
     const initializeApp = async () => {
-        console.log("Initial token:", initialRoute);
       try {
         //SplashScreen.hide();
         // Initialize i18n first
@@ -26,7 +26,6 @@ const App: FC = () => {
         }
         const token = await AsyncStorage.getItem('access_token');
         const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-        console.log("Initial token:", initialRoute);
         if (token) {
           if(hasLaunched === 'false') {
            setInitialRoute('onboarding');

@@ -82,6 +82,8 @@ export const SIZES = {
   body3: 16,
   body4: 14,
 
+  // Input Sizes
+  InputHeight: 40,
   // App Dimensions
   width,
   height,

@@ -13,7 +13,7 @@ export default function ImageSlider({ images }: ImageSliderProps) {
 
   const renderItem = ({ item }: { item: string }) => (
     <Image
-      source={{ uri: `${API_BACKEND_URL}` + (`/partners/` + item || 'placeholder.png') }}
+      source={{ uri: `${API_BACKEND_URL}` + (`/matches/` + item || 'private.jpg') }}
       style={styles.image}
       resizeMode="cover"
     />

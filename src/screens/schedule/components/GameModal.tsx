@@ -9,17 +9,17 @@ import {
   ActivityIndicator,
   Alert,
   TextInput as RNTextInput,
+  Image as RNImage,
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { useForm, Controller } from 'react-hook-form';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import styles from '../styles';
 import { COLORS } from '@constants';
 import { Button } from '@components';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown } from 'react-native-element-dropdown';
-import { JAVA_API } from '@env';
-import { Image } from 'react-native-svg';
+import { authenticatedApi } from '@services/api';
 
 
 interface FormData {
@@ -33,6 +33,7 @@ interface FormData {
   isFree: boolean;
   isPrivate: boolean
   pricePerPlayer: string;
+  image?: string;
 }
 
 const SportTypes = [
@@ -56,6 +57,7 @@ export default function GameModal({
   onCreateGame,
   onClose,
 }: GameModalProps) {
+
   const {
     control,
     handleSubmit,
@@ -75,34 +77,18 @@ export default function GameModal({
       isFree: true,
       isPrivate: true,
       pricePerPlayer: '',
+      image: '',
     },
     mode: 'onBlur',
   });
 
   const isFree = watch('isFree');
-
   const isPrivate = watch('isPrivate');
+  const imageValue = watch('image');
   const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
   const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
-  const [token, setToken] = useState('');
   const [sportTypeFocus, setSportTypeFocus] = useState(false);
 
-  // Fetch token on component mount
-  useEffect(() => {
-    const getToken = async () => {
-      try {
-        const stored_token = await AsyncStorage.getItem('access_token');
-        if (stored_token) {
-          setToken(stored_token);
-        } else {
-          console.warn('No access token found in AsyncStorage');
-        }
-      } catch (error) {
-        console.error('Error retrieving token:', error);
-      }
-    };
-    getToken();
-  }, []);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -196,78 +182,121 @@ export default function GameModal({
     hideEndTimePicker();
   };
 
-  const onSubmit = async (data: FormData) => {
-    console.log('====== FORM DATA RECEIVED ======');
-    console.log(JSON.stringify(data, null, 2));
-    console.log('================================');
+  const handleImagePicker = () => {
+    Alert.alert(
+      'Select Image',
+      'Choose how to select an image',
+      [
+        {
+          text: 'Camera',
+          onPress: () => launchCameraForImage(),
+        },
+        {
+          text: 'Photo Library',
+          onPress: () => launchGalleryForImage(),
+        },
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
-    if (!selectedDate) {
-      Alert.alert('Validation Error', 'Please select a date');
+  const launchCameraForImage = () => {
+    launchCamera(
+      {
+        mediaType: 'photo',
+        cameraType: 'back',
+        quality: 0.8,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled camera picker');
+        } else if (response.errorCode) {
+          Alert.alert('Error', `Camera error: ${response.errorMessage}`);
+        } else if (response.assets && response.assets[0]) {
+          const imageUri = response.assets[0].uri;
+          setValue('image', imageUri);
+          trigger('image');
+        }
+      }
+    );
+  };
+
+  const launchGalleryForImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.8,
+        selectionLimit: 1,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          Alert.alert('Error', `Gallery error: ${response.errorMessage}`);
+        } else if (response.assets && response.assets[0]) {
+          const imageUri = response.assets[0].uri;
+          setValue('image', imageUri);
+          trigger('image');
+        }
+      }
+    );
+  };
+
+  const handleRemoveImage = () => {
+    setValue('image', '');
+    trigger('image');
+  };
+
+  const onSubmit = async (data: FormData) => {
+    // Validation schema for cleaner, reusable validation
+    const validationRules = [
+      { field: 'selectedDate', condition: !selectedDate, message: 'Please select a date' },
+      { field: 'title', condition: !data.title?.trim(), message: 'Title is required' },
+      { field: 'sportType', condition: !data.sportType?.trim(), message: 'Sport type is required' },
+      { field: 'address', condition: !data.address?.trim(), message: 'Address is required' },
+      { field: 'startTime', condition: !data.startTime?.trim(), message: 'Start time is required' },
+      { field: 'endTime', condition: !data.endTime?.trim(), message: 'End time is required' },
+      { field: 'numPlayers', condition: !data.numPlayers?.trim(), message: 'Number of players is required' },
+      {field: 'pricePerPlayer',condition: !data.isFree && !data.pricePerPlayer?.trim(),  message: 'Price per player is required',},
+      {field: 'image', condition: !isPrivate && !data.image,  message: 'Image is required for public games',},
+    ];
+
+    // Check validations and return early if any fail
+    const validationError = validationRules.find(rule => rule.condition);
+    if (validationError) {
+      Alert.alert('Validation Error', validationError.message);
       return;
     }
 
-      if (!token) {
-        Alert.alert('Error', 'Authentication token not found. Please log in again.');
-        return;
-      }
-
-      // Validate required fields
-      if (!data.title || !data.title.trim()) {
-        Alert.alert('Validation Error', 'Title is required');
-        return;
-      }
-      if (!data.sportType || !data.sportType.trim()) {
-        Alert.alert('Validation Error', 'Sport type is required');
-        return;
-      }
-      if (!data.address || !data.address.trim()) {
-        Alert.alert('Validation Error', 'Address is required');
-        return;
-      }
-      if (!data.startTime || !data.startTime.trim()) {
-        Alert.alert('Validation Error', 'Start time is required');
-        return;
-      }
-      if (!data.endTime || !data.endTime.trim()) {
-        Alert.alert('Validation Error', 'End time is required');
-        return;
-      }
-      if (!data.numPlayers || !data.numPlayers.trim()) {
-        Alert.alert('Validation Error', 'Number of players is required');
-        return;
-      }
-      if (!data.isFree && (!data.pricePerPlayer || !data.pricePerPlayer.trim())) {
-        Alert.alert('Validation Error', 'Price per player is required');
-        return;
-      }
-
-      const payload = {
-        title: data.title.trim(),
-        description: data.description,
-        sportType: data.sportType.trim(),
-        city: extractCityFromAddress(data.address),
-        address: data.address.trim(),
-        date: formatDateForAPI(selectedDate),
-        startTime: formatTimeForAPI(data.startTime),
-        endTime: formatTimeForAPI(data.endTime),
-        nbrSpots: parseInt(data.numPlayers, 10),
-      };
-      const response = await fetch(`${JAVA_API}games/create`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      console.log('Response status:', response);
-      console.log('Response headers:', response.headers);
-
-      
+    const payload = {
+      title: data.title.trim(),
+      description: data.description,
+      sportType: data.sportType.trim(),
+      city: extractCityFromAddress(data.address),
+      address: data.address.trim(),
+      date: formatDateForAPI(selectedDate),
+      startTime: formatTimeForAPI(data.startTime),
+      endTime: formatTimeForAPI(data.endTime),
+      nbrSpots: parseInt(data.numPlayers, 10),
+      price: data.isFree ? 0 : parseFloat(data.pricePerPlayer),
+      image: data.image,
+    };
+    console.log(payload);
+    /*try {
+      const response = await authenticatedApi.post(`${JAVA_API}games/create`, payload);
       onCreateGame();
       onClose();
-  };
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to create game. Please try again.';
+      Alert.alert('Error', errorMessage);
+      console.error('Game creation failed:', error);
+    }*/
+};
 
   return (
     <Modal
@@ -540,7 +569,7 @@ export default function GameModal({
                   name="description"
                   control={control}
                   rules={{
-                    required: isPrivate ? 'Description is required' : false,
+                    required: !isPrivate ? 'Description is required' : false,
                     minLength: {
                       value: 10,
                       message: 'Description must be at least 10 characters',
@@ -585,7 +614,7 @@ export default function GameModal({
                   name="image"
                   control={control}
                   rules={{
-                    required: isPrivate ? 'Image is required' : false,
+                    required: !isPrivate ? 'Image is required' : false,
                   }}
                   render={({ field: { onChange, value } }) => (
                     <View>
@@ -594,20 +623,25 @@ export default function GameModal({
                           styles.imageButton,
                           errors?.image && { borderColor: 'red' },
                         ]}
-                        onPress={() => {
-                          // Add image picker logic here
-                          // e.g., launchImageLibrary or launchCamera
-                        }}
+                        onPress={handleImagePicker}
                       >
                         <Text style={styles.imageButtonText}>
                           {value ? 'Change Image' : 'Select Image'}
                         </Text>
                       </TouchableOpacity>
                       {value && (
-                        <Image
-                          source={{ uri: value }}
-                          style={styles.imagePreview}
-                        />
+                        <View style={styles.imagePreviewContainer}>
+                          <RNImage
+                            source={{ uri: value }}
+                            style={styles.imagePreview}
+                          />
+                          <TouchableOpacity
+                            style={styles.removeImageButton}
+                            onPress={handleRemoveImage}
+                          >
+                            <Text style={styles.removeImageButtonText}>Remove</Text>
+                          </TouchableOpacity>
+                        </View>
                       )}
                       {errors?.image && (
                         <Text style={styles.errorText}>

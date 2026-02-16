@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-community-icons';
+import { Icon } from '@components';
+import { COLORS } from '@constants';
 
 export type Game = {
   id: number;
@@ -33,6 +34,16 @@ export default function GameCard({ game, onPress }: GameCardProps) {
 
   const handleGamePress = (game: Game) => {
     navigation.navigate('gameDetail', { game });
+  };
+
+  const handleCancel = () => {
+    // Add your cancel logic here
+    console.log('Cancel game:', game.id);
+  };
+
+  const handleEdit = () => {
+    // Add your edit logic here
+    navigation.navigate('gameEdit', { game });
   };
 
   const isGameFull = game.currentParticipants >= game.maxPlayers;
@@ -88,7 +99,6 @@ export default function GameCard({ game, onPress }: GameCardProps) {
 
       <View style={styles.detailsRow}>
         <View style={styles.detailItem}>
-          
           <Text style={[styles.detailText, isGameFull && styles.usedText]}>
             {formatDateTime(game.startTime)}
           </Text>
@@ -125,10 +135,22 @@ export default function GameCard({ game, onPress }: GameCardProps) {
             ]}
           >
             {isGameFull
-              ? t('game.full')
-              : t('game.spotsAvailable', { count: availableSlots })}
+              ? t('myGames.full')
+              : t('myGames.spotsAvailable', { count: availableSlots })}
           </Text>
         </View>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+          <Icon type="materialCommunityIcons"  name="pencil" size={18} color="#fff" />
+          <Text style={styles.editButtonText}>{t('common.edit')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+          <Icon type="materialCommunityIcons" name="close" size={18} color="#fff" />
+          <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -252,5 +274,40 @@ const styles = StyleSheet.create({
   },
   fullText: {
     color: '#F44336',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.red,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

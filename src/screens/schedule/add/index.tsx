@@ -38,7 +38,6 @@ export default function HomeScreen() {
   const { t } = useTranslation();
 
   const [showExpireDatePicker, setShowExpireDatePicker] = useState(false);
-  const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
 
   const cities = ['Casablanca', 'Fes', 'Rabat', 'Tangier', 'Agadir', 'Marrakesh'];
 

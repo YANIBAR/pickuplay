@@ -1,4 +1,10 @@
 {
+
+  "common": {
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
   "AvailableLanguages": "Available Languages",
   "CustomerService": "Customer Survice",
   "EnterMessage": "Enter Your message...",
@@ -442,17 +448,9 @@
       "title": "Your Membership QR Code",
       "instructions": "Show this QR code at the entrance"
     },
-    "gameTypes": {
-      "fitness": "Fitness",
-      "sports": "Sports",
-      "wellness": "Wellness",
-      "pool": "Pool",
-      "museum": "Museum",
-      "cinema": "Cinema",
-      "park": "Park",
-      "theater": "Theater",
-      "restaurant": "Restaurant"
-    }
+  "myGames": {
+    "full": "Full",
+    "spotsAvailable": "Spots Available"
   },
   "edit_game" : {
     "edit_game": "Edit game",

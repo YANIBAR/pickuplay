@@ -23,3 +23,25 @@ export const formatDateLong = (date: Date): string => {
     year: 'numeric',
   });
 };
+
+export const formatDateShort = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const parseTime = (time: string) => {
+  const [timePart, modifier] = time.split(' '); // "12:19", "pm"
+  let [hours, minutes] = timePart.split(':').map(Number);
+
+  if (modifier.toLowerCase() === 'pm' && hours !== 12) {
+    hours += 12;
+  }
+
+  if (modifier.toLowerCase() === 'am' && hours === 12) {
+    hours = 0;
+  }
+
+  return { hours, minutes };
+};

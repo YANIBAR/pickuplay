@@ -6,6 +6,8 @@ import DayCard from './components/DayCard';
 import GameModal from './components/GameModal';
 import { JAVA_API } from '@env';
 import { authenticatedApi } from '@services/api';
+import { Text } from '@components';
+import { formatDateShort } from '@utils/dateUtils';
 
 interface Participant {
   id: number;
@@ -67,8 +69,7 @@ export default function HomeScreen({ route }) {
 
   const fetchMyGames = async () => {
     try {
-      const response = await authenticatedApi.get(`${JAVA_API}games`);
-      console.log(response.result);
+      const response = await authenticatedApi.get(`${JAVA_API}profile/games/joined?date=` + formatDateShort(weekStart));
       // Check if response is ok
       if (response.status != 200) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -83,7 +84,7 @@ export default function HomeScreen({ route }) {
     } 
   };
   useEffect(() => {
-   
+    console.log("la data ", weekStart);
      fetchMyGames();
   }, []);
   
@@ -190,7 +191,6 @@ export default function HomeScreen({ route }) {
         onPreviousWeek={goToPreviousWeek}
         onNextWeek={goToNextWeek}
       />
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {weekDays.map((date, index) => {
           const dayGames = getGamesForDate(date);

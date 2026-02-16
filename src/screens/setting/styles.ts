@@ -4,7 +4,8 @@ import { COLORS, SIZES } from '@constants';
 export default StyleSheet.create({
     area: {
         flex: 1,
-        backgroundColor: COLORS.white
+        backgroundColor: COLORS.white,
+        minHeight: SIZES.height
       },
       container: {
         flex: 1,

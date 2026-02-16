@@ -23,7 +23,7 @@ export default function NoLeaguePage() {
             You're not currently part of any league
           </Text>
 
-
+    
           <Text style={styles.description}>
             Join a league to start playing with your friends, track stats, and compete in organized games.
           </Text>

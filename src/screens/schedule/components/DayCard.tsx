@@ -125,7 +125,7 @@ export default function DayCard({
                 },
               ]}
             >
-              Players: {game.participants.length}{' '}
+              Players: {/*game.participants.length*/}{' 2'}
               {game.isFree ? '(Free)' : `($${game.price}/player)`}
             </Text>
             {isCancelled(game.id) && (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Image, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
@@ -12,12 +12,14 @@ export default function gameDetailsScreen({ route }) {
   const { t } = useTranslation();
   const { game, membershipId} = route.params || {};
   const [modalVisible, setModalVisible] = useState(false);
+  const [shareModalVisible, setShareModalVisible] = useState(false);
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   const toggleDay = (day: string) => {
     setExpandedDay(expandedDay === day ? null : day);
   };
+
   const playersData = [
     { name: "alloudi", image: "https://pbs.twimg.com/media/F8-YPTEWIAEtdou.jpg" },
     { name: "zidan", image: "https://cdn.artphotolimited.com/images/59888232b0ba742a2efde168/1000x1000/zinedine-zidane-france-ukraine.jpg"},
@@ -34,6 +36,7 @@ export default function gameDetailsScreen({ route }) {
     "opensoccer.jpg" ,
     "pickup-play.jpg"
   ];
+
   const gameData = {
     name: game.name,
     type: game.type,
@@ -50,6 +53,46 @@ export default function gameDetailsScreen({ route }) {
     console.log(game);
   }, []);
 
+  // Generate deep link for sharing
+  const generateDeepLink = () => {
+    const baseURL = 'sports://game'; // Change to your app's URL scheme
+    const params = `?gameId=${game._id}&gameName=${encodeURIComponent(game.title)}`;
+    return baseURL + params;
+  };
+
+  // Handle share button press
+  const handleShareGame = async () => {
+    try {
+      const deepLink = generateDeepLink();
+      const message = `Join me for ${game.title} at ${game.address}! ${game.description}\n\n${deepLink}`;
+      
+      const result = await Share.share({
+        message: message,
+        url: deepLink,
+        title: `Join: ${game.title}`,
+      });
+
+      if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to share game');
+      console.error(error);
+    }
+  };
+
+  // Copy deep link to clipboard
+  const handleCopyDeepLink = async () => {
+    try {
+      const deepLink = generateDeepLink();
+      // You may need to import Clipboard from @react-native-clipboard/clipboard
+      // For now, showing a placeholder
+      Alert.alert('Deep Link', `Link copied to clipboard:\n\n${deepLink}`);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy link');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title={t('game.game_details')} />
@@ -60,13 +103,20 @@ export default function gameDetailsScreen({ route }) {
           <View style={styles.header}>
             <Text style={styles.title}>
               {game.title}
-              
             </Text>
-                <Text style={styles.originalPrice}>$12.99</Text>
-                {' '}
-                <Text style={styles.discountPrice}>$8.99</Text>
-
+            <TouchableOpacity 
+              onPress={() => setShareModalVisible(true)}
+              style={styles.shareButton}
+            >
+              <Icon type="materialCommunityIcons" name="share-variant" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
           </View>
+          
+          <View style={styles.priceContainer}>
+            <Text style={styles.originalPrice}>$12.99</Text>
+            <Text style={styles.discountPrice}>$8.99</Text>
+          </View>
+
           <Text style={styles.description}>{game.description}</Text>
           
 
@@ -191,6 +241,63 @@ export default function gameDetailsScreen({ route }) {
           </View>
         </View>
       </Modal>
+
+      {/* Share Game Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={shareModalVisible}
+        onRequestClose={() => setShareModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t('game.shareModal.title') || 'Share Game'}</Text>
+              <Pressable 
+                onPress={() => setShareModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+              </Pressable>
+            </View>
+            
+            <View style={styles.shareContent}>
+              <Text style={styles.shareDescription}>
+                {game.title}
+              </Text>
+              
+              <TouchableOpacity 
+                style={styles.shareOption}
+                onPress={() => {
+                  handleShareGame();
+                  setShareModalVisible(false);
+                }}
+              >
+                <Icon type="materialCommunityIcons" name="share-variant" size={24} color={COLORS.primary} />
+                <Text style={styles.shareOptionText}>Share with Friends</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.shareOption}
+                onPress={() => {
+                  handleCopyDeepLink();
+                  setShareModalVisible(false);
+                }}
+              >
+                <Icon type="materialCommunityIcons" name="link-variant" size={24} color={COLORS.primary} />
+                <Text style={styles.shareOptionText}>Copy Deep Link</Text>
+              </TouchableOpacity>
+
+              <View style={styles.deepLinkContainer}>
+                <Text style={styles.deepLinkLabel}>Deep Link:</Text>
+                <Text style={styles.deepLinkText} selectable>
+                  {generateDeepLink()}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -206,11 +313,16 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
+  },
+  shareButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   badge: {
     backgroundColor: COLORS.primary,
@@ -240,6 +352,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
     borderRadius: 12,
+    marginVertical: 16,
   },
   buttonText: {
     color: COLORS.white,
@@ -258,7 +371,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 20,
-    width: '80%',
+    width: '85%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -289,7 +402,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     marginBottom: 16,
-    // Add a subtle border
     borderWidth: 1,
     borderColor: '#eee',
   },
@@ -313,6 +425,9 @@ const styles = StyleSheet.create({
   textContainer: {
     marginLeft: 12,
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   label: {
     fontSize: 14,
@@ -326,18 +441,19 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    marginVertical: 8,
   },
-    originalPrice: {
-      textDecorationLine: 'line-through',
-      color: COLORS.error,
-      fontSize: FONTS.h5.fontSize,
-    },
-    discountPrice: {
-      color: COLORS.primary,
-      fontWeight: 'bold',
-      fontSize: FONTS.h3.fontSize,
-    },
+  originalPrice: {
+    textDecorationLine: 'line-through',
+    color: COLORS.error,
+    fontSize: FONTS.h5.fontSize,
+    marginRight: 12,
+  },
+  discountPrice: {
+    color: COLORS.primary,
+    fontWeight: 'bold',
+    fontSize: FONTS.h3.fontSize,
+  },
   section: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -425,5 +541,56 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     color: '#333',
+  },
+  // Share Modal Styles
+  shareContent: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  shareDescription: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  shareOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginVertical: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  shareOptionText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+    marginLeft: 12,
+  },
+  deepLinkContainer: {
+    width: '100%',
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  deepLinkLabel: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  deepLinkText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontFamily: 'Courier',
+    lineHeight: 18,
   },
 });

@@ -4,10 +4,7 @@ import styles from './styles';
 import Header from './components/Header';
 import DayCard from './components/DayCard';
 import GameModal from './components/GameModal';
-import { JAVA_API } from '@env';
 import { authenticatedApi } from '@services/api';
-import { Text } from '@components';
-import { formatDateShort } from '@utils/dateUtils';
 
 interface Participant {
   id: number;
@@ -28,11 +25,11 @@ interface Game {
   address: string;
   startTime: string;
   endTime: string;
-  maxPlayers: number;
+  nbrSpots: number;
   currentParticipants: number;
   creatorId: number;
   creatorName: string;
-  visibility: string;
+  isPrivate: string;
   participants: Participant[];
   createdAt: string;
   updatedAt: string;
@@ -49,7 +46,11 @@ interface FormData {
 }
 
 export default function HomeScreen({ route }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [games, setGames] = useState<Game[]>([]);
@@ -69,22 +70,22 @@ export default function HomeScreen({ route }) {
 
   const fetchMyGames = async () => {
     try {
-      const response = await authenticatedApi.get(`${JAVA_API}profile/games/joined?date=` + formatDateShort(weekStart));
+      const response = await authenticatedApi.get(`profile/games/joined?type=upcoming`);
       // Check if response is ok
       if (response.status != 200) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
       // Set the games with API data
-      if (response.result.data && Array.isArray(response.result.data)) {
-        setGames(response.result.data); 
+      if (response.result.data && Array.isArray(response.result.data.games)) {
+        setGames(response.result.data.games); 
       }
+
+      console.log('Fetched games:', games); 
     } catch (error) {
       console.error('Error fetching games:', error);
     } 
   };
   useEffect(() => {
-    console.log("la data ", weekStart);
      fetchMyGames();
   }, []);
   
@@ -100,7 +101,7 @@ export default function HomeScreen({ route }) {
     today.setHours(0, 0, 0, 0);
     const checkDate = new Date(date);
     checkDate.setHours(0, 0, 0, 0);
-    return checkDate < today;
+    return checkDate <= today;
   };
 
   const weekStart = getWeekStart(currentDate);
@@ -143,32 +144,32 @@ export default function HomeScreen({ route }) {
     setSelectedDate(null);
   };
 
-  const handleCreateGame = () => {
+  const handleCreateGame = (game: Game) => {
 
     if (!formData.isFree && !formData.pricePerPlayer) {
       alert('Please enter price per player');
       return;
     }
-
+    console.log('Creating game with form data:', game);
     const newGame: Game = {
-      id: Date.now(),
-      title: formData.address,
-      description: `${formData.numPlayers} players`,
-      sportType: '',
-      city: '',
-      address: formData.address,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      maxPlayers: parseInt(formData.numPlayers) || 0,
-      currentParticipants: 0,
+      id: game.id,
+      title: game.title,
+      description: game.description,
+      sportType: game.sportType,
+      city: game.city,
+      address: game.address,
+      startTime: game.startTime,
+      endTime: game.endTime,
+      nbrSpots: 1,
+      currentParticipants: 1,
       creatorId: 0,
       creatorName: '',
-      visibility: 'PUBLIC',
+      isPrivate: (game.isPrivate == true) ? "false" : "true",
       participants: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
+    console.log('Creating game with data:', newGame);
     setGames([...games, newGame]);
     closeModal();
   };

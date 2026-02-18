@@ -43,7 +43,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
 
   const handleEdit = () => {
     // Add your edit logic here
-    navigation.navigate('gameEdit', { game });
+    navigation.navigate('editGame', { game });
   };
 
   const isGameFull = game.currentParticipants >= game.maxPlayers;

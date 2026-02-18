@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@components';
 import { useTranslation } from 'react-i18next';
 
-const GameModal = ({ visible, onClose, onSave, initialData }) => {
+const EditGameScreen = ({ visible, onClose, onSave, initialData }) => {
   const [formData, setFormData] = useState(initialData || {
     name: '',
     type: '',
@@ -502,4 +502,4 @@ const pickerSelectStyles = {
   }
 };
 
-export default GameModal;
+export default EditGameScreen;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
 import { Icon } from '@components';
-import { API_BACKEND_URL } from '@env';
+import { API_BACKEND_URL, JAVA_API } from '@env';
 import { COLORS, FONTS, SIZES } from '@constants';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -132,7 +132,7 @@ export default function GameCard({ game }: GameCardProps) {
         onPress={() => handleGamePress(game)}
       >
         <Image 
-          source={{ uri: `${API_BACKEND_URL}` + (`/matches/` + (game.imageUrl ? game.imageUrl : 'private.jpg')) }}
+          source={{ uri: `${JAVA_API}games/${game.id}/image` }}
           style={styles.image}
         />
         <View style={styles.content}>

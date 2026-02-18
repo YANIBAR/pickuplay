@@ -6,7 +6,6 @@ import { withProviders } from '@hocs';
 import AuthProvider from './src/shared/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
-import { Text } from 'react-native-gesture-handler';
 
 const App: FC = () => {
   const [isReady, setIsReady] = useState(false);

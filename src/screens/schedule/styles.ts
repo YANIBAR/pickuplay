@@ -82,12 +82,10 @@ export default StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingVertical: 20,
     paddingHorizontal: 16,
-    maxHeight: '90%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -121,6 +119,10 @@ export default StyleSheet.create({
     paddingVertical: 10,
     fontSize: 14,
     color: '#1f2937',
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: 'top',
   },
   toggleRow: {
     flexDirection: 'row',
@@ -166,7 +168,7 @@ export default StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: COLORS.primary,
   },
   cancelButtonText: {
     textAlign: 'center',
@@ -203,9 +205,13 @@ export default StyleSheet.create({
     width: '100%',
   },
   inputContainer: {
-    borderRadius: 8,
+    width: '100%',
+    paddingHorizontal: SIZES.padding,
+    paddingVertical: SIZES.padding2,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: COLORS.grayscale200,
+    marginVertical: 5,
     flexDirection: 'row',
     height: SIZES.InputHeight,
     alignItems: 'center',
@@ -236,11 +242,12 @@ export default StyleSheet.create({
     dropdown: {
       width: '100%',
       paddingHorizontal: SIZES.padding,
-      paddingVertical: SIZES.padding2,
-      borderRadius: 8,
+      borderRadius: 12,
       borderWidth: 1,
-      borderColor: "#d1d5db", 
+      borderColor: COLORS.greyscale300,
+      marginVertical: 5,
       flexDirection: 'row',
+      height: SIZES.InputHeight,
       alignItems: 'center',
     },
     icon: {
@@ -250,6 +257,7 @@ export default StyleSheet.create({
       tintColor: '#BCBCBC',
     },
     placeholderStyle: {
+      color: '#9ca3af',
       fontSize: 14,
     },
     selectedTextStyle: {
@@ -312,4 +320,118 @@ export default StyleSheet.create({
     fontWeight: '600',
   },
 
+  backButton: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#f0f9ff',
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 44,
+  },
+
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+// Step Indicator Styles
+
+stepIndicator: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingHorizontal: 16,
+  paddingVertical: 24,
+  gap: 12,
+},
+
+stepDot: {
+  width: 14,
+  height: 14,
+  borderRadius: 7,
+  backgroundColor: '#e5e7eb',
+  position: 'relative',
+},
+
+stepDotActive: {
+  backgroundColor: COLORS.primary,
+  shadowColor: COLORS.primary,
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+stepLine: {
+  flex: 1,
+  height: 2,
+  backgroundColor: '#e5e7eb',
+  maxWidth: 50,
+},
+
+// Alternative: With step numbers inside dots
+stepDotWithNumber: {
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  backgroundColor: '#f3f4f6',
+  borderWidth: 2,
+  borderColor: '#e5e7eb',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+stepDotNumberActive: {
+  backgroundColor: COLORS.primary,
+  borderColor: COLORS.primary,
+},
+
+stepDotText: {
+  fontSize: 14,
+  fontWeight: '600',
+  color: '#6b7280',
+},
+
+stepDotTextActive: {
+  color: '#fff',
+},
+
+stepLineActive: {
+  backgroundColor: COLORS.primary,
+},
+
+// Alternative: With labels
+stepIndicatorWithLabels: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 16,
+  paddingVertical: 20,
+  gap: 16,
+},
+
+stepContainer: {
+  alignItems: 'center',
+  gap: 8,
+},
+
+stepLabel: {
+  fontSize: 12,
+  fontWeight: '500',
+  color: '#9ca3af',
+},
+
+stepLabelActive: {
+  color: COLORS.primary,
+  fontWeight: '600',
+},
 });

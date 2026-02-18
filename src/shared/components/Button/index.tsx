@@ -18,6 +18,7 @@ interface ButtonProps extends TouchableOpacityProps {
   color?: string;
   size?: Size;
   textColor?: string;
+  textSize?: number;
   filled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -28,6 +29,7 @@ const Button: FC<ButtonProps> = ({
   title,
   color,
   textColor,
+  textSize,
   filled = false,
   loading = false,
   style,
@@ -63,7 +65,7 @@ const Button: FC<ButtonProps> = ({
         <Text
           style={[
             styles.text,
-            { color: resolvedTextColor },
+            { color: resolvedTextColor, fontSize: textSize },
             disabled && { color: '#FFFFFF' },
           ]}>
           {title}

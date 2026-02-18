@@ -4,7 +4,7 @@ import GameCard, { Game } from './gameCard';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { authenticatedApi } from '@services/api';
+import { authenticatedApi, publicApi } from '@services/api';
 import { Header } from '@components';
 
 export default function GamesScreen() {
@@ -20,10 +20,8 @@ export default function GamesScreen() {
       setError(null);
 
       // Fetch games from the API
-      const response = await authenticatedApi.get('profile/games');
-      
-      
-      
+     const response = await publicApi.get(`games`);
+
       // Handle different response structures
       let gamesData = [];
         gamesData = response.result.data;

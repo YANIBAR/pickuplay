@@ -447,7 +447,8 @@
     "qrModal": {
       "title": "Your Membership QR Code",
       "instructions": "Show this QR code at the entrance"
-    },
+    }
+  },
   "myGames": {
     "full": "Full",
     "spotsAvailable": "Spots Available"

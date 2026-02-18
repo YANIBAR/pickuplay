@@ -86,7 +86,7 @@ export default function DayCard({
             onPress={() => handleGamePress(game)}
             style={[
               styles.gameItem,
-              isCancelled(game.id) && {
+              game.status=="CANCELED" && {
                 backgroundColor: '#fee2e2',
                 borderLeftColor: '#dc2626',
                 borderLeftWidth: 4,

@@ -84,7 +84,7 @@ const Profile = () => {
       
       setLogoutModalVisible(false);
       refRBSheet.current?.close();
-      navigate(screens.login);
+      navigate("login");
     } catch (e) {
       console.error('Failed to log out', e);
       Alert.alert('Error', 'Failed to log out. Please try again.');

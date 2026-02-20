@@ -8,6 +8,7 @@ import { Header, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '@constants';
 import { publicApi } from '@services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const mockGames: Game[] = [];
@@ -38,7 +39,6 @@ export default function HomeScreen({route}) {
   const fetchRequests = async () => {
     try {
       const response = await publicApi.get(`games`);
-      
       setGames(response.result.data.games);
     } catch (error) {
       const errorMessage = error.response?.data?.message;

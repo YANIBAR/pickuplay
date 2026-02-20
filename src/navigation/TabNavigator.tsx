@@ -126,9 +126,9 @@ const TabNavigator = () => {
         name="Setting"
         component={SettingScreen}
         options={{
-          tabBarLabel: t('menu.menu'),
+          tabBarLabel: t('menu.user'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="menu" type="feather" color={color} size={size-2} />
+            <Icon name="user" type="feather" color={color} size={size-2} />
           ),
         }}
       />

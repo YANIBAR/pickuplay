@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function gameDetailsScreen({ route }) {
   const { t } = useTranslation();
-  const { game, membershipId} = route.params || {};
+  const { game} = route.params || {};
   const [modalVisible, setModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
   // Generate multiple images for the slider using our AI API
@@ -221,16 +221,6 @@ export default function gameDetailsScreen({ route }) {
               >
                 <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
               </Pressable>
-            </View>
-            
-            <View style={styles.qrContainer}>
-              <QRCode
-                value={JSON.stringify({
-                  membershipId: membershipId,
-                  gameId: game._id
-                })}
-                size={200}
-              />
             </View>
             
             <Text style={styles.qrInstructions}>

@@ -328,6 +328,7 @@
     "leagues": "Leagues",
     "schedule": "Schedule",
     "games": "Games",
+    "user": "Profile",
     "menu": "Menu"
   },
   "faq": {
@@ -452,7 +453,7 @@
   },
   "myGames": {
     "full": "Full",
-    "spotsAvailable": "Spots Available"
+    "spotsAvailable": "{{count}}  Spots Available"
   },
   "edit_game" : {
     "edit_game": "Edit game",

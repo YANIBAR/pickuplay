@@ -149,7 +149,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
           >
             {isGameFull
               ? t('myGames.full')
-              : t('myGames.spotsAvailable', { count: availableSlots })}
+              : t('myGames.spotsAvailable', { count: game.availableSpots })}
           </Text>
         </View>
       </View>

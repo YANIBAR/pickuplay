@@ -7,6 +7,7 @@ import { Header, Icon } from '@components';
 import { COLORS, FONTS, icons } from '@constants';
 import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
+import { JAVA_API } from '@env';
 
 export default function gameDetailsScreen({ route }) {
   const { t } = useTranslation();
@@ -32,9 +33,7 @@ export default function gameDetailsScreen({ route }) {
   ];
 
   const cover_images = [
-    "private.jpg" ,
-    "opensoccer.jpg" ,
-    "pickup-play.jpg"
+    `${JAVA_API}games/${game.id}/image`
   ];
 
   const gameData = {
@@ -49,9 +48,6 @@ export default function gameDetailsScreen({ route }) {
     isActive: game.isActive
   };
 
-  useEffect(() => {
-    console.log(game);
-  }, []);
 
   // Generate deep link for sharing
   const generateDeepLink = () => {

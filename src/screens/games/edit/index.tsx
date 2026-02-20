@@ -102,7 +102,7 @@ const EditGameScreen = ({ route }) => {
       const response = await authenticatedApi.patch(`games/${gameId}`, gameData);
       uploadImage(game.id, selectedImage);
       Alert.alert(t('common.success'), t('edit_game.game_updated'));
-      navigate("login");
+      navigate("detail", { game: game });
     } catch (error) {
       console.error('Error saving game:', error);
       const status = error?.response?.status;
@@ -250,6 +250,10 @@ const EditGameScreen = ({ route }) => {
     setValue('image', '');
     trigger('image');
   };
+
+  useEffect(() => {
+    setValue('image', `${JAVA_API}games/${game.id}/image`);
+  }, []);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
       

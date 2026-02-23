@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Icon } from '@components';
 import { COLORS, SIZES } from '@constants';
@@ -7,6 +7,7 @@ import { authenticatedApi } from '@services/api';
 import { useRef, useState } from 'react';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { formatDateLong, formatTime, parseTime } from '@utils/dateUtils';
+import { JAVA_API } from '@env';
 
 export type Game = {
   id: number;
@@ -44,19 +45,11 @@ export default function GameCard({ game, onPress }: GameCardProps) {
 
   const handleCancel = async () => {
   try {
-
-    const response = await authenticatedApi.get(`games/${game.id}/cancel`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to cancel game: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('Game cancelled successfully:', data);
-
-    // TODO: update UI state, e.g. setGame({ ...game, status: 'cancelled' })
-  } catch (error) {
-    console.error('Error cancelling game:', error);
+    const response = await authenticatedApi.patch(`games/${game.id}`, JSON.stringify({ status: "CANCELED" }));
+    Alert.alert("Success", "Game cancelled successfully");
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error?.message || "Something went wrong";
+    Alert.alert("Cannot Cancel Game", message);
   }
 };
 
@@ -84,14 +77,16 @@ export default function GameCard({ game, onPress }: GameCardProps) {
     };
     return iconMap[sportType] || 'dumbbell';
   };
-
+  const Editable = (() => {
+    if (!game.startTime) return false;
+    const start = new Date(game.startTime);
+    const now = new Date();
+    const diffMs = start.getTime() - now.getTime();
+    return diffMs > 0 && diffMs < 12 * 60 * 60 * 1000 && !game.isPrivate;
+  })();
   return (
     <TouchableOpacity
       style={[styles.card, isGameFull && styles.usedCard]}
-      onPress={() => {
-        handleGamePress(game);
-        onPress(game);
-      }}
     >
       <View style={styles.header}>
         <View style={styles.titleSection}>
@@ -131,7 +126,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
         <View style={styles.participantsInfo}>
           
           <Text style={[styles.participantsText, isGameFull && styles.usedText]}>
-            {game.participants.length}/{game.nbrSpots}
+            {game.participants ? game.participants.length : 0}/{game.nbrSpots}
           </Text>
         </View>
 
@@ -155,15 +150,23 @@ export default function GameCard({ game, onPress }: GameCardProps) {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-          <Icon type="materialCommunityIcons"  name="pencil" size={18} color="#fff" />
-          <Text style={styles.editButtonText}>{t('common.edit')}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.cancelButton} onPress={() => refRBSheet.current?.open()}>
-          <Icon type="materialCommunityIcons" name="close" size={18} color="#fff" />
-          <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-        </TouchableOpacity>
+        {Editable ? (
+          <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('detail', { game })}>
+            <Icon type="materialCommunityIcons" name="pencil" size={18} color="#fff" />
+            <Text style={styles.editButtonText}>{t('common.view')}</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+            <Icon type="materialCommunityIcons" name="pencil" size={18} color="#fff" />
+            <Text style={styles.editButtonText}>{t('common.edit')}</Text>
+          </TouchableOpacity>
+        )}
+        {game.status == 'ACTIVE' ? (
+          <TouchableOpacity style={styles.cancelButton} onPress={() => refRBSheet.current?.open()}>
+            <Icon type="materialCommunityIcons" name="close" size={18} color="#fff" />
+            <Text style={styles.cancelButtonText}>{t('common.cancel')} {game.status}</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
       <RBSheet
         ref={refRBSheet}

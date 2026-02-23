@@ -2,6 +2,7 @@
 
   "common": {
     "edit": "Edit",
+    "view": "View",
     "cancel": "Cancel",
     "confirm": "Confirm"
   },
@@ -138,7 +139,14 @@
     "phoneNumberRequired": "Phone is required",
     "passwordMinLength": "Too short, Use at least 8 characters",
     "passwordSpecialCharacter": "Password must contain at least one letter and one special character.",
-    "passwordMatch": "Passwords must match"
+    "passwordMatch": "Passwords must match",
+    "otpRequired": "OTP code is required",
+    "otpInvalid": "OTP code is invalid",
+    "otpExpired": "OTP code has expired",
+    "otpResendFailed": "Failed to resend OTP code. Please try again.",
+    "unknownError": "An unknown error occurred. Please try again.",
+    "notConnected": "You need to log in to view your games. Please log in or sign up to continue.",
+    "errorLoadingGames": "An error occurred while loading your games. Please try again later."
   },
   "cnp": {
       "modal": {

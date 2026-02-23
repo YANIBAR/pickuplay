@@ -8,40 +8,17 @@
   import { authenticatedApi } from '@services/api';
 
 
-  export type Game = {
-    id: string;
-    title: string;
-    description: string;
-    city: string;
-    //imageUrl: string;
-    isPrivate: boolean;
-    creatorId: string;
-    sportType: 'Soccer' | 'basketball' | 'volleyball' | 'tennis' | 'hockey-sticks' | 'table-tennis' | 'football';
-    //originalPrice: number;
-    //discountPrice: number;
-    maxPlayers: number;
-    currentParticipants: number;
-    endTime?: string; // ISO format date string
-    startTime?: string; // HH:mm format
-  };
 
-  type GameCardProps = {
-    game: Game;
-  };
-
-  const { width } = Dimensions.get('window');
-  const cardWidth = (width - 32 - 8) / 2;
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
-      soccer: 'soccer',
-      basketball: 'basketball',
-      volleyball: 'volleyball',
-      tennis: 'tennis',
-      hockey: 'hockey-sticks',
-      pingPong: 'table-tennis',
-      football: 'football'
-
+      1: 'soccer',
+      2: 'basketball',
+      3: 'volleyball',
+      5: 'tennis',
+      4: 'hockey-sticks',
+      6: 'table-tennis',
+      7: 'football'
     };
     return iconMap[type] || 'sports';
   };
@@ -142,7 +119,7 @@
               </Text>
               <Icon 
                 type="materialCommunityIcons" 
-                name={getGameIcon(game.sportType)} 
+                name={getGameIcon(game.sportType.id)} 
                 size={24} 
                 color={COLORS.primary}
               />
@@ -215,7 +192,7 @@
 
                 <View style={styles.gameInfoSection}>
                   <Text style={styles.gameNameModal}>{game.name}</Text>
-                  <Text style={styles.gameType}>{game.sportType.toUpperCase()}</Text>
+                  <Text style={styles.gameType}>{game.sportType.name.toUpperCase()}</Text>
                 </View>
 
                 <View style={styles.divider} />

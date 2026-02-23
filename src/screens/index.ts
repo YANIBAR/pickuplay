@@ -26,7 +26,7 @@ export { default as LeaguesScreen  } from './leagues';
 export { default as ScanQRCodeScreen  } from './scanqrcode';
 export { default as GamesScreen } from './games';
 export { default as MyGamesScreen } from './games/myGames';
-export { default as EditgameScreen } from './games/edit';
+export { default as EditGameScreen } from './games/edit';
 export { default as ScheduleScreen  } from './schedule';
 export { default as AddMembershipScreen  } from './schedule/add';
 export { default as DetailScreen  } from './games/detail';

@@ -18,7 +18,6 @@ const createApi = (requiresAuth: boolean) => {
       async (config) => {
         try {
           const token = await AsyncStorage.getItem('access_token');
-          console.log("ddď",token);
           if (!token) {
             // Token missing on protected endpoint - redirect to login
             throw new Error('No authentication token found');

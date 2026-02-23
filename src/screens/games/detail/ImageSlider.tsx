@@ -1,4 +1,4 @@
-import { API_BACKEND_URL } from '@env';
+import { API_BACKEND_URL, JAVA_API } from '@env';
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, FlatList, Pressable } from 'react-native';
 
@@ -13,7 +13,7 @@ export default function ImageSlider({ images }: ImageSliderProps) {
 
   const renderItem = ({ item }: { item: string }) => (
     <Image
-      source={{ uri: `${API_BACKEND_URL}` + (`/partners/` + item || 'placeholder.png') }}
+      source={{ uri: item }}
       style={styles.image}
       resizeMode="cover"
     />

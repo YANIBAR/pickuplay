@@ -11,10 +11,10 @@ export default StyleSheet.create({
     paddingVertical: SIZES.padding2,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: COLORS.black,
     marginVertical: 5,
     flexDirection: 'row',
-    height: 52,
+    height: SIZES.InputHeight,
     alignItems: 'center',
   },
   label: {

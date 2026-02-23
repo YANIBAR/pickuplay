@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Text, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import GameCard, { Game } from './gameCard';
 import { useNavigation } from '@react-navigation/native';
@@ -6,48 +6,61 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authenticatedApi } from '@services/api';
 import { Header } from '@components';
+import { COLORS } from '@constants';
+
+type Nav = {
+  navigate: (value: string) => void;
+};
 
 export default function GamesScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
   const [games, setGames] = useState<Game[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthError, setIsAuthError] = useState(false);
   const { t } = useTranslation();
 
   const fetchGames = async () => {
     try {
       setLoading(true);
       setError(null);
+      setIsAuthError(false);
 
-      // Fetch games from the API
-      const response = await authenticatedApi.get('profile/games');
-      
-      
-      
-      // Handle different response structures
+      const response = await authenticatedApi.get(`profile/games`);
+            
       let gamesData = [];
-        gamesData = response.result.data;
+      gamesData = response.result.data;
 
-      console.log('Raw responsssse:', gamesData);
-      // Ensure gamesData is always an array
       if (!Array.isArray(gamesData)) {
         console.warn('Games data is not an array:', gamesData);
         gamesData = [];
       }
       
       setGames(gamesData);
-      console.log('Fetched games:', gamesData);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching games:', err);
-      setError(t('game.errorLoading') || 'Failed to load games. Please try again.');
+
+      const status = err?.response?.status ?? err?.status;
+      const isUnauthorized = status === 401 || status === 403;
+      const isNetworkError = !err?.response && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK');
+
+      if (isUnauthorized || isNetworkError) {
+        setIsAuthError(true);
+        setError(t('errors.notConnected') || 'You need to log in to view your games.');
+      } else {
+        setError(t('errors.errorLoadingGames') || 'Failed to load games. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleGamePress = (game: Game) => {
-    // Navigate to game detail screen
     navigation.navigate('gameDetail', { game });
+  };
+
+  const handleLoginPress = () => {
+    navigation.navigate('Login');
   };
 
   useEffect(() => {
@@ -68,6 +81,20 @@ export default function GamesScreen() {
       return (
         <View style={styles.centerContainer}>
           <Text style={styles.errorText}>{error}</Text>
+          {isAuthError ? (
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('login')}>
+                <Text style={styles.loginButtonText}>{t('c.login') || 'Log In'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.navigate('register')}>
+                <Text style={styles.cancelButtonText}>{t('c.signUp') || 'Sign Up'}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.retryButton} onPress={fetchGames}>
+              <Text style={styles.retryButtonText}>{t('common.retry') || 'Try Again'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       );
     }
@@ -97,7 +124,7 @@ export default function GamesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-    <Header title={t('game.title') || 'Games'} />
+      <Header title={t('game.title') || 'Games'} />
       <View style={styles.content}>
         {renderContent()}
       </View>
@@ -111,17 +138,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-  },
   content: {
     flex: 1,
   },
@@ -130,6 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
+    gap: 16,
   },
   loadingText: {
     marginTop: 12,
@@ -145,5 +162,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
     textAlign: 'center',
+  },
+
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  loginButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  retryButton: {
+    borderWidth: 1,
+    borderColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#2196F3',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

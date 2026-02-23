@@ -1,19 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, SafeAreaView } from 'react-native';
 import styles from './styles';
 import Header from './components/Header';
 import DayCard from './components/DayCard';
 import GameModal from './components/GameModal';
+import { authenticatedApi } from '@services/api';
+
+interface Participant {
+  id: number;
+  userId: number;
+  userName: string;
+  userEmail: string;
+  userPhone: string;
+  status: string;
+  joinedAt: string;
+}
 
 interface Game {
   id: number;
-  date: Date;
+  title: string;
+  description: string;
+  sportType: string;
+  city: string;
   address: string;
   startTime: string;
   endTime: string;
-  numPlayers: string;
-  isFree: boolean;
-  pricePerPlayer: string;
+  nbrSpots: number;
+  currentParticipants: number;
+  creatorId: number;
+  creatorName: string;
+  isPrivate: string;
+  participants: Participant[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface FormData {
@@ -27,7 +46,11 @@ interface FormData {
 }
 
 export default function HomeScreen({ route }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [games, setGames] = useState<Game[]>([]);
@@ -45,11 +68,40 @@ export default function HomeScreen({ route }) {
     pricePerPlayer: '',
   });
 
+  const fetchMyGames = async () => {
+    try {
+      const response = await authenticatedApi.get(`profile/games/joined?type=upcoming`);
+      // Check if response is ok
+      if (response.status != 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      // Set the games with API data
+      if (response.result.data && Array.isArray(response.result.data.games)) {
+        setGames(response.result.data.games); 
+      }
+
+      console.log('Fetched games:', games); 
+    } catch (error) {
+      console.error('Error fetching games:', error);
+    } 
+  };
+  useEffect(() => {
+     fetchMyGames();
+  }, []);
+  
   const getWeekStart = (date: Date) => {
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
+  }; 
+
+  const isPastDay = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate <= today;
   };
 
   const weekStart = getWeekStart(currentDate);
@@ -92,24 +144,32 @@ export default function HomeScreen({ route }) {
     setSelectedDate(null);
   };
 
-  const handleCreateGame = () => {
+  const handleCreateGame = (game: Game) => {
 
     if (!formData.isFree && !formData.pricePerPlayer) {
       alert('Please enter price per player');
       return;
     }
-
+    console.log('Creating game with form data:', game);
     const newGame: Game = {
-      id: Date.now(),
-      date: selectedDate!,
-      address: formData.address,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      numPlayers: formData.numPlayers,
-      isFree: formData.isFree,
-      pricePerPlayer: formData.pricePerPlayer,
+      id: game.id,
+      title: game.title,
+      description: game.description,
+      sportType: game.sportType,
+      city: game.city,
+      address: game.address,
+      startTime: game.startTime,
+      endTime: game.endTime,
+      nbrSpots: 1,
+      currentParticipants: 1,
+      creatorId: 0,
+      creatorName: '',
+      isPrivate: (game.isPrivate == true) ? "false" : "true",
+      participants: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-
+    console.log('Creating game with data:', newGame);
     setGames([...games, newGame]);
     closeModal();
   };
@@ -119,9 +179,10 @@ export default function HomeScreen({ route }) {
   };
 
   const getGamesForDate = (date: Date) => {
-    return games.filter(
-      (game) => game.date.toDateString() === date.toDateString()
-    );
+    return games.filter((game) => {
+      const gameDate = new Date(game.startTime);
+      return gameDate.toDateString() === date.toDateString();
+    });
   };
 
   return (
@@ -131,7 +192,6 @@ export default function HomeScreen({ route }) {
         onPreviousWeek={goToPreviousWeek}
         onNextWeek={goToNextWeek}
       />
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {weekDays.map((date, index) => {
           const dayGames = getGamesForDate(date);
@@ -141,6 +201,7 @@ export default function HomeScreen({ route }) {
               date={date}
               games={dayGames}
               cancelledGames={cancelledGames}
+              isPastDay={isPastDay(date)}
               onPress={() => openModal(date)}
               onCancelGame={handleCancelGame}
             />

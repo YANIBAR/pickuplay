@@ -8,6 +8,7 @@ import { Header, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '@constants';
 import { publicApi } from '@services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const mockGames: Game[] = [];
@@ -38,15 +39,7 @@ export default function HomeScreen({route}) {
   const fetchRequests = async () => {
     try {
       const response = await publicApi.get(`games`);
-      
-      const data = response.result.data;
-      let newItems = [];
-      if (Array.isArray(response.result.data)) {
-        newItems = response.result.data;
-      } else if (Array.isArray(response.result)) {
-        newItems = response.result;
-      }
-      setGames(newItems);
+      setGames(response.result.data.games);
     } catch (error) {
       const errorMessage = error.response?.data?.message;
       Alert.alert('Error', errorMessage);
@@ -133,49 +126,49 @@ export default function HomeScreen({route}) {
     <SafeAreaView style={styles.container}>
       
       {/* Filters Bar */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>
-        <TouchableOpacity 
-          style={[styles.filterButton, selectedSports.length > 0 && styles.filterButtonActive]}
-          onPress={() => setSportModalVisible(true)}
-        >
-          <Icon type="materialCommunityIcons" name="soccer" size={16} color={selectedSports.length > 0 ? 'white' : COLORS.primary} />
-          <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
-            {selectedSports.length > 0 ? `${selectedSports.length} Sports` : 'Sport'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.filterButton, selectedCities.length > 0 && styles.filterButtonActive]}
-          onPress={() => setCityModalVisible(true)}
-        >
-          <Icon type="materialCommunityIcons" name="map-marker" size={16} color={selectedCities.length > 0 ? 'white' : COLORS.primary} />
-          <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
-            {selectedCities.length > 0 ? `${selectedCities.length} Cities` : 'City'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.filterButton, selectedDate && styles.filterButtonActive]}
-          onPress={() => setDateModalVisible(true)}
-        >
-          <Icon type="materialCommunityIcons" name="calendar" size={16} color={selectedDate ? 'white' : COLORS.primary} />
-          <Text style={[styles.filterButtonText, selectedDate && styles.filterButtonTextActive]}>
-            {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date'}
-          </Text>
-        </TouchableOpacity>
-
-        {hasActiveFilters && (
-          <TouchableOpacity 
-            style={styles.clearButton}
-            onPress={clearAllFilters}
-          >
-            <Icon type="materialCommunityIcons" name="close-circle" size={16} color="white" />
-            <Text style={styles.clearButtonText}>Clear</Text>
-          </TouchableOpacity>
-        )}
-      </ScrollView>
 
       <View style={styles.content}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>
+          <TouchableOpacity 
+            style={[styles.filterButton, selectedSports.length > 0 && styles.filterButtonActive]}
+            onPress={() => setSportModalVisible(true)}
+          >
+            <Icon type="materialCommunityIcons" name="soccer" size={16} color={selectedSports.length > 0 ? 'white' : COLORS.primary} />
+            <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
+              {selectedSports.length > 0 ? `${selectedSports.length} Sports` : 'Sport'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.filterButton, selectedCities.length > 0 && styles.filterButtonActive]}
+            onPress={() => setCityModalVisible(true)}
+          >
+            <Icon type="materialCommunityIcons" name="map-marker" size={16} color={selectedCities.length > 0 ? 'white' : COLORS.primary} />
+            <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
+              {selectedCities.length > 0 ? `${selectedCities.length} Cities` : 'City'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.filterButton, selectedDate && styles.filterButtonActive]}
+            onPress={() => setDateModalVisible(true)}
+          >
+            <Icon type="materialCommunityIcons" name="calendar" size={16} color={selectedDate ? 'white' : COLORS.primary} />
+            <Text style={[styles.filterButtonText, selectedDate && styles.filterButtonTextActive]}>
+              {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date'}
+            </Text>
+          </TouchableOpacity>
+
+          {hasActiveFilters && (
+            <TouchableOpacity 
+              style={styles.clearButton}
+              onPress={clearAllFilters}
+            >
+              <Icon type="materialCommunityIcons" name="close-circle" size={16} color="white" />
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
         <GameGrid games={filteredGames} />
       </View>
 
@@ -361,6 +354,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    minHeight:"100%"
   },
   modalOverlay: {
     flex: 1,

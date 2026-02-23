@@ -1,7 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-community-icons';
+import { Button, Icon } from '@components';
+import { COLORS, SIZES } from '@constants';
+import { authenticatedApi } from '@services/api';
+import { useRef, useState } from 'react';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import { formatDateLong, formatTime, parseTime } from '@utils/dateUtils';
+import { JAVA_API } from '@env';
 
 export type Game = {
   id: number;
@@ -31,8 +37,25 @@ export default function GameCard({ game, onPress }: GameCardProps) {
   const { t } = useTranslation();
   const navigation = useNavigation();
 
+  const refRBSheet = useRef<any>(null);
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const handleGamePress = (game: Game) => {
     navigation.navigate('gameDetail', { game });
+  };
+
+  const handleCancel = async () => {
+  try {
+    const response = await authenticatedApi.patch(`games/${game.id}`, JSON.stringify({ status: "CANCELED" }));
+    Alert.alert("Success", "Game cancelled successfully");
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error?.message || "Something went wrong";
+    Alert.alert("Cannot Cancel Game", message);
+  }
+};
+
+  const handleEdit = () => {
+    // Add your edit logic here
+    navigation.navigate('editGame', { game });
   };
 
   const isGameFull = game.currentParticipants >= game.maxPlayers;
@@ -54,14 +77,16 @@ export default function GameCard({ game, onPress }: GameCardProps) {
     };
     return iconMap[sportType] || 'dumbbell';
   };
-
+  const Editable = (() => {
+    if (!game.startTime) return false;
+    const start = new Date(game.startTime);
+    const now = new Date();
+    const diffMs = start.getTime() - now.getTime();
+    return diffMs > 0 && diffMs < 12 * 60 * 60 * 1000 && !game.isPrivate;
+  })();
   return (
     <TouchableOpacity
       style={[styles.card, isGameFull && styles.usedCard]}
-      onPress={() => {
-        handleGamePress(game);
-        onPress(game);
-      }}
     >
       <View style={styles.header}>
         <View style={styles.titleSection}>
@@ -80,17 +105,10 @@ export default function GameCard({ game, onPress }: GameCardProps) {
         )}
       </View>
 
-      {game.description && (
-        <Text style={[styles.description, isGameFull && styles.usedText]} numberOfLines={1}>
-          {game.description}
-        </Text>
-      )}
-
       <View style={styles.detailsRow}>
         <View style={styles.detailItem}>
-          
           <Text style={[styles.detailText, isGameFull && styles.usedText]}>
-            {formatDateTime(game.startTime)}
+             {formatDateLong(new Date(game.startTime))}, ({formatTime(game.startTime)} - {formatTime(game.endTime)})
           </Text>
         </View>
       </View>
@@ -108,7 +126,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
         <View style={styles.participantsInfo}>
           
           <Text style={[styles.participantsText, isGameFull && styles.usedText]}>
-            {game.currentParticipants}/{game.maxPlayers}
+            {game.participants ? game.participants.length : 0}/{game.nbrSpots}
           </Text>
         </View>
 
@@ -125,13 +143,85 @@ export default function GameCard({ game, onPress }: GameCardProps) {
             ]}
           >
             {isGameFull
-              ? t('game.full')
-              : t('game.spotsAvailable', { count: availableSlots })}
+              ? t('myGames.full')
+              : t('myGames.spotsAvailable', { count: game.availableSpots })}
           </Text>
         </View>
       </View>
+
+      <View style={styles.buttonContainer}>
+        {Editable ? (
+          <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('detail', { game })}>
+            <Icon type="materialCommunityIcons" name="pencil" size={18} color="#fff" />
+            <Text style={styles.editButtonText}>{t('common.view')}</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+            <Icon type="materialCommunityIcons" name="pencil" size={18} color="#fff" />
+            <Text style={styles.editButtonText}>{t('common.edit')}</Text>
+          </TouchableOpacity>
+        )}
+        {game.status == 'ACTIVE' ? (
+          <TouchableOpacity style={styles.cancelButton} onPress={() => refRBSheet.current?.open()}>
+            <Icon type="materialCommunityIcons" name="close" size={18} color="#fff" />
+            <Text style={styles.cancelButtonText}>{t('common.cancel')} {game.status}</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      <RBSheet
+        ref={refRBSheet}
+        closeOnPressMask={true}
+        height={240}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "rgba(0,0,0,0.5)",
+          },
+          draggableIcon: {
+            backgroundColor: COLORS.grayscale200,
+            height: 4
+          },
+          container: {
+            borderTopRightRadius: 32,
+            borderTopLeftRadius: 32,
+            height: 240,
+            backgroundColor: COLORS.white
+          }
+        }}
+      >
+        <Text style={styles.bottomTitle}>Cancletion</Text>
+        <View style={[styles.separateLine, {
+          backgroundColor: COLORS.grayscale200,
+        }]} />
+        <Text style={[styles.bottomSubtitle, {
+          color: COLORS.black
+        }]}>
+          Are you sure you want to cancel this game? This action cannot be undone.
+        </Text>
+        <View style={styles.bottomContainer}>
+          <Button
+            title={"Yes, cancel it"}
+            filled
+            style={styles.confirmCancelButton}
+            onPress={handleCancel}
+          />
+          <Button
+            title={"No, keep it"}
+            style={{
+              width: (SIZES.width - 32) / 2 - 8,
+              backgroundColor: COLORS.transparentPrimary,
+              borderRadius: 32,
+              borderColor: COLORS.transparentPrimary
+            }}
+            textColor={COLORS.primary}
+            onPress={() => refRBSheet.current?.close()}
+          />
+        </View>
+      </RBSheet>
     </TouchableOpacity>
+    
   );
+
+  
 }
 
 const styles = StyleSheet.create({
@@ -253,4 +343,72 @@ const styles = StyleSheet.create({
   fullText: {
     color: '#F44336',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.red,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+      bottomContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginVertical: 12,
+        paddingHorizontal: 16
+      },
+      confirmCancelButton: {
+        width: (SIZES.width - 32) / 2 - 8,
+        backgroundColor: COLORS.primary,
+        borderRadius: 32
+      },
+      bottomTitle: {
+        fontSize: 24,
+        fontFamily: "semiBold",
+        color: COLORS.primary,
+        textAlign: "center",
+        marginTop: 12
+      },
+      bottomSubtitle: {
+        fontSize: 20,
+        fontFamily: "semiBold",
+        color: COLORS.greyscale900,
+        textAlign: "center",
+        marginVertical: 28
+      },
+      separateLine: {
+        width: SIZES.width,
+        height: 1,
+        backgroundColor: COLORS.grayscale200,
+        marginTop: 12
+      }
 });

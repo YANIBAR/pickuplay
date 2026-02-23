@@ -1,133 +1,89 @@
-import { COLORS } from '@constants';
+import { COLORS, SIZES } from '@constants';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
-//import DateTimePicker from '@react-native-community/datetimepicker';
-import { API_BACKEND_URL } from '@env';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Header } from '@components';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Image as RNImage, } from 'react-native';
+import { Button,  Header } from '@components';
 import { useTranslation } from 'react-i18next';
+import { authenticatedApi } from '@services/api';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dropdown } from 'react-native-element-dropdown';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { formatDateShort, formatTime } from '@utils/dateUtils';
+import { Controller, useForm } from 'react-hook-form';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { JAVA_API } from '@env';
+import { useNavigation } from '@react-navigation/native';
 
-const GameModal = ({ visible, onClose, onSave, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
-    name: '',
-    type: '',
-    city: '',
-    allowedVisits: '',
-    description: '',
-    location: '',
-  });
+const EditGameScreen = ({ route }) => {
   const { t } = useTranslation();
-
-  // Active days state with time ranges
-  const [activeDays, setActiveDays] = useState({
-    monday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
+    const { navigate } = useNavigation();
+  const { game } = route.params || {};
+  const [isStartPickerVisible, setStartPickerVisible] = useState(false);
+  const [isEndPickerVisible, setEndPickerVisible] = useState(false);
+  const [gameDate, setGameDate] = useState(formatDateShort(new Date(game?.startTime)));
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const {
+    control,
+    handleSubmit,
+    watch,
+    trigger,
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+  } = useForm<FormData>({
+    defaultValues: {
+      title: '',
+      description: '',
+      sportType: '',
+      address: '',
+      startTime: '',
+      endTime: '',
+      numPlayers: '',
+      isPrivate: true,
+      pricePerPlayer: '',
+      image: '',
     },
-    tuesday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
-    },
-    wednesday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
-    },
-    thursday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
-    },
-    friday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
-    },
-    saturday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
-    },
-    sunday: {
-      active: false,
-      startTime: new Date(),
-      endTime: new Date()
-    }
+    mode: 'onBlur',
   });
-
-  // Time picker visibility state
-  const [timePickerState, setTimePickerState] = useState({
-    visible: false,
-    day: null,
-    isStartTime: true,
+  const [formData, setFormData] = useState({
+    id: game?.id || '',
+    title: game?.title || '',
+    sportType: game?.sportType || '',
+    city: game?.city || '',
+    availableSpots: game?.availableSpots || '',
+    nbrSpots: game?.nbrSpots || '',
+    description: game?.description || '',
+    address: game?.address || '',
+    startTime: new Date(game?.startTime) || '',
+    endTime: new Date(game?.endTime) || '',
+    imageUrl: game?.imageUrl || '',
+    isPrivate: game?.isPrivate || ''
   });
+  const PLAYER_OPTIONS = [
+    { label: '2v2', value: '4' },
+    { label: '3v3', value: '6' },
+    { label: '4v4', value: '8' },
+    { label: '5v5', value: '10' },
+    { label: '6v6', value: '12' },
+    { label: '7v7', value: '14' },
+    { label: '8v8', value: '16' },
+    { label: '9v9', value: '18' },
+    { label: '10v10', value: '20' },
+    { label: '11v11', value: '22' },
+  ];
 
-  // Toggle active days
-  const toggleDay = (day) => {
-    setActiveDays({
-      ...activeDays,
-      [day]: {
-        ...activeDays[day],
-        active: !activeDays[day].active,
-      },
-    });
-  };
-
-  // Handle time changes
-  const onChangeTime = (event, selectedTime) => {
-    if (event.type === 'dismissed') {
-      setTimePickerState({
-        visible: false,
-        day: null,
-        isStartTime: true,
-      });
-      return;
-    }
-
-    const { day, isStartTime } = timePickerState;
-    const currentTime = selectedTime || (isStartTime ? activeDays[day].startTime : activeDays[day].endTime);
-
-    setActiveDays({
-      ...activeDays,
-      [day]: {
-        ...activeDays[day],
-        [isStartTime ? 'startTime' : 'endTime']: currentTime,
-      },
-    });
-
-    if (Platform.OS === 'android') {
-      setTimePickerState({
-        visible: false,
-        day: null,
-        isStartTime: true,
-      });
-    }
-  };
-
-  // Show time picker
-  const showTimePicker = (day, isStartTime) => {
-    setTimePickerState({
-      visible: true,
-      day,
-      isStartTime,
-    });
-  };
-
-  // Format time for display
-  const formatTime = (date) => {
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    return hours + ':' + minutes + ' ' + ampm;
-  };
-
+  const city = [
+    { label: 'Kansas City', value: 'kansas_city' },
+    { label: 'St. Louis', value: 'st_louis' },
+    { label: 'Springfield', value: 'springfield' },
+    { label: 'Columbia', value: 'columbia' },
+    { label: 'Independence', value: 'independence' },
+    { label: 'Lee\'s Summit', value: 'lees_summit' },
+    { label: 'Olathe', value: 'olathe' },
+    { label: 'Overland Park', value: 'overland_park' },
+    { label: 'Blue Springs', value: 'blue_springs' },
+    { label: 'Liberty', value: 'liberty' },  
+  ];
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -137,210 +93,350 @@ const GameModal = ({ visible, onClose, onSave, initialData }) => {
     try {
       const gameData = {
         ...formData,
-        allowedVisits: parseInt(formData.allowedVisits, 10) || 0,
-        activeDays: activeDays,
+        date: gameDate, // Placeholder date, replace with actual date if needed
+        startTime: (formData.startTime.getHours().toString().padStart(2, "0")) + ":" + formData.startTime.getMinutes().toString().padStart(2, "0"),
+        endTime: (formData.endTime.getHours().toString().padStart(2, "0")) + ":" + formData.endTime.getMinutes().toString().padStart(2, "0"),
       };
-      
-      const gameId = await AsyncStorage.getItem('gameId');
-      
-      if (gameId) {
-        // Edit existing game
-        const response = await axios.put(`${API_BACKEND_URL}/games/${gameId}`, gameData);
-        console.log('Game updated:', response.data);
-      } else {
-        // Create new game
-        const response = await axios.post(`${API_BACKEND_URL}/games`, gameData);
-        console.log('Game created:', response.data);
-      }
-      
+      const gameId = formData.id;
+      console.log('Saving game with data:', gameData);
+      const response = await authenticatedApi.patch(`games/${gameId}`, gameData);
+      uploadImage(game.id, selectedImage);
+      Alert.alert(t('common.success'), t('edit_game.game_updated'));
+      navigate("detail", { game: game });
     } catch (error) {
       console.error('Error saving game:', error);
-      // Alert.alert('edit_game.Error', 'Failed to save game');
+      const status = error?.response?.status;
+
+      if (status === 400) {
+        const validationErrors = error?.response?.data?.errors;
+        if (validationErrors && typeof validationErrors === 'object') {
+          const messages = Object.values(validationErrors).flat().join('\n');
+          Alert.alert(t('edit_game.validation_error'), messages);
+        } else {
+          const message = error?.response?.data?.message || t('edit_game.invalid_data');
+          Alert.alert(t('edit_game.validation_error'), message);
+        }
+      } else if (status === 403) {
+        Alert.alert(t('edit_game.error'), t('edit_game.forbidden'));
+      } else if (status === 404) {
+        Alert.alert(t('edit_game.error'), t('edit_game.not_found'));
+      } else {
+        Alert.alert(t('edit_game.error'), t('edit_game.server_error'));
+      }
     }
   }; 
-  
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  useEffect(() => {
-    const getGame = async () => {
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    console.warn("A date has been picked: ", date);
+    hideDatePicker();
+  };
+
+  const fieldsDisabled = (() => {
+    if (!formData.startTime) return false;
+    const start = new Date(formData.startTime);
+    const now = new Date();
+    const diffMs = start.getTime() - now.getTime();
+    return diffMs > 0 && diffMs < 12 * 60 * 60 * 1000 && !formData.isPrivate;
+  })();
+  const uploadImage = async (id,file) => {
+      if (!file) {
+        console.error('Invalid file selected');
+        return;
+      }
+      console.log('Uploading file:', file);
+      
+      const formImage = new FormData();
+      
+      formImage.append('image', {
+        uri: file.uri,
+        name: file.fileName || 'default-image.jpg',
+        type: file.type || 'image/jpeg',
+      });
+
       try {
-        const gameId = await AsyncStorage.getItem('gameId');
-        if (gameId && !initialData) { // Only fetch if no initialData provided
-          const response = await axios.get(`${API_BACKEND_URL}/games/${gameId}`);
+        const token = await AsyncStorage.getItem('access_token');
 
-          // Set form data from fetched game
-          setFormData({
-            name: response.data.name || '',
-            type: response.data.type || '',
-            city: response.data.city || '',
-            allowedVisits: response.data.allowedVisits?.toString() || '',
-            description: response.data.description || '',
-            location: response.data.location || '',
-          });
-          console.log(response.data);
-          // Set active days if they exist
-          if (response.data.activeDays) {
-            const updatedActiveDays = { ...activeDays };
-            
-            // Get only the day names, excluding _id
-            const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            
-            dayNames.forEach(day => {
-              if (response.data.activeDays[day]) {
-                updatedActiveDays[day] = {
-                  active: response.data.activeDays[day].active || false,
-                  startTime: response.data.activeDays[day].startTime 
-                    ? new Date(response.data.activeDays[day].startTime) 
-                    : new Date(),
-                  endTime: response.data.activeDays[day].endTime 
-                    ? new Date(response.data.activeDays[day].endTime) 
-                    : new Date()
-                };
-              }
-            });
-            
-            setActiveDays(updatedActiveDays);
-          }
+        const response = await fetch(`${JAVA_API}games/${id}/upload-image`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+          body: formImage,
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP status ${response.status}`);
         }
+
+        const data = await response.json();
       } catch (error) {
-        console.error('Error fetching game data:', error);
-        // You'll need to import Alert
-        // Alert.alert('edit_game.Error', 'Failed to load game data');
+        console.error('Upload failed:', error);
+        Alert.alert('Error', 'Upload failed');
       }
     };
-  
-      getGame();
-  }, []);
+  const handleImagePicker = () => {
+    Alert.alert(
+      'Select Image',
+      'Choose how to select an image',
+      [
+        {
+          text: 'Camera',
+          onPress: () => launchCameraForImage(),
+        },
+        {
+          text: 'Photo Library',
+          onPress: () => launchGalleryForImage(),
+        },
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
+  const launchCameraForImage = () => {
+    launchCamera(
+      {
+        mediaType: 'photo',
+        cameraType: 'back',
+        quality: 0.8,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled camera picker');
+        } else if (response.errorCode) {
+          Alert.alert('Error', `Camera error: ${response.errorMessage}`);
+        } else if (response.assets && response.assets[0]) {
+          const imageUri = response.assets[0].uri;
+          setSelectedImage(response.assets[0]);
+          setValue('image', imageUri);
+          trigger('image');
+        }
+      }
+    );
+  };
+
+  const launchGalleryForImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.8,
+        selectionLimit: 1,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          Alert.alert('Error', `Gallery error: ${response.errorMessage}`);
+        } else if (response.assets && response.assets[0]) {
+          const imageUri = response.assets[0].uri;
+          setSelectedImage(response.assets[0]);
+          setValue('image', imageUri);
+          trigger('image');
+        }
+      }
+    );
+  };
+
+  const handleRemoveImage = () => {
+    setValue('image', '');
+    trigger('image');
+  };
+
+  useEffect(() => {
+    setValue('image', `${JAVA_API}games/${game.id}/image`);
+  }, []);
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.white }}>
-      <Header title={t('edit_game.edit_game')} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+      
       <ScrollView style={styles.container}>
+        <Header title={t('edit_game.edit_game')} />
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_game.game_name')}</Text>
+            <Text style={styles.label}>{t('edit_game.game_title')}</Text>
             <TextInput
               style={styles.input}
-              value={formData.name}
-              onChangeText={(text) => handleChange('name', text)}
-              placeholder={t('edit_game.enter_game_name')}
+              value={formData.title}
+              onChangeText={(text) => handleChange('title', text)}
+              placeholder={t('edit_game.enter_game_title')}
             />
           </View>
-  
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_game.type')}</Text>
-            <RNPickerSelect
-              onValueChange={(value) => handleChange('type', value)}
-              value={formData.type}
-              items={[
-                { label: t('edit_game.fitness'), value: 'fitness' },
-                { label: t('edit_game.sports'), value: 'sports' },
-                { label: t('edit_game.wellness'), value: 'wellness' },
-                { label: t('edit_game.pool'), value: 'pool' },
-                { label: t('edit_game.museum'), value: 'museum' },
-                { label: t('edit_game.cinema'), value: 'cinema' },
-                { label: t('edit_game.park'), value: 'park' },
-                { label: t('edit_game.theater'), value: 'theater' },
-                { label: t('edit_game.restaurant'), value: 'restaurant' },
-              ]}
-              style={pickerSelectStyles}
+            <Text style={styles.label}>{t('edit_game.price')}</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.price}
+              onChangeText={(text) => handleChange('price', text)}
+              placeholder={t('edit_game.enter_price')}
             />
           </View>
-  
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>{t('edit_game.city')}</Text>
-            <RNPickerSelect
-              onValueChange={(value) => handleChange('city', value)}
+            <Dropdown
+              data={city}
+              labelField="label"
+              valueField="value"
+              placeholder={t('edit_game.select_city') }
               value={formData.city}
-              items={[
-                { label: t('edit_game.casablanca'), value: 'casablanca' },
-                { label: t('edit_game.marrakesh'), value: 'marrakesh' },
-                { label: t('edit_game.tanger'), value: 'tanger' },
-                { label: t('edit_game.fes'), value: 'fes' },
-                { label: t('edit_game.agadir'), value: 'agadir' },
-                { label: t('edit_game.rabat'), value: 'rabat' },
-              ]}
-              style={pickerSelectStyles}
+              onChange={item => handleChange('city', item.value)}
+              style={[styles.dropdown, fieldsDisabled && styles.disabledDropdown]}
+              disable={fieldsDisabled}
             />
           </View>
-          
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_game.location')}</Text>
+            <Text style={styles.label}>{t('edit_game.address')}</Text>
             <TextInput
-              style={styles.input}
-              value={formData.location}
-              onChangeText={(text) => handleChange('location', text)}
-              placeholder={t('edit_game.enter_location')}
+              style={[styles.input, fieldsDisabled && styles.disabledInput]}
+              value={formData.address}
+              onChangeText={(text) => handleChange('address', text)}
+              placeholder={t('edit_game.enter_address')}
+              editable={!fieldsDisabled}
             />
           </View>
-  
+
+          {/* Image Selection */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_game.allowed_visits')}</Text>
-            <RNPickerSelect
-              onValueChange={(value) => handleChange('allowedVisits', value)}
-              value={formData.allowedVisits}
-              items={[
-                { label: '1', value: '1' },
-                { label: '2', value: '2' },
-                { label: '3', value: '3' },
-                { label: '5', value: '5' },
+            <Text style={styles.label}>Select Image *</Text>
+            <Controller
+              name="image"
+              control={control}
+              rules={{
+                required: !game.isPrivate ? 'Image is required' : false,
+              }}
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <TouchableOpacity
+                    style={[
+                      styles.imageButton,
+                      errors?.image && { borderColor: 'red' },
+                    ]}
+                    onPress={handleImagePicker}
+                  >
+                    <Text style={styles.imageButtonText}>
+                      {value ? 'Change Image' : 'Select Image'}
+                    </Text>
+                  </TouchableOpacity>
+                  {value && (
+                    <View style={styles.imagePreviewContainer}>
+                      <RNImage
+                        source={{ uri: value }}
+                        style={styles.imagePreview}
+                      />
+                      <TouchableOpacity
+                        style={styles.removeImageButton}
+                        onPress={handleRemoveImage}
+                      >
+                        <Text style={styles.removeImageButtonText}>Remove</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  {errors?.image && (
+                    <Text style={styles.errorText}>
+                      {errors.image.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>{t('edit_game.sportType')}</Text>
+            <Dropdown
+              data={[
+                { label: 'basketball', value: 'basketball' },
+                { label: 'soccer', value: 'soccer' },
+                { label: 'volleyball', value: 'volleyball' },
+                { label: 'hockey', value: 'hockey' },
+                { label: 'tennis', value: 'tennis' },
               ]}
-              style={pickerSelectStyles}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder={t('edit_game.select_sport_type') }
+              value={formData.sportType}
+              onChange={item => handleChange('sportType', item.value)}
+              style={styles.dropdown}
             />
           </View>
-  
-          {/* Active Days with Time Ranges */}
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('edit_game.active_days_hours')}</Text>
-            
-            {Object.keys(activeDays).map((day) => (
-              <View key={day} style={styles.dayTimeContainer}>
-                <TouchableOpacity
-                  style={styles.checkboxWrapper}
-                  onPress={() => toggleDay(day)}
-                >
-                  <View style={[styles.checkbox, activeDays[day].active && styles.checkboxActive]}>
-                    {activeDays[day].active && <Text style={styles.checkmark}>✓</Text>}
-                  </View>
-                  <Text style={styles.checkboxLabel}>
-                    {t(day.toLowerCase())}
-                  </Text>
-                </TouchableOpacity>
-                
-                {activeDays[day].active && (
-                  <View style={styles.dayTimeRange}>
-                    <TouchableOpacity
-                      style={styles.timeButton}
-                      onPress={() => showTimePicker(day, true)}
-                    >
-                      <Text>{formatTime(activeDays[day].startTime)}</Text>
-                    </TouchableOpacity>
-                    
-                    <Text style={styles.toText}>{t('edit_game.to')}</Text>
-                    
-                    <TouchableOpacity
-                      style={styles.timeButton}
-                      onPress={() => showTimePicker(day, false)}
-                    >
-                      <Text>{formatTime(activeDays[day].endTime)}</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            ))}
-            
-            {/*{timePickerState.visible && (
-              <DateTimePicker
-                value={timePickerState.isStartTime 
-                  ? activeDays[timePickerState.day].startTime 
-                  : activeDays[timePickerState.day].endTime
-                }
-                mode="time"
-                display="default"
-                onChange={onChangeTime}
-              />
-            )}*/}
+            <Text style={styles.label}>{t('edit_game.availableSpots')}</Text>
+            <Dropdown
+              data={PLAYER_OPTIONS}
+              labelField="label"
+              valueField="value"
+              placeholder={t('edit_game.select_available_spots') }
+              value={formData.nbrSpots.toString()}
+              onChange={item => handleChange('nbrSpots', item.value)}
+              style={styles.dropdown}
+            />
           </View>
-  
+
+          <View style={styles.inputGroup}>
+          <Text style={styles.label}>{t('edit_game.date')}</Text>
+          <Button
+            title={gameDate}
+            onPress={() => !fieldsDisabled && setDatePickerVisibility(true)}
+            disabled={fieldsDisabled}
+          />
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            onConfirm={(date: Date) => {
+              const formatted = formatDateShort(date); 
+              setGameDate(formatted );
+              setDatePickerVisibility(false);
+            }}
+            onCancel={() => setDatePickerVisibility(false)}
+          />
+        </View>
+          
+          
+          {/* Start Time and End Time */}
+          <View style={styles.container}>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {/* Start Time */}
+              <View style={{ flex: 1 }}>
+                <Text style={styles.label}>Start Time *</Text>
+                <Button title={formatTime(formData.startTime)} onPress={() => !fieldsDisabled && setStartPickerVisible(true)} disabled={fieldsDisabled} />
+                <DateTimePickerModal
+                  isVisible={isStartPickerVisible}
+                  mode="time"
+                  onConfirm={(text) => {
+                    handleChange('startTime', text);
+                    setStartPickerVisible(false);
+                  }}
+                  onCancel={() => setStartPickerVisible(false)}
+                />
+              </View>
+
+              {/* End Time */}
+              <View style={{ flex: 1 }}>
+                <Text style={styles.label}>End Time *</Text>
+                <Button title={formatTime(formData.endTime)} onPress={() => !fieldsDisabled && setEndPickerVisible(true)} disabled={fieldsDisabled} />
+                <DateTimePickerModal
+                  isVisible={isEndPickerVisible}
+                  mode="time"
+                  onConfirm={(text) => {
+                    handleChange('endTime', text);
+                    setEndPickerVisible(false);
+                  }}
+                  onCancel={() => setEndPickerVisible(false)}
+                />
+              </View>
+            </View>
+          </View>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>{t('edit_game.description')}</Text>
             <TextInput
@@ -360,16 +456,10 @@ const GameModal = ({ visible, onClose, onSave, initialData }) => {
             >
               <Text style={styles.buttonText}>{t('edit_game.save')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, styles.cancelButton]} 
-              onPress={onClose}
-            >
-              <Text style={[styles.buttonText, styles.cancelText]}>{t('edit_game.cancel')}</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -480,26 +570,129 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     color: '#666',
     fontWeight: '500',
-  }
+  },
+  dropdown: {
+      width: '100%',
+      paddingHorizontal: SIZES.padding,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: COLORS.greyscale300,
+      marginVertical: 5,
+      flexDirection: 'row',
+      height: SIZES.InputHeight,
+      alignItems: 'center',
+    },
+    icon: {
+      marginRight: 10,
+      height: 20,
+      width: 20,
+      tintColor: '#BCBCBC',
+    },
+    placeholderStyle: {
+      color: '#9ca3af',
+      fontSize: 14,
+    },
+    selectedTextStyle: {
+      fontSize: 14,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 30,
+      fontSize: 16,
+    },
+  inputContainer: {
+    width: '100%',
+    paddingHorizontal: SIZES.padding,
+    paddingVertical: SIZES.padding2,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: COLORS.grayscale200,
+    marginVertical: 5,
+    flexDirection: 'row',
+    height: SIZES.InputHeight,
+    alignItems: 'center',
+  },
+
+  disabledInput: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+    color: '#aaa',
+  },
+  disabledDropdown: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+    opacity: 0.6,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  lockedBanner: {
+    backgroundColor: '#fff8e1',
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    padding: 12,
+    borderRadius: 6,
+  },
+  lockedBannerText: {
+    color: '#92400e',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  lockedHint: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#f59e0b',
+    fontStyle: 'italic',
+  },
+  imageButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    marginVertical: 8,
+  },
+
+  imageButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  imagePreviewContainer: {
+    marginTop: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+
+  removeImageButton: {
+    backgroundColor: '#ef4444',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
 });
 
-const pickerSelectStyles = {
-  viewContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: 'white',
-  },
-  inputIOS: {
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
-  },
-  inputAndroid: {
-    padding: 12,
-    fontSize: 16,
-    color: '#333',
-  }
-};
 
-export default GameModal;
+export default EditGameScreen;

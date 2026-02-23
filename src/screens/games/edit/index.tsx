@@ -57,7 +57,8 @@ const EditGameScreen = ({ route }) => {
     startTime: new Date(game?.startTime) || '',
     endTime: new Date(game?.endTime) || '',
     imageUrl: game?.imageUrl || '',
-    isPrivate: game?.isPrivate || ''
+    isPrivate: game?.isPrivate || '',
+    price: game?.price || ''
   });
   const PLAYER_OPTIONS = [
     { label: '2v2', value: '4' },
@@ -84,6 +85,16 @@ const EditGameScreen = ({ route }) => {
     { label: 'Blue Springs', value: 'blue_springs' },
     { label: 'Liberty', value: 'liberty' },  
   ];
+  const SportTypes = [
+    { value: '1', label: 'Soccer' },
+    { value: '2', label: 'Basketball' },
+    { value: '3', label: 'Volleyball' },
+    { value: '4', label: 'Hockey' },
+    { value: '5', label: 'Tennis' },
+    { value: '6', label: 'Pickle ball' },
+    { value: '7', label: 'Ping Pong' },
+    { value: '8', label: 'Football' },
+  ];
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -98,7 +109,6 @@ const EditGameScreen = ({ route }) => {
         endTime: (formData.endTime.getHours().toString().padStart(2, "0")) + ":" + formData.endTime.getMinutes().toString().padStart(2, "0"),
       };
       const gameId = formData.id;
-      console.log('Saving game with data:', gameData);
       const response = await authenticatedApi.patch(`games/${gameId}`, gameData);
       uploadImage(game.id, selectedImage);
       Alert.alert(t('common.success'), t('edit_game.game_updated'));
@@ -252,7 +262,7 @@ const EditGameScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    setValue('image', `${JAVA_API}games/${game.id}/image`);
+    console.log('Initial game data:', game);
   }, []);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
@@ -274,7 +284,7 @@ const EditGameScreen = ({ route }) => {
             <Text style={styles.label}>{t('edit_game.price')}</Text>
             <TextInput
               style={styles.input}
-              value={formData.price}
+              value={formData.price ? formData.price.toString() : ''}
               onChangeText={(text) => handleChange('price', text)}
               placeholder={t('edit_game.enter_price')}
             />
@@ -353,13 +363,7 @@ const EditGameScreen = ({ route }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>{t('edit_game.sportType')}</Text>
             <Dropdown
-              data={[
-                { label: 'basketball', value: 'basketball' },
-                { label: 'soccer', value: 'soccer' },
-                { label: 'volleyball', value: 'volleyball' },
-                { label: 'hockey', value: 'hockey' },
-                { label: 'tennis', value: 'tennis' },
-              ]}
+              data={SportTypes}
               search={true}
               labelField="label"
               valueField="value"

@@ -135,7 +135,7 @@ export default function gameDetailsScreen({ route }) {
             <InfoRow 
               icon="map-marker" 
               label={t('game.sportType')} 
-              value={game.sportType} 
+              value={game.sportType.name} 
             />
 
             <InfoRow 

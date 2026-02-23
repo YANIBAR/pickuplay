@@ -39,11 +39,14 @@
   }
 
   const SportTypes = [
-    { label: 'Soccer', value: 'Soccer' },
-    { label: 'Basketball', value: 'Basketball' },
-    { label: 'Volleyball', value: 'Volleyball' },
-    { label: 'Hockey', value: 'Hockey' },
-    { label: 'Tennis', value: 'Tennis' },
+    { value: '1', label: 'Soccer' },
+    { value: '2', label: 'Basketball' },
+    { value: '3', label: 'Volleyball' },
+    { value: '4', label: 'Hockey' },
+    { value: '5', label: 'Tennis' },
+    { value: '6', label: 'Pickle ball' },
+    { value: '7', label: 'Ping Pong' },
+    { value: '8', label: 'Football' },
   ];
 
   interface GameModalProps {

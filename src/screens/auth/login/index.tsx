@@ -193,13 +193,13 @@ const Login = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            style={styles.logo}
-          />
-        </View>
+          <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate("welcome", {screen: "Games"  })}>
+            <Image
+              source={images.logo}
+              resizeMode="contain"
+              style={styles.logo}
+            />
+          </TouchableOpacity>
         <Text
           style={[
             styles.title,

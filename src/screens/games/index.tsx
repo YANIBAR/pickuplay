@@ -40,6 +40,7 @@ export default function HomeScreen({route}) {
     try {
       const response = await publicApi.get(`games`);
       setGames(response.result.data.games);
+      console.log('Fetched games:', games);
     } catch (error) {
       const errorMessage = error.response?.data?.message;
       Alert.alert('Error', errorMessage);

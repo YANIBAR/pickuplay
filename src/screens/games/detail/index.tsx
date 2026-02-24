@@ -1,22 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Image, Share, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Image, Share, Alert, Clipboard, ImageSourcePropType } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
 import { Header, Icon } from '@components';
 import { COLORS, FONTS, icons } from '@constants';
-import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
 import { JAVA_API } from '@env';
+import { authenticatedApi } from '@services/api';
+import { useNavigation } from '@react-navigation/native';
+
+interface Game {
+  id: number;
+  title: string;
+  description: string;
+  sportType: { id: number; name: string }[];
+  city: string;
+  address: string;
+  startTime: string;
+  endTime: string;
+  nbrSpots: number;
+  availableSpot: number;
+  imageUrl: string;
+  creatorId: number;
+  creatorName: string;
+  price: number;
+  isPrivate: boolean;
+  status: string;
+  participants: {
+    id: number,
+    userId: number,
+    userName: string,
+    userEmail: string,
+    userPhone: string,
+    status: string,
+    joinedAt: string
+  }[];
+  createdAt: string;
+  updatedAt: string;
+  canceledAt: string;
+}
 
 export default function gameDetailsScreen({ route }) {
   const { t } = useTranslation();
-  const { game} = route.params || {};
+  const { gameId } = route.params || {};
+  const { navigate } = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [sportType, setSportType] = useState();
+  const [participants, setParticipants] = useState([]);
+  const [game, setGame] = useState([]);
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
+  // Generate multiple images for the slider using our AI API
   const toggleDay = (day: string) => {
     setExpandedDay(expandedDay === day ? null : day);
   };
@@ -32,68 +69,69 @@ export default function gameDetailsScreen({ route }) {
     { name: "yasser zabiri", image: "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/670ff2f1-261d-4378-b23c-9d1e85e8c59a/2025-10-20T023019Z_262015936_UP1ELAK06YI9L_RTRMADP_3_SOCCER-WORLDCUPU-20-ARG-MRC-REPORT.JPG?ver=03-06-2025?w=3840&q=75" },
   ];
 
-  const cover_images = [
-    `${JAVA_API}games/${game.id}/image`
-  ];
+  useEffect(() => {
+    if (gameId) {
+      fetchGame();
+    }
+  }, [gameId]);
 
-  const gameData = {
-    name: game.name,
-    type: game.type,
-    description: game.description,
-    city: game.city,
-    location: game.location,
-    allowedVisits: game.allowedVisits,
-    activeDays: game.activeDays,
-    MemberShipType: game.MemberShipType,
-    isActive: game.isActive
+  const fetchGame = async () => {
+    try {
+      const response = await authenticatedApi.get(`games/${gameId}`);
+      setGame(response.result.data);
+      setSportType(response.result.data.sportType.name);
+      setParticipants(response.result.data.participants);
+      console.log('Game data fetched:', response.result.data, participants.length);
+    } catch (error) {
+      console.error('Error fetching game:', error);
+    } 
   };
-
 
   // Generate deep link for sharing
   const generateDeepLink = () => {
-    const baseURL = 'sports://game'; // Change to your app's URL scheme
-    const params = `?gameId=${game._id}&gameName=${encodeURIComponent(game.title)}`;
-    return baseURL + params;
+    return`pickuplay://game/${game.id}`;
+
   };
 
   // Handle share button press
   const handleShareGame = async () => {
-    try {
-      const deepLink = generateDeepLink();
-      const message = `Join me for ${game.title} at ${game.address}! ${game.description}\n\n${deepLink}`;
-      
-      const result = await Share.share({
-        message: message,
-        url: deepLink,
-        title: `Join: ${game.title}`,
-      });
+  try {
+    const link = generateDeepLink();
 
-      if (result.action === Share.dismissedAction) {
-        console.log('Share dismissed');
+    const message =
+    `⚽ ${game.title}
+
+    📍 ${game.address}
+    🕒 ${new Date(game.startTime).toLocaleString()}
+    💰 $${game.price}
+
+    Join this game on Pickuplay 👇
+    ${link}`;
+
+        await Share.share({
+          message,
+          title: `Join ${game.title} on Pickuplay`,
+        });
+      } catch (error) {
+        Alert.alert('Error', 'Failed to share game');
       }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to share game');
-      console.error(error);
-    }
-  };
+    };
+
 
   // Copy deep link to clipboard
-  const handleCopyDeepLink = async () => {
-    try {
-      const deepLink = generateDeepLink();
-      // You may need to import Clipboard from @react-native-clipboard/clipboard
-      // For now, showing a placeholder
-      Alert.alert('Deep Link', `Link copied to clipboard:\n\n${deepLink}`);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to copy link');
-    }
-  };
+  const handleCopyDeepLink = () => {
+  const link = generateDeepLink();
+  Clipboard.setString(link);
+  Alert.alert('Copied!', 'Game link copied to clipboard.');
+};
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={t('game.game_details')} />
+      
+      <Header title="Game Details" target="welcome" /> 
+
       <ScrollView bounces={false}>
-        <ImageSlider images={cover_images} />
+        <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         
         <View style={styles.content}>
           <View style={styles.header}>
@@ -132,11 +170,6 @@ export default function gameDetailsScreen({ route }) {
               label={t('game.isprivate')} 
               value={game.isprivate ? "Private" : "Public"} 
             />
-            <InfoRow 
-              icon="map-marker" 
-              label={t('game.sportType')} 
-              value={game.sportType.name} 
-            />
 
             <InfoRow 
               icon="clock" 
@@ -148,13 +181,18 @@ export default function gameDetailsScreen({ route }) {
                 { hour: 'numeric', minute: '2-digit', hour12: true  })
                 + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
             />
+            <InfoRow 
+              icon="map-marker" 
+              label={t('game.sportType')} 
+              value={sportType} 
+            />
           </View>
             
             {/* Players Section */}
             <View style={styles.section}>
               <Icon type="materialCommunityIcons" name="account-multiple" size={24} color="#666" />
               <View style={styles.textContainer}>
-                <Text style={styles.label}>Players {game.participants.length}/{game.nbrSpots}</Text>
+                <Text style={styles.label}>Players {participants.length}/{game.availableSpots}</Text>
                 <TouchableOpacity 
                   onPress={() => setExpandedDay(expandedDay ? null : 'all')}
                   style={styles.expandAllButton}
@@ -200,33 +238,6 @@ export default function gameDetailsScreen({ route }) {
         </View>
       </ScrollView>
 
-      {/* QR Code Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('game.qrModal.title')}</Text>
-              <Pressable 
-                onPress={() => setModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
-              </Pressable>
-            </View>
-            
-            <Text style={styles.qrInstructions}>
-              {t('game.qrModal.instructions')}
-            </Text>
-            
-            <Text style={styles.gameName}>{gameData.name}</Text>
-          </View>
-        </View>
-      </Modal>
 
       {/* Share Game Modal */}
       <Modal
@@ -579,4 +590,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Courier',
     lineHeight: 18,
   },
+  headerContainer: {
+    backgroundColor: COLORS.transparent,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    //fontFamily: 'bold',
+    color: COLORS.black,
+  }
 });

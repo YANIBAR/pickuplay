@@ -70,5 +70,15 @@
 		<string>MaterialCommunityIcons.ttf</string>
 		<string>Entypo.ttf</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+	<dict>
+		<key>CFBundleURLSchemes</key>
+		<array>
+		<string>pickuplay</string>
+		</array>
+	</dict>
+	</array>
+
 </dict>
 </plist>

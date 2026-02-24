@@ -164,7 +164,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
         {game.status == 'ACTIVE' ? (
           <TouchableOpacity style={styles.cancelButton} onPress={() => refRBSheet.current?.open()}>
             <Icon type="materialCommunityIcons" name="close" size={18} color="#fff" />
-            <Text style={styles.cancelButtonText}>{t('common.cancel')} {game.status}</Text>
+            <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
         ) : null}
       </View>

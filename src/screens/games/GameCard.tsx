@@ -45,8 +45,8 @@
     const [token, setToken] = useState('');
     const { navigate } = useNavigation<Nav>();
     
-    const handleGamePress = (game: Game) => {
-      navigation.navigate('detail', { game: game });
+    const handleGamePress = (gameId: gameId) => {
+      navigation.navigate('detail', { gameId: game.id});
     };
 
     const handleJoinGame = (e: any) => {
@@ -106,7 +106,7 @@
       <>
         <TouchableOpacity 
           style={[styles.card, (game.currentParticipants < 0 ? styles.usedCard : {})]} 
-          onPress={() => handleGamePress(game)}
+          onPress={() => handleGamePress(game.id)}
         >
           <Image 
             source={{ uri: `${JAVA_API}games/${game.id}/image` }}
@@ -115,7 +115,7 @@
           <View style={styles.content}>
             <View style={styles.titleRow}>
               <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-                {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
+                {game.title.charAt(0).toUpperCase() + game.title.slice(1)} 
               </Text>
               <Icon 
                 type="materialCommunityIcons" 

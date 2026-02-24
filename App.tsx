@@ -6,10 +6,30 @@ import { withProviders } from '@hocs';
 import AuthProvider from './src/shared/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
+import { Linking } from 'react-native';
+import { createNavigationContainerRef } from '@react-navigation/native';
+
+const navigationRef = createNavigationContainerRef();
 
 const App: FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string>('login'); // Default route
+  const linking = {
+  prefixes: [
+    'pickuplay://',
+    'https://mgopass.com',
+  ],
+    config: {
+      screens: {
+        detail: {
+          path: 'game/:gameId',
+          parse: {
+            gameId: (gameId: string) => gameId,
+          },
+        },
+      },
+    },
+  };
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -23,15 +43,12 @@ const App: FC = () => {
         if (storedLanguage && i18n.isInitialized) {
           await i18n.changeLanguage(storedLanguage);
         }
-        const token = await AsyncStorage.getItem('access_token');
         const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-        if (token) {
           if(hasLaunched === 'false') {
            setInitialRoute('onboarding');
           } else {
             setInitialRoute('welcome');
           }
-        } 
       } catch (error) {
         console.error('Initialization error:', error);
         setInitialRoute('onboarding'); // Fallback
@@ -39,8 +56,12 @@ const App: FC = () => {
         setIsReady(true);
       }
     };
-
     initializeApp();
+
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      console.log('Deep link received:', url);
+    });
+    return () => sub.remove();
   }, []);
 
   if (!isReady) {
@@ -48,9 +69,9 @@ const App: FC = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <AuthProvider>
-        <AppStack initialRouteName={'welcome'} />
+        <AppStack initialRouteName={initialRoute} />
       </AuthProvider>
     </NavigationContainer>
   );

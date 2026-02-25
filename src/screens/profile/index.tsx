@@ -9,9 +9,7 @@ import RBSheet from "react-native-raw-bottom-sheet";
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
-import { FlatList } from 'react-native-gesture-handler';
 import { useUserData } from '@services/useUserData';
-import { calendarFormat } from 'moment';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 type Nav = {
@@ -73,40 +71,10 @@ const JOINED_GAMES = [
 const Profile = () => {
   const { t } = useTranslation();
   const { navigate } = useNavigation<Nav>();
-  const [directionModalVisible, setDirectionModalVisible] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const { userData, error, refreshUserData } = useUserData();
-  const isLogged = !userData?.id;
+  const isLogged = userData?.id;
   const refRBSheet = useRef<any>(null);
-
-
-  const handleDropdownSelect = (item: any) => {
-    setModalVisible(false);
-
-    // Perform actions based on the selected item
-    switch (item.value) {
-      case 'share':
-        handleInvite();
-        break;
-      case 'help':
-        navigate('HelpCenter');
-        break;
-      case 'privacy':
-        navigate('PrivacyPolicy');
-        break;
-      case 'terms':
-        navigate('terms');
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleClose = () => {
-    setModalVisible(false);
-  };
-
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
@@ -120,28 +88,7 @@ const Profile = () => {
     };
     return iconMap[type] || 'sports';
   };
-const handleInvite = async () => {
-    try {
-      const userName = userData?.firstName ? `${userData.firstName}` : 'Your friend';
-      
-      const referralMessage = `🎉 ${userName} invited you to MGO Pass!\n\n${inviteMessage}\n\n🎟️ Get admission to a variety of attractions in Casanlanca!\n\n💰 🌐 Learn more: https://pickuplay.com/#how-it-works?id=${userData?.id}\n📱 Download the app and start exploring!`;
-      
-      const result = await Share.share({
-        message: referralMessage,
-        url: 'https://pickuplay.com/',
-        title: 'MGO Pass - Make $5 Refer a Friend',
-      });
-
-      if (result.action === Share.sharedAction) {
-        console.log('Success', 'Referral link shared successfully!');
-      } else if (result.action === Share.dismissedAction) {
-        console.log('Share dialog dismissed');
-      }
-    } catch (error) {
-      console.error('Error sharing referral:', error);
-      Alert.alert('Error', 'An error occurred while sharing the referral link.');
-    }
-  };
+  
   const handleLogout = async () => {
     try {
       const keysToRemove = [
@@ -177,11 +124,6 @@ const handleInvite = async () => {
     return (
       <TouchableOpacity style={styles.headerContainer}>
         <View style={styles.headerLeft}>
-          <Image
-            source={icons.back as ImageSourcePropType}
-            resizeMode="contain"
-            style={styles.backIcon}
-          />
           <Text style={[styles.headerTitle, {
             color: COLORS.greyscale900
           }]}>Profile</Text>

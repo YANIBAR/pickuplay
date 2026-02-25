@@ -164,13 +164,13 @@ const Login = () => {
   const storeUser = async (user: any) => {
     try {
       await AsyncStorage.multiSet([
-        ['id', user._id || ''],
+        ['id', user.id?.toString() || ''], 
         ['firstName', user.firstname || ''],
         ['lastName', user.lastname || ''],
         ['email', user.email || ''],
         ['phone', user.phone || ''],
         //['preferredLanguage', user.preferredLanguage || ''],
-        //['role', user.role || ''],
+        //['role', user.role || ''],anibar@gmail.com
         //['profileImage', user.profileImage || ''],
         //['gameId', user.role === "Partner" ? user.gameId || '' : ''],
       ]);
@@ -193,7 +193,9 @@ const Login = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}>
-          <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate("welcome", {screen: "Games"  })}>
+          <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate("welcome", {
+        screen: "Games"  // Specify which tab to show
+      })}>
             <Image
               source={images.logo}
               resizeMode="contain"

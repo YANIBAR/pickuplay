@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-virtualized-view';
 import { COLORS, SIZES, icons, images, screens } from '@constants';
 import { useNavigation } from '@react-navigation/native';
-import { SettingsItem, Button, MoreModal } from '@components';
+import { SettingsItem, Button, MoreModal, Header } from '@components';
 import RBSheet from "react-native-raw-bottom-sheet";
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -112,46 +112,6 @@ const Profile = () => {
       console.error('Error sharing referral:', error);
       Alert.alert('Error', 'An error occurred while sharing the referral link.');
     }
-  };
-
-  /**
-   * render header
-   */
-  const renderHeader = () => {
-    return (
-      <TouchableOpacity style={styles.headerContainer}>
-        <View style={styles.headerLeft}>
-          <Image
-            source={images.logo}
-            style={styles.logo}
-          />
-          <Text style={[styles.headerTitle, {
-            color: COLORS.greyscale900
-          }]}>Profile</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  /**
-   * render user profile
-   */
-  const renderProfile = () => {    
-    return (
-      isLogged && (
-        <View style={styles.profileContainer}>
-          <View>
-            <Image source={images.logo} resizeMode="contain" style={styles.avatar} />
-          </View>
-          <Text style={[styles.title, { color: COLORS.greyscale900 }]}>
-            {userData?.firstName} {userData?.lastName}
-          </Text>
-          <Text style={[styles.subtitle, { color: COLORS.greyscale900 }]}>
-            {userData?.email}
-          </Text>
-        </View>
-      )
-    );
   };
 
   /**
@@ -263,9 +223,8 @@ const Profile = () => {
   return (
     <SafeAreaView style={[styles.area]}>
       <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-        {renderHeader()}
+        <Header title='Profile'/>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {renderProfile()}
           {renderSettings()}
         </ScrollView>
       </View>

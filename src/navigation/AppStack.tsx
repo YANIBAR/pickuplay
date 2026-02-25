@@ -26,7 +26,8 @@ import {
   DetailScreen,
   LoginScreen,
   MyGamesScreen,
-  EditGameScreen
+  EditGameScreen,
+  SettingScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -40,6 +41,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="onboarding" component={OnboardingScreen} />
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="profile" component={ProfileScreen} />
+      <Stack.Screen name="setting" component={SettingScreen} />
       <Stack.Screen name="LanguageItem" component={LanguageItemScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />

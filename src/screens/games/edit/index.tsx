@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const EditGameScreen = ({ route }) => {
   const { t } = useTranslation();
-    const { navigate } = useNavigation();
+  const { navigate } = useNavigation();
   const { game } = route.params || {};
   const [isStartPickerVisible, setStartPickerVisible] = useState(false);
   const [isEndPickerVisible, setEndPickerVisible] = useState(false);

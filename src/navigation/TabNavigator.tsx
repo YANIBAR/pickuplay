@@ -7,7 +7,8 @@ import {
   ChatScreen,
   LeaguesScreen,
   ScheduleScreen,
-  GamesScreen
+  GamesScreen,
+  ProfileScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -123,8 +124,8 @@ const TabNavigator = () => {
         /> */}
 
       <Tab.Screen
-        name="Setting"
-        component={SettingScreen}
+        name="Profile"
+        component={ProfileScreen}
         options={{
           tabBarLabel: t('menu.user'),
           tabBarIcon: ({ color, size }) => (

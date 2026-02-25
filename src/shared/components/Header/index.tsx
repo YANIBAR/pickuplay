@@ -14,7 +14,7 @@ interface HeaderProps {
   title?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ title, target }) => {
   const navigation = useNavigation<NavigationProp<any>>();
 
   return (
@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           backgroundColor: COLORS.white,
         },
       ]}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity onPress={() => target ? navigation.navigate(target) : navigation.goBack()}>
         <Image
           source={icons.back as ImageSourcePropType}
           resizeMode="contain"

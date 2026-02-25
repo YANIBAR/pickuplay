@@ -385,8 +385,10 @@
       };
       createGame(payload);
     };
+    
     const createGame = async (payload) => { 
       try {
+        console.log('Creating game with payload:', payload);
           const response = await authenticatedApi.post(`games/create`, payload);
           const game = response.result.data;
           uploadImage(game.id, selectedImage);

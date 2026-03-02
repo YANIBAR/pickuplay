@@ -142,14 +142,14 @@ useEffect(() => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        {/*<TouchableOpacity 
           style={[styles.desactivateBotton, loading && styles.disabledButton]}
           disabled={loading}
         >
           <Text style={styles.buttonText}>
             {loading ? t('editProfile.updating') : t('editProfile.deleteMyAccount')}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
         {user.role === 'Partner' && (
           <TouchableOpacity 

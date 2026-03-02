@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
 import { Button, Icon, Text } from '@components';
 import { COLORS, screens } from '@constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { API_BACKEND_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
-import { logout } from 'src/app/slices/auth';
 import { useTranslation } from 'react-i18next';
+import { authenticatedApi } from '@services/api';
+import { useUserData } from '@services/useUserData';
+import { Dropdown } from 'react-native-element-dropdown';
 
 const EditProfileForm = ({ onShowgame }) => {
+  const { userData, error, refreshUserData } = useUserData();
   const [user, setUser] = useState({
+    userId: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -19,82 +20,44 @@ const EditProfileForm = ({ onShowgame }) => {
     city: '',
   });
   const [loading, setLoading] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const { t } = useTranslation();
   const { navigate } = useNavigation();
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const email = await AsyncStorage.getItem('email');
-        const response = await axios.get(API_BACKEND_URL + '/user/getUser/?email=' + email);
-        setUser(response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        Alert.alert('Error', 'Failed to load user profile data');
-      }
-    };
 
-    getUser();
-  }, []);
 
   const handleChange = (field, value) => {
     setUser(prev => ({ ...prev, [field]: value }));
   };
-
-const handleDeleteAccount = async () => {
-  Alert.alert(
-    "Confirm Account Deletion",
-    "Are you sure you want to permanently delete your account?",
-    [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          console.log("Deleting account for user ID:", user._id);
-          try {
-            console.log(API_BACKEND_URL+`/user/delete/${user._id}`);
-            const response = await axios.post(API_BACKEND_URL+`/user/deleteMyAccount/${user._id}`);
-            // Logout user
-            const keysToRemove = [
-              'access_token',
-              'id',
-              'firstName',
-              'lastName',
-              'email',
-              'phone',
-              'role',
-              'preferredLanguage',
-              'profileImage',
-              'gameId',
-            ];
-            await AsyncStorage.multiRemove(keysToRemove);
-            //setUser(null); // Reset user state
-                navigate("login");
-          } catch (err) {
-            Alert.alert("Error", "Failed to delete account.");
-          }
-        },
-      },
-    ]
-  );
-};
-
-
+  const city = [
+    { label: 'Kansas City', value: 'kansas_city' },
+    { label: 'St. Louis', value: 'st_louis' },
+    { label: 'Springfield', value: 'springfield' },
+    { label: 'Columbia', value: 'columbia' },
+    { label: 'Independence', value: 'independence' },
+    { label: 'Lee\'s Summit', value: 'lees_summit' },
+    { label: 'Olathe', value: 'olathe' },
+    { label: 'Overland Park', value: 'overland_park' },
+    { label: 'Blue Springs', value: 'blue_springs' },
+    { label: 'Liberty', value: 'liberty' },  
+  ];
+useEffect(() => {
+  if (userData) {
+    setUser({
+      userId: userData.id ?? "",
+      firstName: userData.firstName ?? "",
+      lastName: userData.lastName ?? "",
+      email: userData.email ?? "",
+      phone: userData.phone ?? "",
+      city: userData.city ?? "",
+    });
+  }
+}, [userData]);
 
   const handleUpdateUser = async () => {
     try {     
       // Format birthday properly if needed
-      const formattedData = {
-        ...user,
-        birthday: user.birthday instanceof Date ? user.birthday.toISOString() : user.birthday,
-      };
-       const response = await axios.post(
-        `${API_BACKEND_URL}/user/edit/${formattedData._id}`, 
-        formattedData
-      );
-      await AsyncStorage.setItem("firstName", formattedData.firstName);
-      await AsyncStorage.setItem("lastName", formattedData.lastName);
+       const response = await authenticatedApi.patch(`profile`, user);
+      await AsyncStorage.setItem("firstName", user.firstName);
+      await AsyncStorage.setItem("lastName", user.lastName);
       if (response.status === 200 || response.status === 201) {
         Alert.alert('Success', 'Profile updated successfully');
       } else {
@@ -156,36 +119,15 @@ const handleDeleteAccount = async () => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>City</Text>
-          <RNPickerSelect
-            onValueChange={(value) => handleChange('city', value)}
-            value={user.city}
-            items={[
-              { label: 'Casablanca', value: 'casablanca' },
-              { label: 'Fes', value: 'fes' },
-              { label: 'Rabat', value: 'rabat' },
-              { label: 'Tangier', value: 'tangier' },
-              { label: 'Marrakesh', value: 'marrakesh' },
-              { label: 'Agadir', value: 'agadir' },
-            ]}
-            style={{
-              viewContainer: {
-                borderWidth: 1,
-                borderColor: '#ddd',
-                borderRadius: 8,
-                backgroundColor: 'white',
-              },
-              inputIOS: {
-                padding: 12,
-                fontSize: 16,
-                color: '#333',
-              },
-              inputAndroid: {
-                padding: 12,
-                fontSize: 16,
-                color: '#333',
-              }
-            }}
-          />
+          <Dropdown
+              data={city}
+              labelField="label"
+              valueField="value"
+              placeholder={t('edit_game.select_city') }
+              value={user.city}
+              onChange={item => handleChange('city', item.value)}
+              style={[styles.dropdown && styles.disabledDropdown]}
+            />
         </View>
 
 
@@ -200,15 +142,14 @@ const handleDeleteAccount = async () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        {/*<TouchableOpacity 
           style={[styles.desactivateBotton, loading && styles.disabledButton]}
-          onPress={handleDeleteAccount}
           disabled={loading}
         >
           <Text style={styles.buttonText}>
             {loading ? t('editProfile.updating') : t('editProfile.deleteMyAccount')}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
         {user.role === 'Partner' && (
           <TouchableOpacity 

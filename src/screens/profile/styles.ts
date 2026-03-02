@@ -200,7 +200,6 @@ export default StyleSheet.create({
         },
         profileContainer: {
         alignItems: "center",
-        paddingVertical: 20
       },
   avatarContainer: {
     marginVertical: 12,
@@ -240,13 +239,12 @@ export default StyleSheet.create({
         fontSize: 18,
         fontFamily: "bold",
         color: COLORS.greyscale900,
-        marginTop: 12
       },
       subtitle: {
         fontSize: 16,
         color: COLORS.greyscale900,
         fontFamily: "medium",
-        marginTop: 4
+        marginTop: 8
       },
   primaryButton: {
     backgroundColor: '#fff',
@@ -256,6 +254,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: COLORS.primary,
+        marginTop: 8
   },
   primaryButtonText: {
     color: '#1FAC9B',

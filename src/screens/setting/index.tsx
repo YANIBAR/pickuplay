@@ -26,7 +26,7 @@ const Profile = () => {
   // Use the custom hook for user data management
   const { userData, error, refreshUserData } = useUserData();
   
-  const isLogged = !userData?.id; // Check if user is logged in based on id
+  const isLogged = userData?.id; // Check if user is logged in based on id
   const inviteMessage = t('Admission to a variety of attraction...');
   
   const dropdownItems = [
@@ -84,7 +84,7 @@ const Profile = () => {
       
       setLogoutModalVisible(false);
       refRBSheet.current?.close();
-      navigate("login");
+      navigate("welcome");
     } catch (e) {
       console.error('Failed to log out', e);
       Alert.alert('Error', 'Failed to log out. Please try again.');

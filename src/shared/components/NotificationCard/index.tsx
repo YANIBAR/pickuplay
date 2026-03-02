@@ -30,6 +30,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         return icons.ticket;
       case 'Payment':
         return icons.wallet2;
+      case 'Reminder':
+        return icons.bell;
       case 'Update':
         return icons.infoSquare2;
       case 'Account':

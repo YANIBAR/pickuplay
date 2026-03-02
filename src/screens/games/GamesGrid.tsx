@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, FlatList } from 'react-native';
+import { StyleSheet, FlatList, RefreshControl } from 'react-native';
 import GameCard, { Game } from './GameCard';
+import { COLORS } from '@constants';
 
-type GameGridProps = {
+interface GameGridProps {
   games: Game[];
-};
+  refreshing?: boolean;
+  onRefresh?: () => void;
+}
 
-export default function GameGrid({ games}: GameGridProps) {
+export default function GameGrid({ games, refreshing = false, onRefresh }: GameGridProps) {
 
   return (
     <FlatList
@@ -19,7 +22,16 @@ export default function GameGrid({ games}: GameGridProps) {
       )}
       numColumns={1}
       contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[COLORS.primary]}       // Android
+          tintColor={COLORS.primary}      // iOS
+        />
+      }
     />
+    
   );
 }
 

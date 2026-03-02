@@ -66,16 +66,17 @@ export default function GameCard({ game, onPress }: GameCardProps) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getSportIcon = (sportType: string) => {
-    const iconMap: { [key: string]: string } = {
-      basketball: 'basketball',
-      soccer: 'soccer',
-      pingPong: 'table-tennis',
-      hockey: 'hockey-puck',
-      tennis: 'tennis',
-      volleyball: 'volleyball',
+  const getGameIcon = (type: string) => {
+    const iconMap: Record<string, string> = {
+      1: 'soccer',
+      2: 'basketball',
+      3: 'volleyball',
+      5: 'tennis',
+      4: 'hockey-sticks',
+      6: 'table-tennis',
+      7: 'football'
     };
-    return iconMap[sportType] || 'dumbbell';
+    return iconMap[type] || 'sports';
   };
   const Editable = (() => {
     if (!game.startTime) return false;
@@ -90,7 +91,14 @@ export default function GameCard({ game, onPress }: GameCardProps) {
     >
       <View style={styles.header}>
         <View style={styles.titleSection}>
-          
+          <View style={styles.gameIcon}>
+            <Icon 
+              type="materialCommunityIcons" 
+              name={getGameIcon(game.sportType.id)} 
+              size={24} 
+              color={COLORS.primary}
+            />
+          </View>
           <View style={styles.titleContainer}>
             <Text style={[styles.title, isGameFull && styles.usedText]}>{game.title}</Text>
             <Text style={[styles.creator, isGameFull && styles.usedText]}>

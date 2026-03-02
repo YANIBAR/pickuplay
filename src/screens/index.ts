@@ -31,3 +31,4 @@ export { default as ScheduleScreen  } from './schedule';
 export { default as AddMembershipScreen  } from './schedule/add';
 export { default as DetailScreen  } from './games/detail';
 export { default as EditProfileScreen } from './profile/editprofile';
+export { default as Notificationcreen } from './notifications';

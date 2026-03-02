@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
 import { Header, Icon } from '@components';
-import { COLORS, FONTS, icons } from '@constants';
+import { COLORS, FONTS, icons, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { JAVA_API } from '@env';
 import { authenticatedApi } from '@services/api';
@@ -126,11 +126,21 @@ export default function gameDetailsScreen({ route }) {
 };
 
   return (
-    <SafeAreaView style={styles.container}>
-      
-      <Header title="Game Details" target="welcome" /> 
-
-      <ScrollView bounces={false}>
+    <SafeAreaView style={styles.area}>
+      <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
+        <TouchableOpacity  onPress={() => navigate("welcome")} style={styles.headerContainer}>
+          <Image
+            source={icons.back as ImageSourcePropType}
+            resizeMode="contain"
+            style={styles.backIcon}
+          />
+          <View style={styles.headerLeft}>
+            <Text style={[styles.headerTitle, { color: COLORS.greyscale900 }]}>Game Details</Text>
+          </View>
+          <TouchableOpacity onPress={() => navigate("editProfile")}>
+              <Icon type="feather" name="edit" size={20} color={COLORS.primary} />
+          </TouchableOpacity>
+        </TouchableOpacity>
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         
         <View style={styles.content}>
@@ -300,12 +310,48 @@ export default function gameDetailsScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+  area: {
+              
+              flex: 1,
+              backgroundColor: COLORS.white,
+              minHeight: SIZES.height
+          },
+          container: {
+              flex: 1,
+              backgroundColor: COLORS.white,
+          },
   content: {
     paddingHorizontal: 16,
+  },
+  headerContainer: {
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  logo: {
+    height: 32,
+    width: 32
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: "bold",
+    color: COLORS.greyscale900,
+    marginLeft: 12
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 16,
+  },
+  headerIcon: {
+    height: 24,
+    width: 24,
+    tintColor: COLORS.greyscale900
   },
   header: {
     flexDirection: 'row',
@@ -407,10 +453,6 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 8,
-  },
-  logo: {
-    width: 100,
-    height: 100,
   },
   gameName: {
     fontSize: 18,
@@ -590,23 +632,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Courier',
     lineHeight: 18,
   },
-  headerContainer: {
-    backgroundColor: COLORS.transparent,
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    //fontFamily: 'bold',
-    color: COLORS.black,
-  }
 });

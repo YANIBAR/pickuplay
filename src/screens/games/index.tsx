@@ -1,16 +1,17 @@
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, FlatList, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, FlatList, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Game, extractCity } from './GameCard';
 import GameGrid from './GamesGrid';
-import { JAVA_API } from '@env';
 import { useEffect, useState } from 'react';
-import { Header, Icon } from '@components';
+import { Icon } from '@components';
 import { useTranslation } from 'react-i18next';
-import { COLORS } from '@constants';
+import { COLORS, icons, SIZES } from '@constants';
 import { publicApi } from '@services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
-
+type Nav = {
+  navigate: (value: string) => void
+}
 const mockGames: Game[] = [];
 
 const SPORTS = ['soccer', 'basketball', 'volleyball', 'tennis'];
@@ -25,7 +26,9 @@ export default function HomeScreen({route}) {
   const { t } = useTranslation();
   const [games, setGames] = useState<Game[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
-  
+  const [refreshing, setRefreshing] = useState(false);
+    const { navigate } = useNavigation<Nav>();
+
   // Filter states
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
@@ -36,6 +39,11 @@ export default function HomeScreen({route}) {
   const [cityModalVisible, setCityModalVisible] = useState(false);
   const [dateModalVisible, setDateModalVisible] = useState(false);
 
+
+const onRefresh = () => {
+  setRefreshing(true);
+  fetchRequests();
+};
   const fetchRequests = async () => {
     try {
       const response = await publicApi.get(`games`);
@@ -93,6 +101,7 @@ export default function HomeScreen({route}) {
   // Apply filters whenever filter state changes
   useEffect(() => {
     applyFilters();
+    setRefreshing(false);
   }, [selectedSports, selectedCities, selectedDate, games]);
 
   useEffect(() => {
@@ -129,48 +138,59 @@ export default function HomeScreen({route}) {
       {/* Filters Bar */}
 
       <View style={styles.content}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>
-          <TouchableOpacity 
-            style={[styles.filterButton, selectedSports.length > 0 && styles.filterButtonActive]}
-            onPress={() => setSportModalVisible(true)}
-          >
-            <Icon type="materialCommunityIcons" name="soccer" size={16} color={selectedSports.length > 0 ? 'white' : COLORS.primary} />
-            <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
-              {selectedSports.length > 0 ? `${selectedSports.length} Sports` : 'Sport'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.filterButton, selectedCities.length > 0 && styles.filterButtonActive]}
-            onPress={() => setCityModalVisible(true)}
-          >
-            <Icon type="materialCommunityIcons" name="map-marker" size={16} color={selectedCities.length > 0 ? 'white' : COLORS.primary} />
-            <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
-              {selectedCities.length > 0 ? `${selectedCities.length} Cities` : 'City'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.filterButton, selectedDate && styles.filterButtonActive]}
-            onPress={() => setDateModalVisible(true)}
-          >
-            <Icon type="materialCommunityIcons" name="calendar" size={16} color={selectedDate ? 'white' : COLORS.primary} />
-            <Text style={[styles.filterButtonText, selectedDate && styles.filterButtonTextActive]}>
-              {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date'}
-            </Text>
-          </TouchableOpacity>
-
-          {hasActiveFilters && (
+        <View style={styles.filtersRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>
             <TouchableOpacity 
-              style={styles.clearButton}
-              onPress={clearAllFilters}
+              style={[styles.filterButton, selectedSports.length > 0 && styles.filterButtonActive]}
+              onPress={() => setSportModalVisible(true)}
             >
-              <Icon type="materialCommunityIcons" name="close-circle" size={16} color="white" />
-              <Text style={styles.clearButtonText}>Clear</Text>
+              <Icon type="materialCommunityIcons" name="soccer" size={16} color={selectedSports.length > 0 ? 'white' : COLORS.primary} />
+              <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
+                {selectedSports.length > 0 ? `${selectedSports.length} Sporsts` : 'Spossrt'}
+              </Text>
             </TouchableOpacity>
-          )}
-        </ScrollView>
-        <GameGrid games={filteredGames} />
+
+            <TouchableOpacity 
+              style={[styles.filterButton, selectedCities.length > 0 && styles.filterButtonActive]}
+              onPress={() => setCityModalVisible(true)}
+            >
+              <Icon type="materialCommunityIcons" name="map-marker" size={16} color={selectedCities.length > 0 ? 'white' : COLORS.primary} />
+              <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
+                {selectedCities.length > 0 ? `${selectedCities.length} Cities` : 'City'}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.filterButton, selectedDate && styles.filterButtonActive]}
+              onPress={() => setDateModalVisible(true)}
+            >
+              <Icon type="materialCommunityIcons" name="calendar" size={16} color={selectedDate ? 'white' : COLORS.primary} />
+              <Text style={[styles.filterButtonText, selectedDate && styles.filterButtonTextActive]}>
+                {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date'}
+              </Text>
+            </TouchableOpacity>
+
+            {hasActiveFilters && (
+              <TouchableOpacity 
+                style={styles.clearButton}
+                onPress={clearAllFilters}
+              >
+                <Icon type="materialCommunityIcons" name="close-circle" size={16} color="white" />
+                <Text style={styles.clearButtonText}>Clear</Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+
+          {/* Bell icon fixed to the right, outside the ScrollView */}
+          <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
+            <Image
+              source={icons.bell}
+              style={styles.headerIcon}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <GameGrid games={filteredGames} refreshing={refreshing} onRefresh={onRefresh}/>
       </View>
 
       {/* Sport Filter Modal */}
@@ -306,25 +326,21 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   filtersBar: {
+    flex: 1,
     flexDirection: 'row',
     paddingHorizontal: 8,
     paddingVertical: 12,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    maxHeight: 60,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginHorizontal: 4,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: COLORS.primary,
-    backgroundColor: 'white',
+    minHeight: SIZES.InputHeight-6,
   },
   filterButtonActive: {
     backgroundColor: COLORS.primary,
@@ -347,6 +363,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderRadius: 20,
     backgroundColor: '#ff6b6b',
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    maxHeight: 60,
+  },
+  headerRight: {
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerIcon: {
+    height: 20,
+    width: 20,
+    tintColor: COLORS.primary,
   },
   clearButtonText: {
     fontSize: 12,

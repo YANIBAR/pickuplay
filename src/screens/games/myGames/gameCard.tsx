@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
       bottomSubtitle: {
         fontSize: 20,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         textAlign: "center",
         marginVertical: 28
       },

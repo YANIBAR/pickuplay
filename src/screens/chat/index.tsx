@@ -24,7 +24,7 @@ const Inbox = () => {
             style={styles.headerLogo}
           />
           <Text style={[styles.headerTitle, {
-            color: COLORS.greyscale900
+            color: COLORS.grayscale900
           }]}>Inbox</Text>
         </View>
         <View style={styles.headerRight}>
@@ -33,7 +33,7 @@ const Inbox = () => {
               source={icons.search}
               resizeMode='contain'
               style={[styles.searchIcon, {
-                tintColor: COLORS.greyscale900
+                tintColor: COLORS.grayscale900
               }]}
             />
           </TouchableOpacity>
@@ -42,7 +42,7 @@ const Inbox = () => {
               source={icons.moreCircle}
               resizeMode='contain'
               style={[styles.moreCircleIcon, {
-                tintColor: COLORS.greyscale900
+                tintColor: COLORS.grayscale900
               }]}
             />
           </TouchableOpacity>

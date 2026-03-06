@@ -18,7 +18,7 @@ export default StyleSheet.create({
   },
   questionNumber: {
     fontSize: 14,
-    color: COLORS.greyscale600 || '#666666',
+    color: COLORS.grayscale600 || '#666666',
     textAlign: 'center',
     marginBottom: 20,
     fontWeight: '500',
@@ -31,7 +31,7 @@ export default StyleSheet.create({
   questionTitleFr: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.greyscale900 || '#333333',
+    color: COLORS.grayscale900 || '#333333',
     textAlign: 'center',
     marginBottom: 8,
     lineHeight: 28,
@@ -39,7 +39,7 @@ export default StyleSheet.create({
   questionTitleAr: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.greyscale700 || '#555555',
+    color: COLORS.grayscale700 || '#555555',
     textAlign: 'center',
     lineHeight: 26,
     fontFamily: 'System',
@@ -50,7 +50,7 @@ export default StyleSheet.create({
   optionButton: {
     backgroundColor: COLORS.white,
     borderWidth: 2,
-    borderColor: COLORS.greyscale200 || '#e9ecef',
+    borderColor: COLORS.grayscale200 || '#e9ecef',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -80,26 +80,26 @@ export default StyleSheet.create({
   numberInput: {
     backgroundColor: COLORS.white,
     borderWidth: 2,
-    borderColor: COLORS.greyscale200 || '#e9ecef',
+    borderColor: COLORS.grayscale200 || '#e9ecef',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
     fontSize: 18,
     textAlign: 'center',
     minHeight: 56,
-    color: COLORS.greyscale900 || '#333333',
+    color: COLORS.grayscale900 || '#333333',
   },
   textInput: {
     backgroundColor: COLORS.white,
     borderWidth: 2,
-    borderColor: COLORS.greyscale200 || '#e9ecef',
+    borderColor: COLORS.grayscale200 || '#e9ecef',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
     fontSize: 16,
     minHeight: 120,
     textAlignVertical: 'top',
-    color: COLORS.greyscale900 || '#333333',
+    color: COLORS.grayscale900 || '#333333',
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -124,7 +124,7 @@ export default StyleSheet.create({
   optionText: {
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.greyscale900 || '#333333',
+    color: COLORS.grayscale900 || '#333333',
     textAlign: 'center',
   },
   selectedOptionText: {

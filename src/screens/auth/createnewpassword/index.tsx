@@ -76,7 +76,7 @@ const CreateNewPassword = () => {
                 style={[
                   styles.modalSubtitle,
                   {
-                    color: COLORS.greyscale600,
+                    color: COLORS.grayscale600,
                   },
                 ]}>
                 {t('cnp.modal.accountReady')}

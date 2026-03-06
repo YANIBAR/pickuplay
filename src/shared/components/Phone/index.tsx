@@ -179,11 +179,11 @@ const Phone: FC<InputProps> = ({
               ? COLORS.red
               : isFocused
               ? COLORS.primary
-              : COLORS.greyscale500,
+              : COLORS.grayscale500,
             backgroundColor:
               isFocused && !errorText
                 ? COLORS.tansparentPrimary
-                : COLORS.greyscale500,
+                : COLORS.grayscale500,
           },
         ]}>
         <TouchableOpacity
@@ -211,7 +211,7 @@ const Phone: FC<InputProps> = ({
               <View
                 style={[
                   styles.flagIcon,
-                  { backgroundColor: COLORS.greyscale300, borderRadius: 2 }
+                  { backgroundColor: COLORS.grayscale300, borderRadius: 2 }
                 ]}
               />
             )}
@@ -263,7 +263,7 @@ const Phone: FC<InputProps> = ({
             <View style={{ 
               padding: 15, 
               borderBottomWidth: 1, 
-              borderBottomColor: COLORS.greyscale300 
+              borderBottomColor: COLORS.grayscale300 
             }}>
               <Text style={{ fontWeight: 'bold', textAlign: 'center' }}>
                 Select Country ({areas.length} countries)

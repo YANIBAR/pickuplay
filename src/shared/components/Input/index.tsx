@@ -31,7 +31,7 @@ const Input: FC<InputProps> = (props) => {
           styles.inputContainer,
           {
             borderColor: isFocused ? COLORS.primary : COLORS.grayTie,
-            backgroundColor: isFocused ? COLORS.transparentPrimary : COLORS.greyscale500,
+            backgroundColor: isFocused ? COLORS.transparentPrimary : COLORS.grayscale500,
           },
         ]}
       >

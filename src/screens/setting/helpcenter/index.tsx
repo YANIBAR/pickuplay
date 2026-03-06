@@ -237,11 +237,11 @@ const SettingsHelpCenter = () => {
             <Image
               source={icons.back}
               style={[styles.backIcon, {
-                tintColor: COLORS.greyscale900
+                tintColor: COLORS.grayscale900
               }]} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, {
-            color: COLORS.greyscale900
+            color: COLORS.grayscale900
           }]}>Help Center</Text>
         </View>
         <TouchableOpacity>
@@ -249,7 +249,7 @@ const SettingsHelpCenter = () => {
             source={icons.moreCircle}
             contentFit='contain'
             style={[styles.moreIcon, {
-              tintColor: COLORS.greyscale900
+              tintColor: COLORS.grayscale900
             }]}
           />
         </TouchableOpacity>

@@ -41,7 +41,7 @@ const Component: FC<ModalProps> = ({
             style={[
               styles.subtitle,
               {
-                color: COLORS.greyscale600,
+                color: COLORS.grayscale600,
               },
             ]}>
             {message ||

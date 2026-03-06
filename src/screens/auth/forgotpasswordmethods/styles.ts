@@ -23,7 +23,7 @@ export default StyleSheet.create({
   title: {
     fontSize: 15,
     //fontFamily: 'medium',
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
   },
   methodContainer: {
     width: SIZES.width - 32,
@@ -52,7 +52,7 @@ export default StyleSheet.create({
   methodTitle: {
     fontSize: 14,
     //fontFamily: 'medium',
-    color: COLORS.greyscale600,
+    color: COLORS.grayscale600,
   },
   methodSubtitle: {
     fontSize: 16,

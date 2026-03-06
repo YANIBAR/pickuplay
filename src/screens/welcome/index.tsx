@@ -49,7 +49,7 @@ const Welcome = () => {
               onPress={() => navigate("notifications")}>
               <Image
                 source={icons.notificationBell2}
-                style={[styles.bellIcon, { tintColor: COLORS.greyscale900 }]}
+                style={[styles.bellIcon, { tintColor: COLORS.grayscale900 }]}
               />
             </TouchableOpacity>
           </View>

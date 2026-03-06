@@ -42,7 +42,7 @@ export default StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     marginBottom: 6,
   },
   date: {

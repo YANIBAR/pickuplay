@@ -59,13 +59,15 @@ export default function GameCard({ game, onPress }: GameCardProps) {
             color={COLORS.primary}
           />
         </View>
+        {/* Vertical divider */}
+        <View style={styles.gameCardDivider} />
         <View style={styles.gameInfo}>
           <Text style={styles.gameName}>{game.title}</Text>
           <Text style={styles.gameSub}>
-            <Icon  type="entypo" name="location-pin" size={16} color={COLORS.primary}/> {game.isPrivate ? t("Private") : t("Public")}
+            <Icon  type="entypo" name="location-pin" size={16} color={COLORS.primary}/> {game.address }
           </Text>
           <Text style={styles.gameSub}>
-            <Icon  type="entypo" name="clock" size={16} color={COLORS.primary}/> {formatDateLong(new Date(game.startTime))}, ({formatTime(game.startTime)} - {formatTime(game.endTime)})
+            {formatDateLong(new Date(game.startTime))}, ({formatTime(game.startTime)} - {formatTime(game.endTime)})
           </Text>
         </View>
         <View style={styles.gameRight}>

@@ -2,13 +2,6 @@ import { StyleSheet } from 'react-native';
 import { COLORS, SIZES } from '@constants';
 
 export default StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'red',
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   headerContainer: {
     position: 'absolute',
     top: 10,
@@ -111,5 +104,129 @@ export default StyleSheet.create({
     fontSize: 16,
     color: '#888',
     marginTop: 5,
+  },
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  filtersBar: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.grayscale600,
+    minHeight: SIZES.InputHeight-6,
+  },
+  filterButtonActive: {
+    backgroundColor: COLORS.transparentPrimary,
+    borderColor: COLORS.primary,
+    color: COLORS.black
+  },
+  filterButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.grayscale600,
+  },
+  filterButtonTextActive: {
+    color: COLORS.grayscale600,
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 20,
+    backgroundColor: '#ff6b6b',
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    maxHeight: 60,
+  },
+  headerRight: {
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerIcon: {
+    height: 20,
+    width: 20,
+    tintColor: COLORS.secondary,
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white',
+  },
+  content: {
+    flex: 1,
+    minHeight:"100%"
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '80%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  filterOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  filterOptionActive: {
+    backgroundColor: '#f9f9f9',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.gray,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  filterOptionText: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+    paddingHorizontal: 10
   },
 });

@@ -146,7 +146,7 @@ const ForgotPasswordPhoneNumber = () => {
           <View
             style={[
               styles.inputContainer,
-              { backgroundColor: COLORS.greyscale500 },
+              { backgroundColor: COLORS.grayscale500 },
             ]}>
             {/* Phone Number Text Input */}
             

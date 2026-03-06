@@ -29,13 +29,13 @@ export default StyleSheet.create({
       headerTitle: {
         fontSize: 22,
         fontFamily: "bold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginLeft: 12
       },
       headerIcon: {
         height: 24,
         width: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
       },
   backIcon: {
     width: 24,
@@ -112,13 +112,13 @@ export default StyleSheet.create({
         },
         bottomTopSubtitle: {
             fontSize: 16,
-            color: COLORS.greyscale900,
+            color: COLORS.grayscale900,
             fontFamily: "regular"
         },
         separateLine: {
             height: .4,
             width: SIZES.width - 32,
-            backgroundColor: COLORS.greyscale300,
+            backgroundColor: COLORS.grayscale300,
             marginVertical: 12
         },
         addressItemContainer: {
@@ -151,7 +151,7 @@ export default StyleSheet.create({
         driverName: {
             fontSize: 18,
             fontFamily: "bold",
-            color: COLORS.greyscale900,
+            color: COLORS.grayscale900,
             marginBottom: 4
         },
         driverCar: {
@@ -176,12 +176,12 @@ export default StyleSheet.create({
         },
         starNum: {
             fontSize: 16,
-            color: COLORS.greyscale900,
+            color: COLORS.grayscale900,
             fontFamily: "regular"
         },
         taxiID: {
             fontSize: 14,
-            color: COLORS.greyscale900,
+            color: COLORS.grayscale900,
             fontFamily: "medium",
             marginTop: 6
         },
@@ -238,11 +238,11 @@ export default StyleSheet.create({
       title: {
         fontSize: 18,
         fontFamily: "bold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
       },
       subtitle: {
         fontSize: 16,
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         fontFamily: "medium",
         marginTop: 8
       },
@@ -261,216 +261,236 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-        actionIcon: {
-            height: 24,
-            width: 24,
-            tintColor: COLORS.black
-        },
-        locationItemContainer: {
-            width: "100%",
-            marginVertical: 12,
-            justifyContent: "space-between"
-        },
-        locationIcon1: {
-            height: 52,
-            width: 52,
-            borderRadius: 999,
-            marginRight: 12,
-            backgroundColor: COLORS.transparentPrimary,
-            alignItems: "center",
-            justifyContent: "center",
-        },
-        locationIcon2: {
-            height: 36,
-            width: 36,
-            borderRadius: 999,
-            backgroundColor: COLORS.primary,
-            alignItems: "center",
-            justifyContent: "center",
-        },
-        locationIcon3: {
-            width: 16,
-            height: 16,
-            tintColor: COLORS.white
-        },
-        baseLocationName: {
-            fontSize: 17,
-            color: COLORS.greyscale900,
-            fontFamily: "bold",
-        },
-        baseLocationAddress: {
-            fontSize: 14,
-            color: COLORS.greyScale800,
-            fontFamily: "regular",
-            marginTop: 8
-        },
-        arrowIconContainer: {
-            width: "100%",
-            alignItems: "center",
-            marginTop: 12
-        },
-        arrowIcon: {
-            height: 18,
-            width: 18,
-            tintColor: COLORS.black
-        },
-        locationDistance: {
-            fontSize: 14,
-            color: COLORS.greyscale900,
-            fontFamily: "medium",
-        },
-        locationItemRow: {
-            flexDirection: "row",
-        },
-        modalTitle: {
-            fontSize: 20,
-            fontFamily: "bold",
-            color: COLORS.black,
-            textAlign: "center",
-            marginVertical: 12
-        },
-        modalSubtitle: {
-            fontSize: 16,
-            fontFamily: "regular",
-            color: COLORS.black,
-            textAlign: "center",
-            marginVertical: 12
-        },
-        modalContainer: {
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.56)"
-        },
-        modalSubContainer: {
-            height: 520,
-            width: SIZES.width * 0.9,
-            backgroundColor: COLORS.white,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16
-        },
-        modalIllustration: {
-            height: 180,
-            width: 180,
-            marginVertical: 22
-        },
-        successBtn: {
-            width: "100%",
-            marginTop: 12,
-            borderRadius: 32
-        },
-        receiptBtn: {
-            width: "100%",
-            marginTop: 12,
-            borderRadius: 32,
-            backgroundColor: COLORS.transparentPrimary,
-            borderColor: COLORS.transparentPrimary
-        },
-        editPencilIcon: {
-            width: 42,
-            height: 42,
-            tintColor: COLORS.white,
-            zIndex: 99999,
-            position: "absolute",
-            top: 58,
-            left: 58,
-        },
-        backgroundIllustration: {
-            height: 150,
-            width: 150,
-            marginVertical: 22,
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: -999
-        },
-        happyMood: {
-            fontSize: 154
-        },
-        orderDetailsContainer: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginVertical: 12,
-            width: "100%"
-        },
-        orderViewContainer: {
-            flexDirection: "row",
-            alignItems: "center"
-        },
-        orderDetailsTitle: {
-            fontSize: 18,
-            fontFamily: "bold",
-            color: COLORS.black,
-            marginBottom: 12
-        },
-        orderDetailsSubtitle: {
-            fontSize: 14,
-            fontFamily: "medium",
-            color: COLORS.grayscale700
-        },
-        deliveryTime: {
-            fontSize: 12,
-            fontFamily: "medium",
-            color: COLORS.grayscale700
-        },
-        orderView: {
-            marginLeft: 12
-        },
-        chatIcon: {
-            height: 24,
-            width: 24,
-            tintColor: COLORS.primary,
-            marginRight: 12
-        },
-        phoneIcon: {
-            height: 24,
-            width: 24,
-            tintColor: COLORS.error,
-            marginLeft: 12
-        },
-        summaryViewContainer: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: SIZES.width - 32,
-            paddingHorizontal: 10,
-        },
-        viewItemContainer: {
-            alignItems: "center",
-        },
-        viewIconContainer: {
-            height: 64,
-            width: 64,
-            borderRadius: 999,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: COLORS.transparentPrimary,
-            marginBottom: 6
-        },
-        viewIcon: {
-            height: 24,
-            width: 24,
-            tintColor: COLORS.primary
-        },
-        viewTitle: {
-            fontSize: 16,
-            fontFamily: "bold",
-            color: COLORS.black,
-            marginBottom: 6
-        },
-        viewSubtitle: {
-            fontSize: 14,
-            fontFamily: "medium",
-            color: COLORS.grayscale700
-        },
-
+    actionIcon: {
+        height: 24,
+        width: 24,
+        tintColor: COLORS.black
+    },
+    locationItemContainer: {
+        width: "100%",
+        marginVertical: 12,
+        justifyContent: "space-between"
+    },
+    locationIcon1: {
+        height: 52,
+        width: 52,
+        borderRadius: 999,
+        marginRight: 12,
+        backgroundColor: COLORS.transparentPrimary,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    locationIcon2: {
+        height: 36,
+        width: 36,
+        borderRadius: 999,
+        backgroundColor: COLORS.primary,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    locationIcon3: {
+        width: 16,
+        height: 16,
+        tintColor: COLORS.white
+    },
+    baseLocationName: {
+        fontSize: 17,
+        color: COLORS.grayscale900,
+        fontFamily: "bold",
+    },
+    baseLocationAddress: {
+        fontSize: 14,
+        color: COLORS.grayscale800,
+        fontFamily: "regular",
+        marginTop: 8
+    },
+    arrowIconContainer: {
+        width: "100%",
+        alignItems: "center",
+        marginTop: 12
+    },
+    arrowIcon: {
+        height: 18,
+        width: 18,
+        tintColor: COLORS.black
+    },
+    locationDistance: {
+        fontSize: 14,
+        color: COLORS.grayscale900,
+        fontFamily: "medium",
+    },
+    locationItemRow: {
+        flexDirection: "row",
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontFamily: "bold",
+        color: COLORS.black,
+        textAlign: "center",
+        marginVertical: 12
+    },
+    modalSubtitle: {
+        fontSize: 16,
+        fontFamily: "regular",
+        color: COLORS.black,
+        textAlign: "center",
+        marginVertical: 12
+    },
+    modalContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0,0,0,0.56)"
+    },
+    modalSubContainer: {
+        height: 520,
+        width: SIZES.width * 0.9,
+        backgroundColor: COLORS.white,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16
+    },
+    modalIllustration: {
+        height: 180,
+        width: 180,
+        marginVertical: 22
+    },
+    successBtn: {
+        width: "100%",
+        marginTop: 12,
+        borderRadius: 32
+    },
+    receiptBtn: {
+        width: "100%",
+        marginTop: 12,
+        borderRadius: 32,
+        backgroundColor: COLORS.transparentPrimary,
+        borderColor: COLORS.transparentPrimary
+    },
+    editPencilIcon: {
+        width: 42,
+        height: 42,
+        tintColor: COLORS.white,
+        zIndex: 99999,
+        position: "absolute",
+        top: 58,
+        left: 58,
+    },
+    backgroundIllustration: {
+        height: 150,
+        width: 150,
+        marginVertical: 22,
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: -999
+    },
+    happyMood: {
+        fontSize: 154
+    },
+    orderDetailsContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginVertical: 12,
+        width: "100%"
+    },
+    orderViewContainer: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    orderDetailsTitle: {
+        fontSize: 18,
+        fontFamily: "bold",
+        color: COLORS.black,
+        marginBottom: 12
+    },
+    orderDetailsSubtitle: {
+        fontSize: 14,
+        fontFamily: "medium",
+        color: COLORS.grayscale700
+    },
+    deliveryTime: {
+        fontSize: 12,
+        fontFamily: "medium",
+        color: COLORS.grayscale700
+    },
+    orderView: {
+        marginLeft: 12
+    },
+    chatIcon: {
+        height: 24,
+        width: 24,
+        tintColor: COLORS.primary,
+        marginRight: 12
+    },
+    phoneIcon: {
+        height: 24,
+        width: 24,
+        tintColor: COLORS.error,
+        marginLeft: 12
+    },
+    summaryViewContainer: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        alignItems: "center",
+        width: SIZES.width - 32,
+        paddingHorizontal: 16,
+        paddingVertical: 20,
+        borderRadius: 24,
+        backgroundColor: COLORS.white,
+        borderColor: "rgba(0,0,0,0.06)",
+        borderWidth: 1,
+        marginVertical: 12,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 8,
+    },
+    viewItemContainer: {
+        alignItems: "center",
+        flex: 1,
+    },
+    // Vertical divider between items (apply to middle item or use a separator View)
+    viewDivider: {
+        width: 1,
+        height: 52,
+        backgroundColor: "rgba(0,0,0,0.08)",
+    },
+    viewIconContainer: {
+        height: 48,
+        width: 48,
+        borderRadius: 56,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 10,
+        backgroundColor: COLORS.transparentPrimary, // 9% opacity tint
+    },
+    viewIcon: {
+        height: 24,
+        width: 24,
+        tintColor: COLORS.primary,
+    },
+    viewTitle: {
+        fontSize: 12,
+        fontFamily: "bold",
+        color: COLORS.grayscale900,
+        marginBottom: 2,
+        letterSpacing: -0.3,
+    },
+    viewSubtitle: {
+        fontSize: 10,
+        fontFamily: "medium",
+        color: COLORS.grayscale500,
+        letterSpacing: 0.4,
+        textTransform: "uppercase",
+    },
   /* ── Section Title ── */
   sectionTitle: {
     fontSize: 18,
-    fontFamily: 'bold',
-    color: '#1A1A2E',
+    fontWeight: "700",
+    color: COLORS.secondary,
     marginBottom: 12,
   },
   /* ── Empty State ── */
@@ -529,7 +549,7 @@ export default StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: COLORS.transparentPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -546,7 +566,7 @@ export default StyleSheet.create({
     color: '#1A1A2E',
   },
   gameSub: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: 'regular',
     color: '#888',
   },
@@ -556,11 +576,16 @@ export default StyleSheet.create({
   gamePlayers: {
     fontSize: 15,
     fontFamily: 'bold',
-    color: '#2E7D32',
+    color: COLORS.primary,
   },
   gamePlayersLabel: {
     fontSize: 11,
     fontFamily: 'regular',
     color: '#999',
   },
+  gameCardDivider: {
+    width: 1,
+    height: 46,
+    backgroundColor: COLORS.transparentPrimary, // or '#E5E5E5' for neutral
+    }
 });

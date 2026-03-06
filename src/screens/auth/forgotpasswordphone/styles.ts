@@ -96,14 +96,14 @@ export default StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    borderColor: COLORS.greyscale500,
+    borderColor: COLORS.grayscale500,
     borderWidth: 0.4,
     borderRadius: 6,
     height: 58,
     width: SIZES.width - 32,
     alignItems: 'center',
     marginVertical: 16,
-    backgroundColor: COLORS.greyscale500,
+    backgroundColor: COLORS.grayscale500,
   },
   downIcon: {
     width: 10,

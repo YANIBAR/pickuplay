@@ -34,7 +34,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                     />
 
                     <Text style={[styles.name, {
-                        color: COLORS.greyscale900
+                        color: COLORS.grayscale900
                     }]}>{name}</Text>
                 </View>
                 <View style={styles.reviewHeaderRight}>
@@ -46,7 +46,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                 </View>
             </View>
             <Text style={[styles.description, {
-                color: COLORS.greyscale900
+                color: COLORS.grayscale900
             }]}>{description}</Text>
             {numLikes ? (
             <View style={styles.reviewBottomContainer}>
@@ -72,7 +72,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                         }
                     </TouchableOpacity>
                     <Text style={[styles.numLikes, {
-                        color: COLORS.greyscale900
+                        color: COLORS.grayscale900
                     }]}>{numLikes}</Text>
                 </View>
             </View>)

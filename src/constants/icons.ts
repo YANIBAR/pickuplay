@@ -521,6 +521,7 @@ const mastercard2 = require('@assets/icons/mastercard2.png');
 const hidden = require('@assets/icons/hidden.png');
 const lang = require('@assets/icons/lang.png');
 const whistle = require('@assets/icons/whistle.png');
+const fieldOutline = require('@assets/icons/field-outline.png');
 
 const icons = {
   lang,
@@ -604,6 +605,7 @@ const icons = {
   timeCircle,
   trash,
   unlock,
+  fieldOutline,
   upAndDownArrow,
   userOutline,
   user,

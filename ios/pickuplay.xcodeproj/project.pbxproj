@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		21E55E162254E64A68ED46F9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		75398A0C9056A32B24C86D8D /* libPods-pickuplay.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD157747C2207C447A5631F1 /* libPods-pickuplay.a */; };
+		3178E783C6C5CD0DE7E0391E /* libPods-pickuplay.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C939139EB4BEDE4A0F6D700A /* libPods-pickuplay.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		E86D06572F20042700059C87 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = E86D06562F20042700059C87 /* splash.png */; };
 /* End PBXBuildFile section */
@@ -19,11 +19,11 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = pickuplay/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = pickuplay/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = pickuplay/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		6A52C4DB6C7A6B9A72A5ECCC /* Pods-pickuplay.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pickuplay.debug.xcconfig"; path = "Target Support Files/Pods-pickuplay/Pods-pickuplay.debug.xcconfig"; sourceTree = "<group>"; };
+		7616F4F131B092CE43A8ED08 /* Pods-pickuplay.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pickuplay.release.xcconfig"; path = "Target Support Files/Pods-pickuplay/Pods-pickuplay.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = pickuplay/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = pickuplay/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		BD157747C2207C447A5631F1 /* libPods-pickuplay.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pickuplay.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D7411147502DD3BE2ABAA6F6 /* Pods-pickuplay.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pickuplay.release.xcconfig"; path = "Target Support Files/Pods-pickuplay/Pods-pickuplay.release.xcconfig"; sourceTree = "<group>"; };
+		A767F31F98F0663A6463581A /* Pods-pickuplay.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pickuplay.debug.xcconfig"; path = "Target Support Files/Pods-pickuplay/Pods-pickuplay.debug.xcconfig"; sourceTree = "<group>"; };
+		C939139EB4BEDE4A0F6D700A /* libPods-pickuplay.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pickuplay.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E86D06562F20042700059C87 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -33,7 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				75398A0C9056A32B24C86D8D /* libPods-pickuplay.a in Frameworks */,
+				3178E783C6C5CD0DE7E0391E /* libPods-pickuplay.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,7 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				BD157747C2207C447A5631F1 /* libPods-pickuplay.a */,
+				C939139EB4BEDE4A0F6D700A /* libPods-pickuplay.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -94,8 +94,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				6A52C4DB6C7A6B9A72A5ECCC /* Pods-pickuplay.debug.xcconfig */,
-				D7411147502DD3BE2ABAA6F6 /* Pods-pickuplay.release.xcconfig */,
+				A767F31F98F0663A6463581A /* Pods-pickuplay.debug.xcconfig */,
+				7616F4F131B092CE43A8ED08 /* Pods-pickuplay.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -107,13 +107,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "pickuplay" */;
 			buildPhases = (
-				252D599DEA5BC99CB96B2D16 /* [CP] Check Pods Manifest.lock */,
+				7EA68F182BB18C418E45E8D2 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				9BECAF356C0A1748C15F54C5 /* [CP] Embed Pods Frameworks */,
-				E920311FD1462140B633A8C5 /* [CP] Copy Pods Resources */,
+				D3D3A8A65015CCF41B630CB9 /* [CP] Embed Pods Frameworks */,
+				CC16B1119ABBAD9A88E2E181 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -185,7 +185,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		252D599DEA5BC99CB96B2D16 /* [CP] Check Pods Manifest.lock */ = {
+		7EA68F182BB18C418E45E8D2 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -207,24 +207,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9BECAF356C0A1748C15F54C5 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E920311FD1462140B633A8C5 /* [CP] Copy Pods Resources */ = {
+		CC16B1119ABBAD9A88E2E181 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -239,6 +222,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D3D3A8A65015CCF41B630CB9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pickuplay/Pods-pickuplay-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -257,7 +257,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6A52C4DB6C7A6B9A72A5ECCC /* Pods-pickuplay.debug.xcconfig */;
+			baseConfigurationReference = A767F31F98F0663A6463581A /* Pods-pickuplay.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -286,7 +286,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D7411147502DD3BE2ABAA6F6 /* Pods-pickuplay.release.xcconfig */;
+			baseConfigurationReference = 7616F4F131B092CE43A8ED08 /* Pods-pickuplay.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

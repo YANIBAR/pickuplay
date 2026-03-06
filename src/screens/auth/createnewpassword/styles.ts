@@ -100,7 +100,7 @@ export default StyleSheet.create({
   modalSubtitle: {
     fontSize: 16,
     //fontFamily: 'regular',
-    color: COLORS.greyscale600,
+    color: COLORS.grayscale600,
     textAlign: 'center',
     marginVertical: 12,
   },

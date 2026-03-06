@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: SIZES.padding,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: COLORS.greyscale300,
+      borderColor: COLORS.grayscale300,
       marginVertical: 5,
       flexDirection: 'row',
       height: SIZES.InputHeight,

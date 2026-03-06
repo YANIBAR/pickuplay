@@ -29,13 +29,13 @@ export default StyleSheet.create({
       headerTitle: {
         fontSize: 22,
         fontFamily: "bold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginLeft: 12
       },
       headerIcon: {
         height: 24,
         width: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
       },
       profileContainer: {
         alignItems: "center",
@@ -62,12 +62,12 @@ export default StyleSheet.create({
       title: {
         fontSize: 18,
         fontFamily: "bold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginTop: 12
       },
       subtitle: {
         fontSize: 16,
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         fontFamily: "medium",
         marginTop: 4
       },
@@ -88,18 +88,18 @@ export default StyleSheet.create({
       settingsIcon: {
         height: 24,
         width: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
       },
       settingsName: {
         fontSize: 18,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginLeft: 12
       },
       settingsArrowRight: {
         width: 24,
         height: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
       },
       rightContainer: {
         flexDirection: "row",
@@ -108,7 +108,7 @@ export default StyleSheet.create({
       rightLanguage: {
         fontSize: 18,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginRight: 8
       },
       switch: {
@@ -129,12 +129,12 @@ export default StyleSheet.create({
       logoutIcon: {
         height: 24,
         width: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
       },
       logoutName: {
         fontSize: 18,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginLeft: 12
       },
       bottomContainer: {
@@ -164,7 +164,7 @@ export default StyleSheet.create({
       bottomSubtitle: {
         fontSize: 20,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         textAlign: "center",
         marginVertical: 28
       },

@@ -20,11 +20,11 @@ const SettingsItem: FC<SettingsItemProps> = ({ icon, name, onPress, hasArrowRigh
                     source={icon}
                     contentFit='contain'
                     style={[styles.icon, {
-                        tintColor: COLORS.greyscale900
+                        tintColor: COLORS.grayscale900
                     }]}
                 />
                 <Text style={[styles.name, {
-                    color: COLORS.greyscale900
+                    color: COLORS.grayscale900
                 }]}>{name}</Text>
             </View>
             {
@@ -33,7 +33,7 @@ const SettingsItem: FC<SettingsItemProps> = ({ icon, name, onPress, hasArrowRigh
                         source={icons.arrowRight}
                         contentFit='contain'
                         style={[styles.arrowRight, {
-                            tintColor: COLORS.greyscale900
+                            tintColor: COLORS.grayscale900
                         }]}
                     />
                 )
@@ -57,18 +57,18 @@ const styles = StyleSheet.create({
     icon: {
         height: 24,
         width: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
     },
     name: {
         fontSize: 18,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         marginLeft: 12
     },
     arrowRight: {
         width: 24,
         height: 24,
-        tintColor: COLORS.greyscale900
+        tintColor: COLORS.grayscale900
     }
 })
 

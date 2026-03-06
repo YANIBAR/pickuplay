@@ -4,10 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
 import { Header, Icon } from '@components';
-import { COLORS, FONTS, icons, SIZES } from '@constants';
+import { COLORS, FONTS, icons, images, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { JAVA_API } from '@env';
-import { authenticatedApi } from '@services/api';
+import { authenticatedApi, publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 
 interface Game {
@@ -41,7 +41,7 @@ interface Game {
   canceledAt: string;
 }
 
-export default function gameDetailsScreen({ route }) {
+export default function GameDetailsScreen({ route }) {
   const { t } = useTranslation();
   const { gameId } = route.params || {};
   const { navigate } = useNavigation();
@@ -77,7 +77,7 @@ export default function gameDetailsScreen({ route }) {
 
   const fetchGame = async () => {
     try {
-      const response = await authenticatedApi.get(`games/${gameId}`);
+      const response = await publicApi.get(`games/${gameId}`);
       setGame(response.result.data);
       setSportType(response.result.data.sportType.name);
       setParticipants(response.result.data.participants);
@@ -135,7 +135,7 @@ export default function gameDetailsScreen({ route }) {
             style={styles.backIcon}
           />
           <View style={styles.headerLeft}>
-            <Text style={[styles.headerTitle, { color: COLORS.greyscale900 }]}>Game Details</Text>
+            <Text style={[styles.headerTitle, { color: COLORS.grayscale900 }]}>Game Details</Text>
           </View>
           <TouchableOpacity onPress={() => navigate("editProfile")}>
               <Icon type="feather" name="edit" size={20} color={COLORS.primary} />
@@ -202,7 +202,7 @@ export default function gameDetailsScreen({ route }) {
             <View style={styles.section}>
               <Icon type="materialCommunityIcons" name="account-multiple" size={24} color="#666" />
               <View style={styles.textContainer}>
-                <Text style={styles.label}>Players {participants.length}/{game.availableSpots}</Text>
+                <Text style={styles.label}>Players {participants.length}/{game.nbrSpots}</Text>
                 <TouchableOpacity 
                   onPress={() => setExpandedDay(expandedDay ? null : 'all')}
                   style={styles.expandAllButton}
@@ -221,14 +221,14 @@ export default function gameDetailsScreen({ route }) {
             {expandedDay && (
               <View style={styles.playersContainer}>
                 <View style={styles.playersGrid}>
-                  {playersData.map((player, index) => (
+                  {game?.participants.map((player, index) => (
                     <View key={index} style={styles.playerCard}>
                       <Image
-                        source={{ uri: player.image || 'https://via.placeholder.com/150' }}
+                        source={{ uri: playersData[player.userId].image || images.avatar }}
                         style={styles.playerImage}
                       />
                       <Text style={styles.playerName} numberOfLines={2}>
-                        {player.name}
+                        {player.userName}
                       </Text>
                     </View>
                   ))}
@@ -236,15 +236,6 @@ export default function gameDetailsScreen({ route }) {
               </View>
             )}
 
-          {game.remainingVisits > 0 && (
-            <TouchableOpacity 
-              style={styles.button}
-              onPress={() => setModalVisible(true)}
-            >
-              <Icon type="materialCommunityIcons" name="qrcode-scan" size={24} color="white" />
-              <Text style={styles.buttonText}>{t('game.scanButton')}</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </ScrollView>
 
@@ -340,18 +331,37 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontFamily: "bold",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     marginLeft: 12
   },
   backIcon: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     marginRight: 16,
+    padding: 4,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)', // optional, helps define edge
+
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+
+    // Android shadow
+    elevation: 5,
+
+    // CRITICAL: background color required for shadow to show
+    backgroundColor: '#fff', // or whatever your icon background should be
   },
-  headerIcon: {
+    headerIcon: {
     height: 24,
     width: 24,
-    tintColor: COLORS.greyscale900
+    tintColor: COLORS.grayscale900
   },
   header: {
     flexDirection: 'row',

@@ -23,7 +23,7 @@ const VerifyYourIdentity = () => {
             style={[
               styles.title,
               {
-                color: COLORS.greyscale900,
+                color: COLORS.grayscale900,
               },
             ]}
           >
@@ -33,7 +33,7 @@ const VerifyYourIdentity = () => {
             style={[
               styles.subtitle,
               {
-                color: COLORS.greyscale900,
+                color: COLORS.grayscale900,
               },
             ]}
           >

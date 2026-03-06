@@ -59,7 +59,7 @@ export default StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: "regular",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: "center",
     paddingHorizontal: 3
   },
@@ -69,7 +69,7 @@ export default StyleSheet.create({
   proofTitle: {
     fontSize: 20,
     fontFamily: "bold",
-    color: COLORS.greyscale900
+    color: COLORS.grayscale900
   },
   proofView: {
     flexDirection: 'row',
@@ -94,7 +94,7 @@ export default StyleSheet.create({
   countryText: {
     fontSize: 16,
     fontFamily: "semiBold",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     marginLeft: 16
   },
   changeText: {
@@ -126,7 +126,7 @@ export default StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: "semiBold",
-    color: COLORS.greyscale900
+    color: COLORS.grayscale900
   },
   checkboxContainer: {
     justifyContent: 'center',

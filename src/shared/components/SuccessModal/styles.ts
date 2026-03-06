@@ -16,7 +16,7 @@ export default StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.greyscale600,
+    color: COLORS.grayscale600,
     textAlign: 'center',
     marginVertical: 12,
   },

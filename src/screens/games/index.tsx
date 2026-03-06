@@ -3,28 +3,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Game, extractCity } from './GameCard';
 import GameGrid from './GamesGrid';
 import { useEffect, useState } from 'react';
-import { Icon } from '@components';
+import { Checkbox, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
-import { COLORS, icons, SIZES } from '@constants';
+import { icons } from '@constants';
 import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
+import styles from './styles';
+import { useUserData } from '@services/useUserData';
 
 type Nav = {
   navigate: (value: string) => void
 }
 const mockGames: Game[] = [];
 
-const SPORTS = ['soccer', 'basketball', 'volleyball', 'tennis'];
+const SPORTS = ['1', '2', '3', '5'];
 const SPORT_LABELS = {
-  soccer: '⚽ Soccer',
-  basketball: '🏀 Basketball',
-  volleyball: '🏐 Volleyball',
-  tennis: '🎾 Tennis',
+  1: 'Soccer ⚽ ',
+  2: 'Basketball 🏀 ',
+  3: 'Volleyball 🏐 ',
+  5: 'Tennis 🎾 ',
 };
 
 export default function HomeScreen({route}) {
   const { t } = useTranslation();
   const [games, setGames] = useState<Game[]>([]);
+
+    const { userData, error, refreshUserData } = useUserData();
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [refreshing, setRefreshing] = useState(false);
     const { navigate } = useNavigation<Nav>();
@@ -32,12 +36,10 @@ export default function HomeScreen({route}) {
   // Filter states
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   
   // Modal states
   const [sportModalVisible, setSportModalVisible] = useState(false);
   const [cityModalVisible, setCityModalVisible] = useState(false);
-  const [dateModalVisible, setDateModalVisible] = useState(false);
 
 
 const onRefresh = () => {
@@ -46,9 +48,9 @@ const onRefresh = () => {
 };
   const fetchRequests = async () => {
     try {
+      console.log(userData?.city);
       const response = await publicApi.get(`games`);
       setGames(response.result.data.games);
-      console.log('Fetched games:', games);
     } catch (error) {
       const errorMessage = error.response?.data?.message;
       Alert.alert('Error', errorMessage);
@@ -59,40 +61,32 @@ const onRefresh = () => {
 
   // Get unique cities from games
   const getCities = (): string[] => {
-    const cities = new Set(games.map(game => extractCity(game.city)));
+    const cities = new Set(
+      games.map(
+        game => extractCity(game.city)
+      )
+    );
     return Array.from(cities).sort();
   };
 
-  // Get next 7 days for date filter
-  const getUpcomingDates = (): string[] => {
-    const dates = [];
-    for (let i = 1; i < 9; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]);
-    }
-    return dates;
-  };
 
   // Filter games based on selected filters
   const applyFilters = () => {
     let filtered = [...games];
 
     if (selectedSports.length > 0) {
-      filtered = filtered.filter(game => selectedSports.includes(game.type));
+      filtered = filtered.filter(game => selectedSports.includes(String(game.sportType.id)));
     }
 
-    if (selectedCities.length > 0) {
+    // Use selected cities, or default to user's city if no city filter is active
+    const citiesToFilter = selectedCities.length > 0 
+      ? selectedCities 
+      : userData?.city ? [extractCity(userData.city)] : [];
+
+    if (citiesToFilter.length > 0) {
       filtered = filtered.filter(game => 
-        selectedCities.includes(extractCity(game.city))
+        citiesToFilter.includes(extractCity(game.city))
       );
-    }
-
-    if (selectedDate) {
-      filtered = filtered.filter(game => {
-        if (!game.date) return false;
-        return game.date.startsWith(selectedDate);
-      });
     }
 
     setFilteredGames(filtered);
@@ -102,7 +96,7 @@ const onRefresh = () => {
   useEffect(() => {
     applyFilters();
     setRefreshing(false);
-  }, [selectedSports, selectedCities, selectedDate, games]);
+  }, [selectedSports, selectedCities, games]);
 
   useEffect(() => {
     fetchRequests();
@@ -127,10 +121,9 @@ const onRefresh = () => {
   const clearAllFilters = () => {
     setSelectedSports([]);
     setSelectedCities([]);
-    setSelectedDate(null);
   };
 
-  const hasActiveFilters = selectedSports.length > 0 || selectedCities.length > 0 || selectedDate;
+  const hasActiveFilters = selectedSports.length > 0 || selectedCities.length > 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -144,9 +137,8 @@ const onRefresh = () => {
               style={[styles.filterButton, selectedSports.length > 0 && styles.filterButtonActive]}
               onPress={() => setSportModalVisible(true)}
             >
-              <Icon type="materialCommunityIcons" name="soccer" size={16} color={selectedSports.length > 0 ? 'white' : COLORS.primary} />
               <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
-                {selectedSports.length > 0 ? `${selectedSports.length} Sporsts` : 'Spossrt'}
+                {selectedSports.length > 0 ? `${selectedSports.length} Sports` : 'Sport'}
               </Text>
             </TouchableOpacity>
 
@@ -154,22 +146,11 @@ const onRefresh = () => {
               style={[styles.filterButton, selectedCities.length > 0 && styles.filterButtonActive]}
               onPress={() => setCityModalVisible(true)}
             >
-              <Icon type="materialCommunityIcons" name="map-marker" size={16} color={selectedCities.length > 0 ? 'white' : COLORS.primary} />
               <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
                 {selectedCities.length > 0 ? `${selectedCities.length} Cities` : 'City'}
               </Text>
             </TouchableOpacity>
             
-            <TouchableOpacity 
-              style={[styles.filterButton, selectedDate && styles.filterButtonActive]}
-              onPress={() => setDateModalVisible(true)}
-            >
-              <Icon type="materialCommunityIcons" name="calendar" size={16} color={selectedDate ? 'white' : COLORS.primary} />
-              <Text style={[styles.filterButtonText, selectedDate && styles.filterButtonTextActive]}>
-                {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date'}
-              </Text>
-            </TouchableOpacity>
-
             {hasActiveFilters && (
               <TouchableOpacity 
                 style={styles.clearButton}
@@ -184,7 +165,7 @@ const onRefresh = () => {
           {/* Bell icon fixed to the right, outside the ScrollView */}
           <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
             <Image
-              source={icons.bell}
+              source={icons.bellOutline}
               style={styles.headerIcon}
             />
           </TouchableOpacity>
@@ -208,18 +189,17 @@ const onRefresh = () => {
                 <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
-            
+
             {SPORTS.map(sport => (
               <TouchableOpacity
                 key={sport}
                 style={styles.filterOption}
                 onPress={() => handleSportToggle(sport)}
               >
-                <View style={styles.checkbox}>
-                  {selectedSports.includes(sport) && (
-                    <Icon type="materialCommunityIcons" name="check" size={16} color="white" />
-                  )}
-                </View>
+                <Checkbox
+                  checked={selectedSports.includes(sport)}
+                  onValueChange={() => handleSportToggle(sport)}
+                />
                 <Text style={styles.filterOptionText}>
                   {SPORT_LABELS[sport as keyof typeof SPORT_LABELS] || sport}
                 </Text>
@@ -251,66 +231,12 @@ const onRefresh = () => {
                 style={styles.filterOption}
                 onPress={() => handleCityToggle(city)}
               >
-                <View style={styles.checkbox}>
-                  {selectedCities.includes(city) && (
-                    <Icon type="materialCommunityIcons" name="check" size={16} color="white" />
-                  )}
-                </View>
+
+                <Checkbox
+                  checked={selectedCities.includes(city)}
+                  onValueChange={() => handleCityToggle(city)}
+                />
                 <Text style={styles.filterOptionText}>{city}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </Modal>
-
-      {/* Date Filter Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={dateModalVisible}
-        onRequestClose={() => setDateModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Date</Text>
-              <TouchableOpacity onPress={() => setDateModalVisible(false)}>
-                <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity
-              style={[styles.filterOption, !selectedDate && styles.filterOptionActive]}
-              onPress={() => {
-                setSelectedDate(null);
-                setDateModalVisible(false);
-              }}
-            >
-              <View style={styles.checkbox}>
-                {!selectedDate && (
-                  <Icon type="materialCommunityIcons" name="check" size={16} color="white" />
-                )}
-              </View>
-              <Text style={styles.filterOptionText}>All Dates</Text>
-            </TouchableOpacity>
-
-            {getUpcomingDates().map(date => (
-              <TouchableOpacity
-                key={date}
-                style={[styles.filterOption, selectedDate === date && styles.filterOptionActive]}
-                onPress={() => {
-                  setSelectedDate(date);
-                  setDateModalVisible(false);
-                }}
-              >
-                <View style={styles.checkbox}>
-                  {selectedDate === date && (
-                    <Icon type="materialCommunityIcons" name="check" size={16} color="white" />
-                  )}
-                </View>
-                <Text style={styles.filterOptionText}>
-                  {new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -320,127 +246,3 @@ const onRefresh = () => {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  filtersBar: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginHorizontal: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-    minHeight: SIZES.InputHeight-6,
-  },
-  filterButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  filterButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.primary,
-  },
-  filterButtonTextActive: {
-    color: 'white',
-  },
-  clearButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginHorizontal: 4,
-    borderRadius: 20,
-    backgroundColor: '#ff6b6b',
-  },
-  filtersRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    maxHeight: 60,
-  },
-  headerRight: {
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerIcon: {
-    height: 20,
-    width: 20,
-    tintColor: COLORS.primary,
-  },
-  clearButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
-  },
-  content: {
-    flex: 1,
-    minHeight:"100%"
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: '80%',
-    paddingBottom: 20,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  filterOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  filterOptionActive: {
-    backgroundColor: '#f9f9f9',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  filterOptionText: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1,
-  },
-});

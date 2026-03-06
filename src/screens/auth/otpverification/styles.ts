@@ -13,7 +13,7 @@ export default StyleSheet.create({
   },
   title: {
     marginVertical: 54,
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
   },
   inputStyles: {
     borderRadius: 6,
@@ -33,7 +33,7 @@ export default StyleSheet.create({
   },
   code: {
     fontSize: 18,
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: 'center',
   },
   time: {

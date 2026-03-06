@@ -11,4 +11,9 @@ export const dateFormat = (date: any) => {
     : moment(date).format(DATE_FORMAT_FR);
 };
 
+export const toTitleCase = (str: string) =>
+  str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 export const imagePickerHelper = () => {};

@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { StyleSheet, FlatList, RefreshControl } from 'react-native';
 import GameCard, { Game } from './GameCard';
 import { COLORS } from '@constants';

@@ -35,7 +35,7 @@ const ForgotPassword = () => {
           style={[
             styles.title,
             {
-              color: COLORS.greyscale900,
+              color: COLORS.grayscale900,
             },
           ]}>
           {t('passwordMethods.subtitle')}

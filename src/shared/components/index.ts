@@ -35,6 +35,7 @@ import NotificationCard from './NotificationCard';
 import ActivityIndicator from './ActivityIndicator';
 import SettingsItem from './SettingsItem';
 import ReviewCard from './ReviewCard.tsx';
+import NotSignedInView from './NotSignedInView/index.tsx';
 
 export {
   Row,
@@ -62,6 +63,7 @@ export {
   TextInput,
   ModalBase,
   NoHistory,
+  NotSignedInView,
   ErrorModal,
   OrSeparator,
   OtpInput,

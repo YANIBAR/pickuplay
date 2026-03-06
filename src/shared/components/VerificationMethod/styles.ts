@@ -26,7 +26,7 @@ export default StyleSheet.create({
         flex: 1,
         fontSize: 16,
         fontFamily: "semiBold",
-        color: COLORS.greyscale900
+        color: COLORS.grayscale900
       },
       checkboxContainer: {
         justifyContent: 'center',

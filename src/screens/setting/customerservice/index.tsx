@@ -80,12 +80,12 @@ const CustomerService = () => {
                             <Image
                                 source={icons.arrowLeft}
                                 style={[styles.headerIcon, {
-                                    tintColor: COLORS.greyscale900
+                                    tintColor: COLORS.grayscale900
                                 }]}
                             />
                         </TouchableOpacity>
                         <Text style={[styles.headerTitle, {
-                            color: COLORS.greyscale900
+                            color: COLORS.grayscale900
                         }]}>{t('CustomerService')}</Text>
                     </View>
                     <View style={{ flexDirection: "row", alignItems: 'center' }}>
@@ -93,7 +93,7 @@ const CustomerService = () => {
                             <Image
                                 source={icons.call}
                                 style={[styles.headerIcon, {
-                                    tintColor: COLORS.greyscale900
+                                    tintColor: COLORS.grayscale900
                                 }]}
                             />
                         </TouchableOpacity>
@@ -101,7 +101,7 @@ const CustomerService = () => {
                             <Image
                                 source={icons.moreCircle}
                                 style={[styles.headerIcon, {
-                                    tintColor: COLORS.greyscale900
+                                    tintColor: COLORS.grayscale900
                                 }]}
                             />
                         </TouchableOpacity>
@@ -117,7 +117,7 @@ const CustomerService = () => {
                             style={styles.input}
                             value={inputMessage}
                             onChangeText={handleInputText}
-                            placeholderTextColor={COLORS.greyscale900}
+                            placeholderTextColor={COLORS.grayscale900}
                             placeholder={t('EnterMessage')}
                         />
                     </View>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     input: {
-        color: COLORS.greyscale900,
+        color: COLORS.grayscale900,
         flex: 1,
         paddingHorizontal: 10,
     },

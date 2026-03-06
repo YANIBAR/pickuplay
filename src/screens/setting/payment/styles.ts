@@ -63,14 +63,14 @@ export default StyleSheet.create({
   title: {
     fontSize: 28,
     fontFamily: "bold",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: "center",
     marginVertical: 22
   },
   subtitle: {
     fontSize: 16,
     fontFamily: "regular",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: "center",
     paddingHorizontal: 3
   },
@@ -80,7 +80,7 @@ export default StyleSheet.create({
   proofTitle: {
     fontSize: 20,
     fontFamily: "bold",
-    color: COLORS.greyscale900
+    color: COLORS.grayscale900
   },
   proofView: {
     flexDirection: 'row',
@@ -105,7 +105,7 @@ export default StyleSheet.create({
   countryText: {
     fontSize: 16,
     fontFamily: "semiBold",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     marginLeft: 16
   },
   changeText: {
@@ -125,21 +125,6 @@ export default StyleSheet.create({
     alignItems: "center",
     zIndex: 9999
   },
-  button: {
-    marginTop: 12,
-    width: SIZES.width - 32,
-    borderRadius: 32
-  },
-  bottomContainer: {
-    position: "absolute",
-    bottom: 28,
-    right: 0,
-    left: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16
-  },
   iconContainer: {
     marginRight: 10,
   },
@@ -153,7 +138,7 @@ export default StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: "semiBold",
-    color: COLORS.greyscale900
+    color: COLORS.grayscale900
   },
   checkboxContainer: {
     justifyContent: 'center',

@@ -9,10 +9,11 @@ export default StyleSheet.create({
     height: 18,
     width: 18,
     borderRadius: 4,
-    borderColor: COLORS.primary,
-    borderWidth: 2,
+    borderColor: COLORS.grayscale300,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: COLORS.grayscale200
   },
   errorContainer: {
     marginVertical: 1,
@@ -36,5 +37,6 @@ export default StyleSheet.create({
     width: 18,
     height: 18,
     tintColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
 });

@@ -42,7 +42,7 @@ const Component: React.FC<Props> = ({
                 style={[
                   styles.subtitle,
                   {
-                    color: COLORS.greyscale600,
+                    color: COLORS.grayscale600,
                   },
                 ]}>
                 { message }
@@ -64,7 +64,7 @@ const Component: React.FC<Props> = ({
                 style={[
                   styles.subtitle,
                   {
-                    color: COLORS.greyscale600,
+                    color: COLORS.grayscale600,
                   },
                 ]}>
                 { message }

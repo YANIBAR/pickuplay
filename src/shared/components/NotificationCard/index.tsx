@@ -95,7 +95,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               style={[
                 styles.title,
                 {
-                  color: COLORS.greyscale900,
+                  color: COLORS.grayscale900,
                 },
               ]}>
               {title}

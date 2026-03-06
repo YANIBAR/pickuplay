@@ -155,7 +155,7 @@ const OTPVerification = () => {
               style={[
                 styles.code,
                 {
-                  color: COLORS.greyscale900,
+                  color: COLORS.grayscale900,
                 },
               ]}>
               {t('otpVerification.resendCodeIn')}
@@ -165,7 +165,7 @@ const OTPVerification = () => {
               style={[
                 styles.code,
                 {
-                  color: COLORS.greyscale900,
+                  color: COLORS.grayscale900,
                 },
               ]}>
               s

@@ -1,14 +1,12 @@
   import React, { useEffect, useState } from 'react';
   import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
-  import { Icon } from '@components';
-  import { API_BACKEND_URL, JAVA_API } from '@env';
-  import { COLORS, FONTS, SIZES } from '@constants';
+  import { Button, Icon, NotSignedInView } from '@components';
+  import { JAVA_API } from '@env';
+  import { COLORS, FONTS, icons, SIZES } from '@constants';
   import { useNavigation } from '@react-navigation/native';
   import AsyncStorage from '@react-native-async-storage/async-storage';
   import { authenticatedApi } from '@services/api';
-
-
-
+import { useTranslation } from 'react-i18next';
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
@@ -22,6 +20,7 @@
     };
     return iconMap[type] || 'sports';
   };
+
 
   export function extractCity(location: string): string {
     // Extracts city from full address (e.g., "New York" from "1100 Avenue of the Americas, New York")
@@ -39,12 +38,34 @@
     };
   export default function GameCard({ game }: GameCardProps) {
     const navigation = useNavigation();
+    const { t } = useTranslation();
     const [joinModalVisible, setJoinModalVisible] = useState(false);
     const [numPlayers, setNumPlayers] = useState('');
     const [promoCode, setPromoCode] = useState('');
     const [token, setToken] = useState('');
+    const [discountPrice, setDiscountPrice] = useState('');
     const { navigate } = useNavigation<Nav>();
-    
+
+    const ApplyDiscount = (code: string) => {
+      const promoCodes: Record<string, number> = {
+        "PUP10%": 0.1,
+        "PUP20%": 0.2,
+        "PUP50%": 0.5,
+      };
+
+      const discount = promoCodes[code];
+      const players = parseInt(numPlayers) || 1;
+      if (discount) {
+        const pricePerPlayer = game.price * (1 - discount);
+      console.log("pricePerPlayer", pricePerPlayer);
+
+        setDiscountPrice((pricePerPlayer * players).toFixed(2)); // 👈 multiply by players
+      } else {
+        Alert.alert('Invalid promo code');
+        setDiscountPrice('');
+      }
+    };
+
     const handleGamePress = (gameId: gameId) => {
       navigation.navigate('detail', { gameId: game.id});
     };
@@ -62,10 +83,7 @@
 
     try {
       
-      const response = await authenticatedApi.post(`games/${game.id}/join`, {
-        numPlayers: parseInt(numPlayers),
-        promoCode: promoCode || null,
-      });
+      const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
 
       if (response.status === 200) {
         // Success - clear form and close modal
@@ -99,9 +117,12 @@
       setPromoCode('');
     };
     useEffect(() => {
-      const tkn = getToken();
-        setToken(tkn);
-      }, []);
+      const fetchToken = async () => {
+        const tkn = await getToken(); // ✅ Await the async function
+        setToken(tkn ?? '');          // Use empty string if null
+      };
+      fetchToken();
+    }, []);
     return (
       <>
         <TouchableOpacity 
@@ -112,6 +133,10 @@
             source={{ uri: `${JAVA_API}games/${game.id}/image` }}
             style={styles.image}
           />
+
+          <View style={game.nbrSpots >= game.participants.length ? styles.leftBadge : styles.fullBadge}>
+            <Text style={styles.usedText}>{game.participants.length}/{game.nbrSpots}</Text>
+          </View>
           <View style={styles.content}>
             <View style={styles.titleRow}>
               <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
@@ -127,31 +152,28 @@
 
             <View style={styles.infoContainer}>
               <Text style={styles.address} numberOfLines={1}>
-                <Icon type="materialCommunityIcons" name="map-marker" size={14} color="#666" />
+                <Icon type="materialCommunityIcons" name="map-marker" size={16} color={COLORS.grayscale600} />
                 {' ' + game.city}
               </Text>
-              
-              <Text style={styles.time}>
-                <Icon type="materialCommunityIcons" name="clock" size={14} color="#666" />
-                {' ' + (
-                  new Date(game.startTime).toLocaleTimeString('en-US', 
-                  { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm') 
-                  + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US', 
-                  { hour: 'numeric', minute: '2-digit', hour12: true  })
-                  + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
-              </Text>
-            </View>
-
-            <View style={styles.footer}>
-              <View style={styles.priceContainer}>
-                <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
-                  <Text style={styles.originalPrice}>${game.price}</Text>
-                  {' '}
-                  <Text style={styles.discountPrice}>$7</Text>
+              <View style={styles.row}>
+                <Text style={styles.time}>
+                  <Icon type="materialCommunityIcons" name="clock" size={16} color={COLORS.grayscale600} />
+                  {' ' + (
+                    new Date(game.startTime).toLocaleTimeString('en-US', 
+                    { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm') 
+                    + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US', 
+                    { hour: 'numeric', minute: '2-digit', hour12: true  })
+                    + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
                 </Text>
-              </View>
-              <View style={game.nbrSpots >= game.participants.length ? styles.leftBadge : styles.fullBadge}>
-                <Text style={styles.usedText}>{game.participants.length}/{game.nbrSpots}</Text>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
+                    <Text style={styles.originalPrice}>${game.price}</Text>
+                    {game.discount && (
+                      <Text style={styles.discountPrice}>${game.price-game.discount}</Text>
+                    )}
+                    
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -178,14 +200,11 @@
           onRequestClose={handleCloseModal}
         >
           <View style={styles.modalOverlay}>
-            {token ? (
+            {token!="" ? (
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Join Game</Text>
-                  <Pressable 
-                    onPress={handleCloseModal}
-                    style={styles.closeButton}
-                  >
+                  <Pressable onPress={handleCloseModal} style={styles.closeButton}>
                     <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
                   </Pressable>
                 </View>
@@ -247,12 +266,7 @@
                 <View style={styles.fieldContainer}>
                   <Text style={styles.fieldLabel}>Promo Code (Optional)</Text>
                   <View style={styles.inputWrapper}>
-                    <Icon 
-                      type="materialCommunityIcons" 
-                      name="ticket-percent" 
-                      size={20} 
-                      color={COLORS.primary}
-                    />
+                    <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
                     <TextInput
                       style={styles.input}
                       placeholder="Enter promo code"
@@ -260,74 +274,57 @@
                       value={promoCode}
                       onChangeText={setPromoCode}
                     />
+                    <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}>  {/* 👈 Add this */}
+                      <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
 
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>Original Price:</Text>
-                    <Text style={styles.originalPriceText}>${game.originalPrice}</Text>
+                    <Text style={styles.priceLabel}>Price per guest:</Text>
+                    <Text style={styles.originalPriceText}>${game.price}</Text>
                   </View>
-                  <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>Discounted Price:</Text>
-                    <Text style={styles.discountedPriceText}>${game.discountPrice}</Text>
+                  <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
+                    <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
+                      Total ({numPlayers || 0} guests):
+                    </Text>
+                    <Text style={styles.discountedPriceText}>
+                      ${discountPrice || (game.price * (parseInt(numPlayers) || 0)).toFixed(2)}
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.buttonContainer}>
-                  <TouchableOpacity 
-                    style={styles.cancelButton}
+                  <Button
+                    title="Cancel"
+                    style={{
+                      width: (SIZES.width) / 3,
+                      backgroundColor: COLORS.transparentPrimary,
+                      borderRadius: 32,
+                      borderColor: COLORS.transparentPrimary
+                    }}
+                    textColor={COLORS.primary}
                     onPress={handleCloseModal}
-                  >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
+                  />
+                  <Button
+                    title="Confirm"
+                    filled
                     style={styles.confirmButton}
                     onPress={handleConfirmJoin}
-                  >
-                    <Icon 
-                      type="materialCommunityIcons" 
-                      name="check-circle" 
-                      size={20} 
-                      color="white"
-                    />
-                    <Text style={styles.confirmButtonText}>Confirm</Text>
-                  </TouchableOpacity>
+                  />
                 </View>
               </View>
             ) : (
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Join Game</Text>
-                  <Pressable 
-                    onPress={handleCloseModal}
-                    style={styles.closeButton}
-                  >
-                    <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
-                  </Pressable>
-                </View>
-              <Text>Please connect before joining</Text>
-              <View style={styles.buttonContainer}>
-                  <TouchableOpacity 
-                    style={styles.cancelButton}
-                    onPress={() => handleRedirectModal('register')}
-                  >
-                    <Text style={styles.cancelButtonText}>Sign-In</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.confirmButton}
-                    onPress={() => handleRedirectModal('login')}
-                  >
-                    <Icon 
-                      type="materialCommunityIcons" 
-                      name="check-circle" 
-                      size={20} 
-                      color="white"
-                    />
-                    <Text style={styles.confirmButtonText}>Login </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              
+                
+              
+              <NotSignedInView
+                heading="Sign in to join game"
+                description="Access your upcoming and past sessions when signed in."
+                containerStyle={{ flex: 1 }}
+                onNavigate={() => setJoinModalVisible(false)}  // or however you close your modal
+              />
             )}
           </View>
         </Modal>
@@ -364,11 +361,18 @@
       alignItems: 'center',
       marginBottom: 8,
     },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
     title: {
       fontSize: FONTS.h3.fontSize,
-      fontWeight: 'bold',
+      fontWeight: '800',
       marginTop: 8,
       flex: 1,
+      color: COLORS.primary
     },
     infoContainer: {
       marginBottom: 10,
@@ -381,6 +385,7 @@
     time: {
       fontSize: 12,
       color: '#666',
+      flex: 1,
     },
     description: {
       fontSize: FONTS.h3.fontSize,
@@ -396,6 +401,7 @@
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
+      alignSelf: "flex-end"
     },
     locationContainer: {
       flexDirection: 'row',
@@ -416,11 +422,13 @@
       marginLeft: 4,
     },
     leftBadge: {
-      backgroundColor: COLORS.primary,
+      position: "absolute",
+      alignSelf: 'flex-end',
+      backgroundColor: COLORS.secondary,
       paddingHorizontal: 6,
       paddingVertical: 2,
       borderRadius: 4,
-      marginLeft: 4,
+      margin: 4,
     },
     usedText: {
       color: 'white',
@@ -428,9 +436,10 @@
       fontWeight: 'bold',
     },
     originalPrice: {
-      textDecorationLine: 'line-through',
-      color: COLORS.error,
-      fontSize: FONTS.h4.fontSize,
+      //textDecorationLine: 'line-through',
+      color: COLORS.primary,
+      fontSize: FONTS.h3.fontSize,
+      fontWeight: "700"
     },
     discountPrice: {
       color: '#999',
@@ -473,7 +482,6 @@
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 16,
     },
     modalTitle: {
       fontSize: 20,
@@ -562,32 +570,18 @@
       gap: 12,
     },
     cancelButton: {
-      flex: 1,
-      paddingVertical: 12,
-      borderWidth: 1.5,
-      borderColor: COLORS.primary,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    cancelButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: '#666',
+      width: (SIZES.width - 32) / 2 - 8,
+      backgroundColor: COLORS.transparentPrimary,
+      borderRadius: 32
     },
     confirmButton: {
-      flex: 1,
-      flexDirection: 'row',
-      paddingVertical: 12,
+      width: (SIZES.width) / 3,
       backgroundColor: COLORS.primary,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
+      borderRadius: 32
     },
     confirmButtonText: {
       fontSize: 14,
-      fontWeight: '600',
+      fontWeight: '900',
       color: 'white',
     },
     playerCountContainer: {
@@ -597,13 +591,13 @@
       gap: 12,
     },
     counterButton: {
-      width: 24,
-      height: 24,
+      width: 32,
+      height: 32,
       borderRadius: 25,
       backgroundColor: COLORS.primary,
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#000',
+      shadowColor: COLORS.primary,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
       elevation: 3,
@@ -615,14 +609,12 @@
       justifyContent: 'center',
       gap: 8,
       paddingVertical: 6,
-      backgroundColor: '#f9f9f9',
+      backgroundColor: COLORS.grayscale100,
       borderRadius: 8,
-      borderWidth: 1,
-      borderColor: '#e0e0e0',
     },
     playerCountText: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: COLORS.primary,
+      color: COLORS.grayTie,
     },
   });

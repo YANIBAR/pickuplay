@@ -85,11 +85,11 @@ const Country: FC<CountryProps> = ({
               ? COLORS.red
               : isFocused
               ? COLORS.primary
-              : COLORS.greyscale500,
+              : COLORS.grayscale500,
             backgroundColor:
               isFocused && !errorText
                 ? COLORS.tansparentPrimary
-                : COLORS.greyscale500,
+                : COLORS.grayscale500,
           },
         ]}>
         {icon && (
@@ -128,7 +128,7 @@ const Country: FC<CountryProps> = ({
               },
               placeholder: {
                 fontFamily: 'Urbanist-light',
-                color: COLORS.greyscale600,
+                color: COLORS.grayscale600,
               },
             }}
             {...rest}

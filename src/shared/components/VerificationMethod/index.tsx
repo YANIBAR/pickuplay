@@ -21,7 +21,7 @@ const VerificationMethod: React.FC<VerificationMethodProps> = ({ icon, name, isS
         <Image source={icon} style={styles.icon} />
       </View>
       <Text style={[styles.name, {
-        color: COLORS.greyscale900
+        color: COLORS.grayscale900
       }]}>{name}</Text>
       <View style={styles.checkboxContainer}>
         <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>

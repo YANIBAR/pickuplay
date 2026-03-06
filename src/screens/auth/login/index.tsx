@@ -169,8 +169,9 @@ const Login = () => {
         ['lastName', user.lastname || ''],
         ['email', user.email || ''],
         ['phone', user.phone || ''],
-        //['preferredLanguage', user.preferredLanguage || ''],
-        //['role', user.role || ''],anibar@gmail.com
+        ['city', user.city || ''],
+        ['preferredLanguage', user.preferredLanguage || 'en'],
+        ['role', user.role || ''],
         //['profileImage', user.profileImage || ''],
         //['gameId', user.role === "Partner" ? user.gameId || '' : ''],
       ]);

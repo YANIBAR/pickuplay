@@ -125,13 +125,6 @@ const Profile = () => {
         {/* Profile Items */}      
         {isLogged && (
           <>
-            <SettingsItem
-              icon={icons.userOutline}
-              name={t('settings.editProfile')}
-              onPress={() => navigate('editProfile')}
-              hasArrowRight={false}
-            />
-
           
             {/* Language & Region */}
             <TouchableOpacity
@@ -141,28 +134,19 @@ const Profile = () => {
               <View style={styles.leftContainer}>
                 <Image
                   source={icons.lang}
-                  style={[styles.settingsIcon, { tintColor: COLORS.greyscale900 }]}
+                  style={[styles.settingsIcon, { tintColor: COLORS.grayscale900 }]}
                 />
-                <Text style={[styles.settingsName, { color: COLORS.greyscale900 }]}>
+                <Text style={[styles.settingsName, { color: COLORS.grayscale900 }]}>
                   {t('settings.languageRegion')}
                 </Text>
               </View>
               <View style={styles.rightContainer}>
                 <Image
                   source={icons.arrowRight}
-                  style={[styles.settingsArrowRight, { tintColor: COLORS.greyscale900 }]}
+                  style={[styles.settingsArrowRight, { tintColor: COLORS.grayscale900 }]}
                 />
               </View>
             </TouchableOpacity>
-
-
-            {/* My Games */}
-            <SettingsItem
-              icon={icons.fileUploadOutline}
-              name={t('settings.myGames')}
-              onPress={() => navigate('myGames')}
-              hasArrowRight={false}
-            />
 
             {/* Payment Methods */}
             <SettingsItem

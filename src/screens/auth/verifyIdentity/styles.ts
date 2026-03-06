@@ -9,13 +9,13 @@ export default StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: 'center',
     marginVertical: 22,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: 'center',
     paddingHorizontal: 3,
   },

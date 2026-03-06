@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  WelcomeScreen,
-  SettingScreen,
-  ChatScreen,
   LeaguesScreen,
   ScheduleScreen,
   GamesScreen,

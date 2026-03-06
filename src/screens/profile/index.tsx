@@ -14,7 +14,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { JAVA_API } from '@env';
 import { authenticatedApi } from '@services/api';
 import GameCard, { Game } from './gameCard'; // ← adjust path to your gameCard location
-import axios from 'axios';
+import { toTitleCase } from '@utils/helpers';
 
 type Nav = {
   navigate: (value: string) => void
@@ -73,12 +73,12 @@ const Profile = () => {
   const renderHeader = () => (
     <TouchableOpacity style={styles.headerContainer}>
       <View style={styles.headerLeft}>
-        <Text style={[styles.headerTitle, { color: COLORS.greyscale900 }]}>Profile</Text>
+        <Text style={[styles.headerTitle, { color: COLORS.grayscale900 }]}>Profile</Text>
       </View>
       <TouchableOpacity onPress={() => navigate("setting")}>
         <Image
           source={icons.settingOutline}
-          style={[styles.headerIcon, { tintColor: COLORS.greyscale900 }]}
+          style={[styles.headerIcon, { tintColor: COLORS.grayscale900 }]}
         />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -177,14 +177,9 @@ const Profile = () => {
             <Icon type="materialCommunityIcons" name="pencil-outline" size={24} color={COLORS.white} />
           </TouchableOpacity>
         </View>
-        <Text style={[styles.title, { color: COLORS.greyscale900 }]}>
-          {userData?.firstName} {userData?.lastName}
+        <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
+          {toTitleCase(userData?.firstName)} {toTitleCase(userData?.lastName)}
         </Text>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => navigate("editProfile")}>
-          <Text style={styles.primaryButtonText}>
-            <Icon type="materialCommunityIcons" name="pencil-outline" color={COLORS.primary} /> Edit profile
-          </Text>
-        </TouchableOpacity>
       </View>
   );
 
@@ -260,13 +255,12 @@ const Profile = () => {
   // ──────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
-      <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
+    <SafeAreaView style={[styles.area]}>
+      <ScrollView style={[styles.container]}>
         {renderHeader()}
         {isLogged ? (
           <View style={[styles.bottomContainer, { backgroundColor: COLORS.white }]}>
             {renderProfile()}
-            <View style={styles.separateLine} />
 
             {/* Stats summary */}
             <View style={styles.summaryViewContainer}>
@@ -274,26 +268,25 @@ const Profile = () => {
                 <View style={styles.viewIconContainer}>
                   <Image source={icons.sport2 as ImageSourcePropType} resizeMode='contain' style={styles.viewIcon} />
                 </View>
-                <Text style={[styles.viewTitle, { color: COLORS.greyscale900 }]}>31 games</Text>
-                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Played")}</Text>
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900 }]}>{games.length} {t("games")}</Text>
+                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Joined")}</Text>
               </View>
               <View style={styles.viewItemContainer}>
                 <View style={styles.viewIconContainer}>
                   <Image source={icons.timeCircle as ImageSourcePropType} resizeMode='contain' style={styles.viewIcon} />
                 </View>
-                <Text style={[styles.viewTitle, { color: COLORS.greyscale900 }]}>45.5 hr</Text>
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900 }]}>45.5 hr</Text>
                 <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Played")}</Text>
               </View>
               <View style={styles.viewItemContainer}>
                 <View style={styles.viewIconContainer}>
-                  <Image source={icons.whistle as ImageSourcePropType} resizeMode='contain' style={{ height: 64, width: 64, tintColor: COLORS.primary }} />
+                  <Image source={icons.fieldOutline as ImageSourcePropType} resizeMode='contain' style={{ height: 44, width: 44, tintColor: COLORS.primary }} />
                 </View>
-                <Text style={[styles.viewTitle, { color: COLORS.greyscale900 }]}>{games.length} games</Text>
-                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>Organized</Text>
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900 }]}>0 fields</Text>
+                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>rented</Text>
               </View>
             </View>
 
-            <View style={styles.separateLine} />
 
             {/* Organized Games */}
             <View style={styles.locationItemContainer}>
@@ -321,7 +314,7 @@ const Profile = () => {
             </View>
 
             {/* Heading */}
-            <Text style={{ fontSize: 20, fontWeight: '700', color: COLORS.greyscale900, marginBottom: 8, textAlign: 'center' }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: COLORS.grayscale900, marginBottom: 8, textAlign: 'center' }}>
               {t("You're not signed in")}
             </Text>
             <Text style={{ fontSize: 14, color: COLORS.grayscale700, textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>

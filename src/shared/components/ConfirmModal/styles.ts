@@ -61,12 +61,12 @@ export default StyleSheet.create({
   logoutIcon: {
     height: 24,
     width: 24,
-    tintColor: COLORS.greyscale900
+    tintColor: COLORS.grayscale900
   },
   logoutName: {
     fontSize: 18,
     fontFamily: "semiBold",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     marginLeft: 12
   },
   bottomContainer: {
@@ -96,7 +96,7 @@ export default StyleSheet.create({
   bottomSubtitle: {
     fontSize: 20,
     fontFamily: "semiBold",
-    color: COLORS.greyscale900,
+    color: COLORS.grayscale900,
     textAlign: "center",
     marginVertical: 28
   },

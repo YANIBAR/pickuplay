@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  LeaguesScreen,
+  MatchupsScreen,
   ScheduleScreen,
   GamesScreen,
   ProfileScreen
@@ -11,6 +11,7 @@ import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
+import { COLORS } from '@constants';
 
 const Tab = createBottomTabNavigator();
 
@@ -83,7 +84,7 @@ const TabNavigator = () => {
           options={{
             tabBarLabel: t('menu.games'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="home" type="feather" color={color} size={size-2} />
+              <Icon name="home" type="ionicons" color={color} size={size} />
             ),
           }}
         />
@@ -93,18 +94,18 @@ const TabNavigator = () => {
           options={{
             tabBarLabel: t('menu.schedule'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="calendar" type="feather" color={color} size={size-2} />
+              <Icon name="calendar" type="ionicons" color={color} size={size} />
             ),
           }}
         />
       
         <Tab.Screen
-          name="Leagues"
-          component={LeaguesScreen}
+          name="Matchups"
+          component={MatchupsScreen}
           options={{
-            tabBarLabel: t('menu.leagues'),
+            tabBarLabel: t('menu.matchups'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="trophy-outline" type="ionicons" color={color} size={size-2} />
+              <Icon name="sword-cross" type="materialCommunityIcons" color={color} size={size} />
             ),
           }}
         /> 
@@ -115,7 +116,7 @@ const TabNavigator = () => {
           options={{
             tabBarLabel: t('menu.chat'),
             tabBarIcon: ({ color, size }) => (
-              <Icon name="chatbubbles-outline" type="ionicons" color={color} size={size-2} />
+              <Icon name="chatbubbles-outline" type="ionicons" color={color} size={size} />
             ),
           }}
         /> */}
@@ -126,7 +127,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: t('menu.user'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="user" type="feather" color={color} size={size-2} />
+            <Icon name="person" type="ionicons" color={color} size={size} />
           ),
         }}
       />

@@ -4,7 +4,10 @@
     "edit": "Edit",
     "view": "View",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "error": "Error",
+    "copied": "Copied!"
+
   },
   "AvailableLanguages": "Available Languages",
   "CustomerService": "Customer Survice",
@@ -334,40 +337,50 @@
   "menu": {
     "chat": "Chat",
     "leagues": "Leagues",
+    "matchups": "Matchups",
     "schedule": "Schedule",
     "games": "Games",
     "user": "Profile",
-    "menu": "Menu"
+    "menu": "Menu",
+    "matchups": "Matchups"
   },
   "faq": {
-    "categories": {
-      "general": "General",
-      "account": "Account",
-      "security": "Security",
-      "shopper": "Shopper",
-      "traveler": "Traveler",
-      "issues": "Issues",
-      "tracking": "Tracking"
-    },
-    "question1": "How long is my pass valid for?",
-    "answer1": "M'go Passes are valid 1 year from the date of purchase, not for a calendar year. If you purchase your pass in the middle of the year and events are past or out of season, they will be available to you the following season until your pass expires.",
-    "question2": "What happens when I renew my M'go Pass membership early?",
-    "answer2": "Renewing your M'go Pass membership early simply extends your original expiration date one year. Any visits to venues prior to your original pass expiring will count towards your original pass.  If it exceeds the allowed limit, it will count towards the renewed pass.  Once your original pass expires, your pass usages will reset to zero.",
-    "question3": "How do I reserve my tickets to a sporting event?",
-    "answer3": "The calandar icon on the M'go Pass app displays all upcoming 'Events' available to you as a M'go Pass member.  Choose the event to register your passes.  If your on www.M'gopass.com, click on the venue you would like to reserve tickets for and proceed to the 'Events' tab at the top of the page slideout. Event registration links appear next to that event 2 weeks prior to game day, and disappears 48 hours prior to event start. Tickets will either be at 'Will Call' the day of event, or will be emailed electronically depending on how the venue dispurses tickets.  Instructions for getting tickets will arrive in your event registration confirmation email.",
-    "question4": "How do I change my contact information for my M'go Pass?",
-    "answer4": "Simply login to your account and you will be able to edit your account information.",
-    "question5": "Is the M'go Pass transferable?",
-    "answer5": "M'go Pass memberships are not transferrable.  Each pass comes with the owner`s name and individualized bar code that can only be used by the pass owner.",
-    "question6": "Will the current Venues always be available on the M'go Pass?",
-    "answer6": "We anticipate that current venues will remain on the M'go Pass. However, participating venues are subject to change.  New venues are often added at no additional charge to current M'go Pass members.",
-    "question7": "At what age do I need M'go Pass?",
-    "answer7": "We recommend that children ages 2 years old and up have their own M'go Pass with their own name on it. Most venues begin charging admission at this age. Some venues do require admission for children who have had a birthday.  Please check specific venue pages for details.",
-    "question8": "Will any new Venues be added?",
-    "answer8": "Yes. We are always looking at adding additional venues to the M'go Pass. When done, existing pass holders are automatically included.",
-    "question9": "How do refunds work?",
-    "answer9": "M'go Pass will refund orders within 30 days of purchase.  Refunds will not be issued on memberships that have been used at participating venues."
+  "categories": {
+    "general": "General",
+    "account": "Account",
+    "games": "Games",
+    "participation": "Participation",
+    "notifications": "Notifications",
+    "location": "Location",
+    "issues": "Issues"
   },
+  "question1": "What is Pickuplay?",
+  "answer1": "Pickuplay is a platform that helps players easily find, create, and join pickup sports games in their city. You can connect with other players and organize games in just a few taps.",
+
+  "question2": "How do I join a game?",
+  "answer2": "Open the Games section, choose a game that fits your schedule, and tap Join Game. If there are available spots, you will immediately be added to the participants list.",
+
+  "question3": "How do I create a game?",
+  "answer3": "Go to the Create Game screen, select the sport, location, date, and number of players, then publish the game. Other players will be able to see and join it.",
+
+  "question4": "Can I add guests to a game?",
+  "answer4": "Yes. When joining a game, you can add guests if the organizer allows it and if there are available spots remaining.",
+
+  "question5": "How do I cancel my participation in a game?",
+  "answer5": "Open the game you joined and tap Leave Game. Your spot will become available for other players.",
+
+  "question6": "How do I update my profile information?",
+  "answer6": "Go to your Profile screen and tap Edit Profile. You can update your photo, city, bio, and other personal information.",
+
+  "question7": "How do notifications work?",
+  "answer7": "Pickuplay sends notifications for important updates such as new players joining your game, game reminders, or changes made by the organizer.",
+
+  "question8": "Why does the app ask for my location?",
+  "answer8": "Your location helps Pickuplay show games happening near you so you can easily find and join local games.",
+
+  "question9": "What should I do if I experience a problem in the app?",
+  "answer9": "If you encounter a technical issue or unexpected behavior, please contact support through the Help Center or report the problem in the app."
+},
   "payment": {
     "cardHolderName": "Card holder name",
     "cardNumber": "Card number",
@@ -395,18 +408,6 @@
     },
     "common": {
       "loading": "Loading data..."
-    }
-  },
-  "scanQRCode": {
-    "scan": {
-      "instructionsTop": "Please scan a QR code to continue",
-      "instructionsBottom": "Position the QR code within the frame",
-      "tapToScan": "Tap to scan QR code"
-    },
-    "common": {
-      "ok": "OK",
-      "confirm": "Confirm",
-      "cancel": "Cancel"
     }
   },
   "membership": {
@@ -445,19 +446,25 @@
   },
   "games_header": "games list",
   "game": {
-    "location": "Location",
-    "activeDays": "Active Days",
-    "allowedVisits": "Time",
-    "visitCount_one": " visit",
-    "visitCount_plural": " visits",
-    "membershipTypes": "Membership Types",
-    "scanButton": "Scan QR to Check-in",
-    "game_details": "game Details",
-    "qrModal": {
-      "title": "Your Membership QR Code",
-      "instructions": "Show this QR code at the entrance"
+    "details": {
+      "title": "Game Details"
     },
-    "by" : "Orginazed by"
+    "Orginazer": "Organizer",
+    "location": "Location",
+    "isprivate": "Privacy",
+    "time": "Time",
+    "sportType": "Sport Type",
+    "private": "Private",
+    "public": "Public",
+    "players": "Players",
+    "shareModal": {
+      "title": "Share Game",
+      "shareWithFriends": "Share with Friends",
+      "copyDeepLink": "Copy Deep Link",
+      "deepLinkLabel": "Deep Link:",
+      "failedToShare": "Failed to share game",
+      "linkCopied": "Game link copied to clipboard."
+    }
   },
   "myGames": {
     "full": "Full",
@@ -539,33 +546,5 @@
       "error": "Error"
     },
     "divider": "OR"
-  },
-  "event": {
-    "eventTitle": "Events",
-    "eventDetails": "Event Details",
-    "occurrence": "Registered: {{count}}",
-    "eventsPerYear": "Max Visits: {{count}}",
-    "eventsAvailable": "events available",
-    "noEventsAvailable": "No events available at the moment",
-    "registered": "Registered",
-    "maxVisits": "Max Visits",
-    "available": "Available",
-    "full": "Full",
-    "registrationOpen": "Registration Open",
-    "registrationClosed": "Registration Closed",
-    "registerBefore": "Register within {{days}} days (Before {{date}})",
-    "eventDate": "Event Date",
-    "eventTime": "Event Time",
-    "location": "Location",
-    "availableSlots": "Available Slots",
-    "of": "of",
-    "membershipTypes": "Membership Types",
-    "howItWorks": "How It Works",
-    "registerNow": "Register Now",
-    "eventFull": "Event is Full",
-    "qrModal": {
-      "title": "Event Registration QR Code",
-      "instructions": "Show this QR code at the event entrance"
-    }
   }
 }

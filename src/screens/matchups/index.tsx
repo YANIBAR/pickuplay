@@ -10,7 +10,7 @@ export default function NoLeaguePage() {
         {/* Header */}
         <View style={styles.header}>
           <Image
-            source={images.logo}
+            source={images.matchups}
             resizeMode="contain"
             style={styles.logo}
           />
@@ -18,24 +18,25 @@ export default function NoLeaguePage() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          <Text style={styles.mainTitle}>No Active League</Text>
+          <Text style={styles.mainTitle}>Start a Matchup</Text>
+
           <Text style={styles.subtitle}>
-            You're not currently part of any league
+          No challenges yet
           </Text>
 
-    
           <Text style={styles.description}>
-            Join a league to start playing with your friends, track stats, and compete in organized games.
+          Challenge another team in your city and compete on the field.
+          Create a matchup, set the time and location, and let the game decide the winner.
           </Text>
 
           {/* Action Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Join a League</Text>
+              <Text style={styles.primaryButtonText}>Create Matchup</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondaryButton}>
-              <Text style={styles.secondaryButtonText}>Create a League</Text>
+              <Text style={styles.secondaryButtonText}>Find Teams</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 10,
   },
   logoContainer: {
     marginBottom: 12,
@@ -66,8 +67,8 @@ const styles = StyleSheet.create({
     height: 180
   },
   logo: {
-    width: 300,
-    height: 100,
+    width: 400,
+    height: 300,
     justifyContent: 'center',
     alignItems: 'center',
   },

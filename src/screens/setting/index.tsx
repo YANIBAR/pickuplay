@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { FlatList } from 'react-native-gesture-handler';
 import { useUserData } from '@services/useUserData';
+import { isStoredTokenExpired } from '@utils/api/auth';
 
 type Nav = {
   navigate: (value: string) => void
@@ -25,8 +26,7 @@ const Profile = () => {
   
   // Use the custom hook for user data management
   const { userData, error, refreshUserData } = useUserData();
-  
-  const isLogged = userData?.id; // Check if user is logged in based on id
+  const [isLogged, setIsLogged] = useState(false);
   const inviteMessage = t('Admission to a variety of attraction...');
   
   const dropdownItems = [
@@ -113,6 +113,13 @@ const Profile = () => {
       Alert.alert('Error', 'An error occurred while sharing the referral link.');
     }
   };
+  useEffect(() => {
+    const checkToken = async () => {
+      const expired = await isStoredTokenExpired();
+      setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+    };
+    checkToken();
+  }, []);
 
   /**
    * Render Settings
@@ -123,7 +130,7 @@ const Profile = () => {
     return (
       <View style={[styles.settingsContainer, { backgroundColor: isDarkMode ? COLORS.black : COLORS.white }]}>
         {/* Profile Items */}      
-        {isLogged && (
+        {isLogged==true && (
           <>
           
             {/* Language & Region */}
@@ -185,7 +192,7 @@ const Profile = () => {
           onPress={() => navigate('terms')}
           hasArrowRight={false}
         />
-        {/* Logout Button */}
+        {isLogged==true && (
           <TouchableOpacity
             onPress={() => refRBSheet.current?.open()}
             style={styles.logoutContainer}
@@ -200,18 +207,17 @@ const Profile = () => {
               </Text>
             </View>
           </TouchableOpacity>
+        )}
       </View>
     );
   };
 
   return (
     <SafeAreaView style={[styles.area]}>
-      <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-        <Header title='Profile'/>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {renderSettings()}
-        </ScrollView>
-      </View>
+      <Header title='Profile'/>
+      <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, { backgroundColor: COLORS.white }]}>
+        {renderSettings()}
+      </ScrollView>
 
       {/* Logout Confirmation Modal */}
       <RBSheet

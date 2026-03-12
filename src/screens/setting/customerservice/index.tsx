@@ -39,7 +39,7 @@ const CustomerService = () => {
                         justifyContent: 'flex-start',
                     }}>
                     <Image
-                        source={images.avatar}
+                        source={images.idAvatar}
                         style={{
                             width: 40,
                             height: 40,

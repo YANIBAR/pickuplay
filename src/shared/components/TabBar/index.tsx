@@ -41,7 +41,7 @@ const TabBar: FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
         const icon =
           options.tabBarIcon &&
           options.tabBarIcon({
-            color: isFocused ? COLORS.primary : '#222',
+            color: isFocused ? COLORS.primary : COLORS.secondary,
             size: 24,
           });
 
@@ -57,9 +57,9 @@ const TabBar: FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
             style={styles.item}>
             {icon}
             <Text
-              size="h5"
+              size="h6"
               color={isFocused ? COLORS.primary : '#222'}
-              style={{ textTransform: 'uppercase' }}>
+              style={{ textTransform: 'capitalize', marginTop: 3 }}>
               {label}
             </Text>
           </TouchableOpacity>

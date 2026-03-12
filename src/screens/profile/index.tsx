@@ -1,4 +1,4 @@
-import { View, Text, Alert, ImageSourcePropType, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, Alert, ImageSourcePropType, TouchableOpacity, Image, ActivityIndicator, PermissionsAndroid, Platform } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-virtualized-view';
@@ -14,7 +14,9 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { JAVA_API } from '@env';
 import { authenticatedApi } from '@services/api';
 import GameCard, { Game } from './gameCard'; // ← adjust path to your gameCard location
-import { toTitleCase } from '@utils/helpers';
+import { getCurrentCity, toTitleCase } from '@utils/helpers';
+import Geolocation from '@react-native-community/geolocation';
+import { isStoredTokenExpired } from '@utils/api/auth';
 
 type Nav = {
   navigate: (value: string) => void
@@ -25,7 +27,7 @@ const Profile = () => {
   const { navigate } = useNavigation<Nav>();
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const { userData, error, refreshUserData } = useUserData();
-  const isLogged = userData?.id;
+  const [isLogged, setIsLogged] = useState(false);
   const refRBSheet = useRef<any>(null);
   const [selectedImage, setSelectedImage] = useState<any>(null);
 
@@ -35,7 +37,23 @@ const Profile = () => {
   const [gamesError, setGamesError] = useState<string | null>(null);
   const [showAllGames, setShowAllGames] = useState(false);
   const GAMES_PREVIEW = 3;
+  const [profileInfo, setProfileInfo] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
+  const fetchProfileInfo = async () => {
+    if (!userData?.id) return;
+    try {
+      setProfileLoading(true);
+      const response = await authenticatedApi.get(`profile/${userData.id}`);
+      const data = response.result?.data ?? response.data ?? null;
+      setProfileInfo(data);
+    } catch (err: any) {
+      console.error('Error fetching profile info:', err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+  
   const fetchGames = async () => {
     try {
       setGamesLoading(true);
@@ -77,41 +95,27 @@ const Profile = () => {
       </View>
       <TouchableOpacity onPress={() => navigate("setting")}>
         <Image
-          source={icons.settingOutline}
+          source={icons.moreCircle}
           style={[styles.headerIcon, { tintColor: COLORS.grayscale900 }]}
         />
       </TouchableOpacity>
     </TouchableOpacity>
   );
-
+ 
   useEffect(() => {
-    getProfilePicture();
-    fetchGames();
-  }, []);
+    const checkToken = async () => {
+      const expired = await isStoredTokenExpired();
+      setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+    };
 
-  const getProfilePicture = async () => {
-    const token = await AsyncStorage.getItem('access_token');
-
-    const response = await fetch(`${JAVA_API}profile/image`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const blob = await response.blob();
-
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result); // "data:image/jpeg;base64,..."
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    setSelectedImage(base64);
-  };
+    checkToken();
+    if(isLogged) {
+      setSelectedImage(`${JAVA_API}profile/${userData?.id}/image`);
+      fetchGames();
+      //console.log(getCurrentCity());
+      fetchProfileInfo();
+    }
+  }, [userData?.id]);
 
   const uploadImage = async (file: any) => {
     if (!file) return;
@@ -165,23 +169,24 @@ const Profile = () => {
   };
 
   const renderProfile = () => (
-    
-      <View style={styles.profileContainer}>
-        <View style={styles.avatarContainer}>
-          <Image
-            source={selectedImage ? { uri: selectedImage} : images.idAvatar}
-            resizeMode="contain"
-            style={styles.avatar}
-          />
-          <TouchableOpacity style={styles.pickImage} onPress={handleImagePicker}>
-            <Icon type="materialCommunityIcons" name="pencil-outline" size={24} color={COLORS.white} />
-          </TouchableOpacity>
-        </View>
-        <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
-          {toTitleCase(userData?.firstName)} {toTitleCase(userData?.lastName)}
-        </Text>
-      </View>
-  );
+  <View style={styles.profileContainer}>
+    <View style={styles.avatarContainer}>
+      <Image
+        source={{ uri: `${JAVA_API}profile/${userData?.id}/image` }}
+        resizeMode="contain"
+        style={styles.avatar}
+      />
+      <TouchableOpacity style={styles.pickImage} onPress={handleImagePicker}>
+        <Icon type="materialCommunityIcons" name="pencil-outline" size={24} color={COLORS.white} />
+      </TouchableOpacity>
+    </View>
+    <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
+      {toTitleCase(profileInfo?.firstName ?? userData?.firstName)}{' '}
+      {toTitleCase(profileInfo?.lastName ?? userData?.lastName)}
+    </Text>
+
+  </View>
+);
 
   // ─── Games section renderer ────────────────────────────────────
   const renderGames = () => {
@@ -268,21 +273,21 @@ const Profile = () => {
                 <View style={styles.viewIconContainer}>
                   <Image source={icons.sport2 as ImageSourcePropType} resizeMode='contain' style={styles.viewIcon} />
                 </View>
-                <Text style={[styles.viewTitle, { color: COLORS.grayscale900 }]}>{games.length} {t("games")}</Text>
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700" }]}>{profileInfo ? profileInfo.gameStatistics.gameCount : 0} {t("games")}</Text>
                 <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Joined")}</Text>
               </View>
               <View style={styles.viewItemContainer}>
                 <View style={styles.viewIconContainer}>
                   <Image source={icons.timeCircle as ImageSourcePropType} resizeMode='contain' style={styles.viewIcon} />
                 </View>
-                <Text style={[styles.viewTitle, { color: COLORS.grayscale900 }]}>45.5 hr</Text>
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700"  }]}>{profileInfo ? profileInfo.gameStatistics.totalMinutes%60 : 0}  hr</Text>
                 <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Played")}</Text>
               </View>
               <View style={styles.viewItemContainer}>
                 <View style={styles.viewIconContainer}>
                   <Image source={icons.fieldOutline as ImageSourcePropType} resizeMode='contain' style={{ height: 44, width: 44, tintColor: COLORS.primary }} />
                 </View>
-                <Text style={[styles.viewTitle, { color: COLORS.grayscale900 }]}>0 fields</Text>
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700"  }]}>0 fields</Text>
                 <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>rented</Text>
               </View>
             </View>

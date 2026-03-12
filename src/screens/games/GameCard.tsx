@@ -7,6 +7,7 @@
   import AsyncStorage from '@react-native-async-storage/async-storage';
   import { authenticatedApi } from '@services/api';
 import { useTranslation } from 'react-i18next';
+import { isStoredTokenExpired } from '@utils/api/auth';
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
@@ -27,22 +28,14 @@ import { useTranslation } from 'react-i18next';
     const parts = location.split(',').map(p => p.trim());
     return parts[parts.length - 1] || location;
   }
-  const getToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem('access_token');
-        return token;
-      } catch (e) {
-        console.error('Failed to fetch the token', e);
-        return null;
-      }
-    };
+
   export default function GameCard({ game }: GameCardProps) {
     const navigation = useNavigation();
     const { t } = useTranslation();
     const [joinModalVisible, setJoinModalVisible] = useState(false);
     const [numPlayers, setNumPlayers] = useState('');
     const [promoCode, setPromoCode] = useState('');
-    const [token, setToken] = useState('');
+    const [isLogged, setIsLogged] = useState(false);
     const [discountPrice, setDiscountPrice] = useState('');
     const { navigate } = useNavigation<Nav>();
 
@@ -117,11 +110,12 @@ import { useTranslation } from 'react-i18next';
       setPromoCode('');
     };
     useEffect(() => {
-      const fetchToken = async () => {
-        const tkn = await getToken(); // ✅ Await the async function
-        setToken(tkn ?? '');          // Use empty string if null
+      const checkToken = async () => {
+        const expired = await isStoredTokenExpired();
+        setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
       };
-      fetchToken();
+  
+      checkToken();
     }, []);
     return (
       <>
@@ -146,7 +140,7 @@ import { useTranslation } from 'react-i18next';
                 type="materialCommunityIcons" 
                 name={getGameIcon(game.sportType.id)} 
                 size={24} 
-                color={COLORS.primary}
+                color={COLORS.secondary}
               />
             </View>
 
@@ -200,7 +194,7 @@ import { useTranslation } from 'react-i18next';
           onRequestClose={handleCloseModal}
         >
           <View style={styles.modalOverlay}>
-            {token!="" ? (
+            {isLogged==true ? (
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Join Game</Text>
@@ -317,14 +311,21 @@ import { useTranslation } from 'react-i18next';
               </View>
             ) : (
               
-                
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}></Text>
+                  <Pressable onPress={handleCloseModal} style={styles.closeButton}>
+                    <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                  </Pressable>
+                </View>
               
-              <NotSignedInView
-                heading="Sign in to join game"
-                description="Access your upcoming and past sessions when signed in."
-                containerStyle={{ flex: 1 }}
-                onNavigate={() => setJoinModalVisible(false)}  // or however you close your modal
-              />
+                <NotSignedInView
+                  heading="Sign in to join game"
+                  description="Access your upcoming and past sessions when signed in."
+                  containerStyle={{ flex: 1 }}
+                  onNavigate={() => setJoinModalVisible(false)}  // or however you close your modal
+                />
+              </View>
             )}
           </View>
         </Modal>
@@ -372,7 +373,7 @@ import { useTranslation } from 'react-i18next';
       fontWeight: '800',
       marginTop: 8,
       flex: 1,
-      color: COLORS.primary
+      color: COLORS.secondary
     },
     infoContainer: {
       marginBottom: 10,

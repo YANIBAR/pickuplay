@@ -125,7 +125,6 @@ const Phone: FC<InputProps> = ({
         },
       ];
 
-      console.log(`Loaded ${selectedCountries.length} countries`);
       setAreas(selectedCountries);
       
       // Set default to US
@@ -179,11 +178,7 @@ const Phone: FC<InputProps> = ({
               ? COLORS.red
               : isFocused
               ? COLORS.primary
-              : COLORS.grayscale500,
-            backgroundColor:
-              isFocused && !errorText
-                ? COLORS.tansparentPrimary
-                : COLORS.grayscale500,
+              : COLORS.grayscale300,
           },
         ]}>
         <TouchableOpacity

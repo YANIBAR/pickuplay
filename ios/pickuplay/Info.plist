@@ -35,6 +35,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to scan QR code</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow app to access your location.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app does not use your photo library directly. Some features may require limited image access.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

@@ -19,9 +19,10 @@ export default StyleSheet.create({
     paddingVertical: SIZES.padding2,
     borderRadius: 30,
     borderWidth: 1,
+    borderColor: COLORS.black,
     marginVertical: 5,
     flexDirection: 'row',
-    height: 52,
+    height: SIZES.InputHeight,
     alignItems: 'center',
   },
   downIcon: {

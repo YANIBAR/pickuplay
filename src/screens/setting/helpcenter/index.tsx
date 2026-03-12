@@ -9,6 +9,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import HelpCenterItem from './HelpCenterItem';
 import { useTranslation } from 'react-i18next';
 import { pickuplay_facebook_URL } from '@env';
+import { Header } from '@components';
 
 interface KeywordItemProps {
   item: {
@@ -209,11 +210,14 @@ const SettingsHelpCenter = () => {
       {...props}
       indicatorStyle={{
         backgroundColor: COLORS.primary,
+        
       }}
       style={{
         backgroundColor: COLORS.white,
       }}
-      renderLabel={({ route, focused }) => (
+      activeColor={COLORS.black}
+      inactiveColor={COLORS.gray}
+      renderLabel={({ routes, focused }) => (
         <Text style={[{
           color: focused ? COLORS.primary : 'gray',
           fontSize: 16,
@@ -224,43 +228,11 @@ const SettingsHelpCenter = () => {
       )}
     />
   )
-  /**
-   * Render Header
-   */
-  const renderHeader = () => {
-    const navigation = useNavigation<NavigationProp<any>>();
-    return (
-      <View style={styles.headerContainer}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}>
-            <Image
-              source={icons.back}
-              style={[styles.backIcon, {
-                tintColor: COLORS.grayscale900
-              }]} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, {
-            color: COLORS.grayscale900
-          }]}>Help Center</Text>
-        </View>
-        <TouchableOpacity>
-          <Image
-            source={icons.moreCircle}
-            contentFit='contain'
-            style={[styles.moreIcon, {
-              tintColor: COLORS.grayscale900
-            }]}
-          />
-        </TouchableOpacity>
-      </View>
-    )
-  }
 
   return (
-    <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
-      <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-        {renderHeader()}
+    <SafeAreaView style={[styles.area]}>
+      <Header title={'HelpCenter'}/>
+      <View style={[styles.container]}>
         <TabView
           navigationState={{ index, routes }}
           renderScene={renderScene}
@@ -281,7 +253,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    padding: 16
+    padding: 16,
   },
   headerContainer: {
     flexDirection: "row",

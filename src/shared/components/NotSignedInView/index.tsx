@@ -36,7 +36,7 @@ const NotSignedInView: React.FC<NotSignedInViewProps> = ({
     navigation.navigate(route);
   };
   return (
-    <View style={[styles.bottomContainer, { backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', paddingVertical: 60, paddingHorizontal: 24 }]}
+    <View style={[{ backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }]}
     >
       {/* Icon */}
       <View
@@ -47,7 +47,6 @@ const NotSignedInView: React.FC<NotSignedInViewProps> = ({
           backgroundColor: COLORS.primary + '15',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 20,
         }}
       >
         <Image

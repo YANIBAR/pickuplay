@@ -33,13 +33,3 @@ export interface registerFormData {
   confirmPwd?: string;
 }
 
-export interface Todo {
-  userId: number;
-  id: number;
-  title: string;
-  completed: boolean;
-}
-export interface TodoState {
-  data: Todo[];
-  error: string | null | unknown;
-}

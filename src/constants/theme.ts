@@ -4,7 +4,7 @@ const { height, width } = Dimensions.get('window');
 
 export const COLORS = {
   primary: '#22BB9C',
-  secondary: '#1A2E35',
+  secondary: '#565656',
   third: '#F4A74B',
   tertiary: '#6C4DDA',
   success: '#0ABE75',
@@ -30,7 +30,7 @@ export const COLORS = {
   grayscale700: '#616161',
   grayscale400: '#BDBDBD',
   grayscale300: '#E0E0E0',
-  grayscale500: '#FAFAFA',
+  grayscale500: '#656565',
   grayscale600: '#757575',
   grayscale200: '#EEEEEE',
   grayscale100: '#F5F5F5',

@@ -10,7 +10,7 @@ export default StyleSheet.create({
       container: {
         flex: 1,
         backgroundColor: COLORS.white,
-        padding: 16,
+        paddingHorizontal: 16,
         marginBottom: 32
       },
       headerContainer: {

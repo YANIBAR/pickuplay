@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, FlatList, Alert, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Game, extractCity } from './GameCard';
 import GameGrid from './GamesGrid';
@@ -10,6 +10,7 @@ import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
 import { useUserData } from '@services/useUserData';
+import { getCurrentCity } from '@utils/helpers';
 
 type Nav = {
   navigate: (value: string) => void
@@ -24,15 +25,15 @@ const SPORT_LABELS = {
   5: 'Tennis 🎾 ',
 };
 
-export default function HomeScreen({route}) {
+export default function HomeScreen() {
   const { t } = useTranslation();
   const [games, setGames] = useState<Game[]>([]);
-
-    const { userData, error, refreshUserData } = useUserData();
+  const { userData, error, refreshUserData } = useUserData();
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-    const { navigate } = useNavigation<Nav>();
+  const { navigate } = useNavigation<Nav>();
 
+  const [currentCity, setCurrentCity] = useState<string | null>(null);
   // Filter states
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
@@ -41,35 +42,63 @@ export default function HomeScreen({route}) {
   const [sportModalVisible, setSportModalVisible] = useState(false);
   const [cityModalVisible, setCityModalVisible] = useState(false);
 
-
-const onRefresh = () => {
-  setRefreshing(true);
-  fetchRequests();
-};
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchRequests();
+  };
   const fetchRequests = async () => {
     try {
-      console.log(userData?.city);
       const response = await publicApi.get(`games`);
       setGames(response.result.data.games);
     } catch (error) {
       const errorMessage = error.response?.data?.message;
       Alert.alert('Error', errorMessage);
-      console.error('Game creation failed:', error);
       setGames(mockGames);
+    } finally {
+      setRefreshing(false);
     }
   };
 
   // Get unique cities from games
-  const getCities = (): string[] => {
-    const cities = new Set(
-      games.map(
-        game => extractCity(game.city)
-      )
-    );
-    return Array.from(cities).sort();
-  };
+ // Add this near your other state declarations
+const [cities, setCities] = useState<string[]>([]);
 
+// Replace your getCities function with this
+const getCities = async (): Promise<void> => {
+  try {
+    const response = await publicApi.get('cities');
+    const cityList: City[] = response.result.data;
 
+    const dbCities = cityList.map((city) => city.name);
+
+    let updatedCities = [...dbCities];
+
+    if (currentCity) {
+      const userCity = extractCity(currentCity);
+
+      // Add city if not in DB
+      if (!dbCities.includes(userCity)) {
+        updatedCities.unshift(userCity);
+      } else {
+        // Move it to first position
+        updatedCities = [
+          userCity,
+          ...dbCities.filter((c) => c !== userCity),
+        ];
+      }
+
+      // Select it by default
+      setSelectedCities([userCity]);
+    }
+
+    setCities(updatedCities);
+  } catch (error) {
+    const errorMessage = (error as any).response?.data?.message;
+    Alert.alert('Error', errorMessage);
+    console.error('Cities fetch failed:', error);
+    setCities([]);
+  }
+};
   // Filter games based on selected filters
   const applyFilters = () => {
     let filtered = [...games];
@@ -77,12 +106,10 @@ const onRefresh = () => {
     if (selectedSports.length > 0) {
       filtered = filtered.filter(game => selectedSports.includes(String(game.sportType.id)));
     }
-
     // Use selected cities, or default to user's city if no city filter is active
     const citiesToFilter = selectedCities.length > 0 
       ? selectedCities 
-      : userData?.city ? [extractCity(userData.city)] : [];
-
+      : currentCity ? [extractCity(currentCity)] : [];
     if (citiesToFilter.length > 0) {
       filtered = filtered.filter(game => 
         citiesToFilter.includes(extractCity(game.city))
@@ -99,8 +126,23 @@ const onRefresh = () => {
   }, [selectedSports, selectedCities, games]);
 
   useEffect(() => {
-    fetchRequests();
+    const fetchCity = async () => {
+      try {
+        const city = await getCurrentCity();
+        setCurrentCity(city);
+      } catch (error) {
+        console.error('Failed to get city:', error);
+      }
+    };
+    fetchCity();
   }, []);
+
+  useEffect(() => { 
+    if (currentCity) {
+      fetchRequests();
+      getCities();
+    }
+  }, [currentCity]);
 
   const handleSportToggle = (sport: string) => {
     setSelectedSports(prev =>
@@ -225,13 +267,12 @@ const onRefresh = () => {
               </TouchableOpacity>
             </View>
             
-            {getCities().map(city => (
+            {cities.map(city => (
               <TouchableOpacity
                 key={city}
                 style={styles.filterOption}
                 onPress={() => handleCityToggle(city)}
               >
-
                 <Checkbox
                   checked={selectedCities.includes(city)}
                   onValueChange={() => handleCityToggle(city)}

@@ -7,8 +7,12 @@ import { Header, Icon } from '@components';
 import { COLORS, FONTS, icons, images, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { JAVA_API } from '@env';
-import { authenticatedApi, publicApi } from '@services/api';
+import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
+import { formatDateLong, formatTime } from '@utils/dateUtils';
+import { useUserData } from '@services/useUserData';
+import { getItem } from '@utils/storage';
+import { isStoredTokenExpired } from '@utils/api/auth';
 
 interface Game {
   id: number;
@@ -41,8 +45,8 @@ interface Game {
   canceledAt: string;
 }
 
-export default function GameDetailsScreen({ route }) {
-  const { t } = useTranslation();
+export default function GameDetailsScreen({ route }: { route: any }) {
+    const { t } = useTranslation();
   const { gameId } = route.params || {};
   const { navigate } = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -50,6 +54,8 @@ export default function GameDetailsScreen({ route }) {
   const [sportType, setSportType] = useState();
   const [participants, setParticipants] = useState([]);
   const [game, setGame] = useState([]);
+  const [isLogged, setIsLogged] = useState(false);
+  const { userData, error, refreshUserData } = useUserData(); 
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
@@ -58,18 +64,15 @@ export default function GameDetailsScreen({ route }) {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
-  const playersData = [
-    { name: "alloudi", image: "https://pbs.twimg.com/media/F8-YPTEWIAEtdou.jpg" },
-    { name: "zidan", image: "https://cdn.artphotolimited.com/images/59888232b0ba742a2efde168/1000x1000/zinedine-zidane-france-ukraine.jpg"},
-    { name: "Maradona", image: "https://fcb-abj-pre.s3.amazonaws.com/img/jugadors/501_maradona.jpg" },
-    { name: "Messi", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrrZKlZldiLM3-HD7SkznJ3TUpdF5AqiDOkQ&s" },
-    { name: "Ronaldinho", image: "https://assets.goal.com/images/v3/blt4df7329019456080/b5216132b85c9f8120a989382bc204ebdc69067e.jpg?auto=webp&format=pjpg&width=3840&quality=60" },
-    { name: "Ronaldo", image: "https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-2234200789.jpg?c=original" },
-    { name: "jwi3a", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXt1UN6HL4_qlijjO-6jcBgA72g12giqFpGg&s" },
-    { name: "yasser zabiri", image: "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/670ff2f1-261d-4378-b23c-9d1e85e8c59a/2025-10-20T023019Z_262015936_UP1ELAK06YI9L_RTRMADP_3_SOCCER-WORLDCUPU-20-ARG-MRC-REPORT.JPG?ver=03-06-2025?w=3840&q=75" },
-  ];
+
 
   useEffect(() => {
+    const checkToken = async () => {
+      const expired = await isStoredTokenExpired();
+      setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+    };
+
+    checkToken();
     if (gameId) {
       fetchGame();
     }
@@ -81,7 +84,6 @@ export default function GameDetailsScreen({ route }) {
       setGame(response.result.data);
       setSportType(response.result.data.sportType.name);
       setParticipants(response.result.data.participants);
-      console.log('Game data fetched:', response.result.data, participants.length);
     } catch (error) {
       console.error('Error fetching game:', error);
     } 
@@ -113,7 +115,7 @@ export default function GameDetailsScreen({ route }) {
           title: `Join ${game.title} on Pickuplay`,
         });
       } catch (error) {
-        Alert.alert('Error', 'Failed to share game');
+        Alert.alert(t('common.error'), t('game.shareModal.failedToShare'));
       }
     };
 
@@ -122,51 +124,70 @@ export default function GameDetailsScreen({ route }) {
   const handleCopyDeepLink = () => {
   const link = generateDeepLink();
   Clipboard.setString(link);
-  Alert.alert('Copied!', 'Game link copied to clipboard.');
+  Alert.alert(t('common.copied'), t('game.shareModal.linkCopied'));
 };
 
   return (
     <SafeAreaView style={styles.area}>
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
-        <TouchableOpacity  onPress={() => navigate("welcome")} style={styles.headerContainer}>
+       <View style={styles.wrapper}>
+        {/* Back + Title */}
+        <TouchableOpacity
+          onPress={() => navigate("welcome")}
+          style={styles.backGroup}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Image
-            source={icons.back as ImageSourcePropType}
-            resizeMode="contain"
-            style={styles.backIcon}
-          />
+              source={icons.back as ImageSourcePropType}
+              resizeMode="contain"
+              style={styles.backIcon}
+            />
+
           <View style={styles.headerLeft}>
-            <Text style={[styles.headerTitle, { color: COLORS.grayscale900 }]}>Game Details</Text>
+            <Text style={[styles.headerTitle, { color: COLORS.grayscale900 }]}>{t('game.details.title')}</Text>
           </View>
-          <TouchableOpacity onPress={() => navigate("editProfile")}>
-              <Icon type="feather" name="edit" size={20} color={COLORS.primary} />
-          </TouchableOpacity>
         </TouchableOpacity>
+
+        {/* Action Buttons */}
+        <View style={styles.actions}>
+          <TouchableOpacity
+            onPress={() => setShareModalVisible(true)}
+            style={styles.iconBtn}
+            activeOpacity={0.75}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            <Icon type="materialCommunityIcons" name="share-variant" size={20} color={COLORS.primary} />
+          </TouchableOpacity>
+        {(userData?.id == game?.creatorId && isLogged) && (
+          <TouchableOpacity
+            onPress={() => navigate("editGame", { game })}
+            style={styles.iconBtn}
+            activeOpacity={0.75}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            <Icon type="feather" name="edit" size={20} color={COLORS.primary} />
+          </TouchableOpacity>
+        )}
+          
+        </View>
+      </View>
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
-        
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>
-              {game.title}
+              {game.title} {game?.creatorId}
             </Text>
-            <TouchableOpacity 
-              onPress={() => setShareModalVisible(true)}
-              style={styles.shareButton}
-            >
-              <Icon type="materialCommunityIcons" name="share-variant" size={24} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.priceContainer}>
-            <Text style={styles.originalPrice}>$12.99</Text>
-            <Text style={styles.discountPrice}>$8.99</Text>
+            {/*<Text style={styles.originalPrice}>$12.99</Text>*/}
+            <Text style={styles.discountPrice}>${game.price}</Text>
+            
           </View>
 
           <Text style={styles.description}>{game.description}</Text>
-          
 
           <View style={styles.infoContainer}>
             <InfoRow 
-              icon="map-marker" 
+              icon="account" 
               label={t('game.Orginazer')} 
               value={game.creatorName} 
             />
@@ -176,20 +197,15 @@ export default function GameDetailsScreen({ route }) {
               value={game.address} 
             />
             <InfoRow 
-              icon="map-marker" 
+              icon="lock" 
               label={t('game.isprivate')} 
-              value={game.isprivate ? "Private" : "Public"} 
+              value={game.isprivate ? t('game.private') : t('game.public')} 
             />
 
             <InfoRow 
               icon="clock" 
               label={t('game.time')} 
-              value={(
-                new Date(game.startTime).toLocaleTimeString('en-US', 
-                { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm') 
-                + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US', 
-                { hour: 'numeric', minute: '2-digit', hour12: true  })
-                + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
+              value={`${formatDateLong(new Date(game.startTime))}, (${formatTime(game.startTime)} - ${formatTime(game.endTime)})`}
             />
             <InfoRow 
               icon="map-marker" 
@@ -202,7 +218,7 @@ export default function GameDetailsScreen({ route }) {
             <View style={styles.section}>
               <Icon type="materialCommunityIcons" name="account-multiple" size={24} color="#666" />
               <View style={styles.textContainer}>
-                <Text style={styles.label}>Players {participants.length}/{game.nbrSpots}</Text>
+                <Text style={styles.label}>{t('game.players')} {participants.length}/{game.nbrSpots}</Text>
                 <TouchableOpacity 
                   onPress={() => setExpandedDay(expandedDay ? null : 'all')}
                   style={styles.expandAllButton}
@@ -224,7 +240,7 @@ export default function GameDetailsScreen({ route }) {
                   {game?.participants.map((player, index) => (
                     <View key={index} style={styles.playerCard}>
                       <Image
-                        source={{ uri: playersData[player.userId].image || images.avatar }}
+                        source={{ uri: `${JAVA_API}profile/${player?.userId}/image` }}
                         style={styles.playerImage}
                       />
                       <Text style={styles.playerName} numberOfLines={2}>
@@ -250,7 +266,7 @@ export default function GameDetailsScreen({ route }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('game.shareModal.title') || 'Share Game'}</Text>
+              <Text style={styles.modalTitle}>{t('game.shareModal.title')}</Text>
               <Pressable 
                 onPress={() => setShareModalVisible(false)}
                 style={styles.closeButton}
@@ -272,7 +288,7 @@ export default function GameDetailsScreen({ route }) {
                 }}
               >
                 <Icon type="materialCommunityIcons" name="share-variant" size={24} color={COLORS.primary} />
-                <Text style={styles.shareOptionText}>Share with Friends</Text>
+                <Text style={styles.shareOptionText}>{t('game.shareModal.shareWithFriends')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
@@ -283,11 +299,11 @@ export default function GameDetailsScreen({ route }) {
                 }}
               >
                 <Icon type="materialCommunityIcons" name="link-variant" size={24} color={COLORS.primary} />
-                <Text style={styles.shareOptionText}>Copy Deep Link</Text>
+                <Text style={styles.shareOptionText}>{t('game.shareModal.copyDeepLink')}</Text>
               </TouchableOpacity>
 
               <View style={styles.deepLinkContainer}>
-                <Text style={styles.deepLinkLabel}>Deep Link:</Text>
+                <Text style={styles.deepLinkLabel}>{t('game.shareModal.deepLinkLabel')}</Text>
                 <Text style={styles.deepLinkText} selectable>
                   {generateDeepLink()}
                 </Text>
@@ -302,23 +318,32 @@ export default function GameDetailsScreen({ route }) {
 
 const styles = StyleSheet.create({
   area: {
-              
-              flex: 1,
-              backgroundColor: COLORS.white,
-              minHeight: SIZES.height
-          },
-          container: {
-              flex: 1,
-              backgroundColor: COLORS.white,
-          },
+    flex: 1,
+    backgroundColor: COLORS.white,
+    minHeight: SIZES.height
+  },
+  container: {
+      flex: 1,
+      backgroundColor: COLORS.white,
+  },
   content: {
     paddingHorizontal: 16,
   },
-  headerContainer: {
-    padding: 10,
+  wrapper: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.transparentPrimary,
+  },
+
+  // ── Left side ──────────────────────────────────────────────────────────────
+  backGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 12,
   },
   headerLeft: {
     flexDirection: "row",
@@ -358,24 +383,34 @@ const styles = StyleSheet.create({
     // CRITICAL: background color required for shadow to show
     backgroundColor: '#fff', // or whatever your icon background should be
   },
-    headerIcon: {
-    height: 24,
-    width: 24,
-    tintColor: COLORS.grayscale900
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  titleBlock: {
     flex: 1,
   },
-  shareButton: {
-    padding: 8,
-    marginLeft: 8,
+  eyebrow: {
+    fontSize: 10,
+    letterSpacing: 1.6,
+    color: COLORS.grayscale500,
+    fontWeight: "700",
+    marginBottom: 1,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: COLORS.grayscale900,
+    letterSpacing: -0.3,
+  },
+
+  // ── Right side ─────────────────────────────────────────────────────────────
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  iconBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   badge: {
     backgroundColor: COLORS.primary,
@@ -393,7 +428,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     lineHeight: 24,
-    marginBottom: 10,
   },
   infoContainer: {
     marginBottom: 6,

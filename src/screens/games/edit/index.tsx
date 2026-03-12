@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Image as RNImage, } from 'react-native';
 import { Button,  Header } from '@components';
 import { useTranslation } from 'react-i18next';
-import { authenticatedApi } from '@services/api';
+import { authenticatedApi, publicApi } from '@services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -22,6 +22,8 @@ const EditGameScreen = ({ route }) => {
   const [isEndPickerVisible, setEndPickerVisible] = useState(false);
   const [gameDate, setGameDate] = useState(formatDateShort(new Date(game?.startTime)));
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [Sports, setSports] = useState<string[]>([]);
+  const [cities, setCities] = useState<{ label: string; value: string }[]>([]);
   const {
     control,
     handleSubmit,
@@ -41,14 +43,14 @@ const EditGameScreen = ({ route }) => {
       numPlayers: '',
       isPrivate: true,
       pricePerPlayer: '',
-      image: '',
+      image: `${JAVA_API}games/${game.id}/image`,
     },
     mode: 'onBlur',
   });
   const [formData, setFormData] = useState({
     id: game?.id || '',
     title: game?.title || '',
-    sportType: game?.sportType || '',
+    sportType: game?.sportType.id || '',
     city: game?.city || '',
     availableSpots: game?.availableSpots || '',
     nbrSpots: game?.nbrSpots || '',
@@ -56,7 +58,7 @@ const EditGameScreen = ({ route }) => {
     address: game?.address || '',
     startTime: new Date(game?.startTime) || '',
     endTime: new Date(game?.endTime) || '',
-    imageUrl: game?.imageUrl || '',
+    imageUrl: `${JAVA_API}games/${game.id}/image`,
     isPrivate: game?.isPrivate || '',
     price: game?.price || ''
   });
@@ -73,28 +75,41 @@ const EditGameScreen = ({ route }) => {
     { label: '11v11', value: '22' },
   ];
 
-  const city = [
-    { label: 'Kansas City', value: 'kansas_city' },
-    { label: 'St. Louis', value: 'st_louis' },
-    { label: 'Springfield', value: 'springfield' },
-    { label: 'Columbia', value: 'columbia' },
-    { label: 'Independence', value: 'independence' },
-    { label: 'Lee\'s Summit', value: 'lees_summit' },
-    { label: 'Olathe', value: 'olathe' },
-    { label: 'Overland Park', value: 'overland_park' },
-    { label: 'Blue Springs', value: 'blue_springs' },
-    { label: 'Liberty', value: 'liberty' },  
-  ];
-  const SportTypes = [
-    { value: '1', label: 'Soccer' },
-    { value: '2', label: 'Basketball' },
-    { value: '3', label: 'Volleyball' },
-    { value: '4', label: 'Hockey' },
-    { value: '5', label: 'Tennis' },
-    { value: '6', label: 'Pickle ball' },
-    { value: '7', label: 'Ping Pong' },
-    { value: '8', label: 'Football' },
-  ];
+  const getCities = async (): Promise<void> => {
+    try {
+      const response = await publicApi.get('cities');
+      const cityList: City[] = response.result.data;
+      setCities(
+        cityList
+          .map((city) => ({ label: city.name, value: city.name }))
+          .sort((a, b) => a.label.localeCompare(b.label))
+      );
+    } catch (error) {
+      const errorMessage = (error as any).response?.data?.message;
+      Alert.alert('Error', errorMessage);
+      console.error('Cities fetch failed:', error);
+      setCities([]); // fallback to empty array
+    }
+  };
+
+  const getSports = async (): Promise<void> => {
+    try {
+      const response = await publicApi.get('games/sports');
+      const sportsList: Sport[] = response.result.data;
+      setSports(sportsList.map((sport) => ({ label: sport.name, value: sport.id })).sort((a, b) => a.label.localeCompare(b.label)));
+    } catch (error) {
+      const errorMessage = (error as any).response?.data?.message;
+      Alert.alert('Error', errorMessage);
+      console.error('sport type fetch failed:', error);
+      setSports([]); // fallback to empty array
+    }
+  };
+
+  useEffect(() => {
+    getSports();
+    getCities();
+  }, []);
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -139,11 +154,6 @@ const EditGameScreen = ({ route }) => {
 
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
-  };
-
-  const handleConfirm = (date) => {
-    console.warn("A date has been picked: ", date);
-    hideDatePicker();
   };
 
   const fieldsDisabled = (() => {
@@ -261,14 +271,11 @@ const EditGameScreen = ({ route }) => {
     trigger('image');
   };
 
-  useEffect(() => {
-    console.log('Initial game data:', game);
-  }, []);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
       
       <ScrollView style={styles.container}>
-        <Header title={t('edit_game.edit_game')} />
+        <Header title={t('edit_game.edit_game')}/>
         <View style={styles.form}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>{t('edit_game.game_title')}</Text>
@@ -293,10 +300,10 @@ const EditGameScreen = ({ route }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>{t('edit_game.city')}</Text>
             <Dropdown
-              data={city}
+              data={cities}
               labelField="label"
               valueField="value"
-              placeholder={t('edit_game.select_city') }
+              placeholder={t('edit_game.select_city')}
               value={formData.city}
               onChange={item => handleChange('city', item.value)}
               style={[styles.dropdown, fieldsDisabled && styles.disabledDropdown]}
@@ -321,6 +328,7 @@ const EditGameScreen = ({ route }) => {
             <Controller
               name="image"
               control={control}
+              defaultValue={`${JAVA_API}games/${game.id}/image`}
               rules={{
                 required: !game.isPrivate ? 'Image is required' : false,
               }}
@@ -363,14 +371,14 @@ const EditGameScreen = ({ route }) => {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>{t('edit_game.sportType')}</Text>
             <Dropdown
-              data={SportTypes}
+              data={Sports}
               search={true}
               labelField="label"
               valueField="value"
               placeholder={t('edit_game.select_sport_type') }
               value={formData.sportType}
               onChange={item => handleChange('sportType', item.value)}
-              style={styles.dropdown}
+              style={[styles.dropdown, fieldsDisabled && styles.disabledDropdown]}
             />
           </View>
 
@@ -383,7 +391,8 @@ const EditGameScreen = ({ route }) => {
               placeholder={t('edit_game.select_available_spots') }
               value={formData.nbrSpots.toString()}
               onChange={item => handleChange('nbrSpots', item.value)}
-              style={styles.dropdown}
+
+              style={[styles.dropdown, fieldsDisabled && styles.disabledDropdown]}
             />
           </View>
 
@@ -699,4 +708,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default EditGameScreen;
+export default EditGameScreen; 

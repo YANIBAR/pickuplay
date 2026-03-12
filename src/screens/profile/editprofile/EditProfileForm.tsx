@@ -151,23 +151,6 @@ useEffect(() => {
           </Text>
         </TouchableOpacity>*/}
 
-        {user.role === 'Partner' && (
-          <TouchableOpacity 
-            style={[styles.button, { marginTop: 12, backgroundColor: COLORS.secondary }]}
-            onPress={() => navigate("editgame")}
-          >
-            <Text style={styles.buttonText}> t('edit_game.edit_game')</Text>
-          </TouchableOpacity>
-        )}
-
-        {/*user.role === 'Customer' && (
-          <TouchableOpacity 
-            style={[styles.button, { marginTop: 12, backgroundColor: '#5856D6' }]}
-            onPress={() => navigation.navigate("addMembership")}
-          >
-            <Text style={styles.buttonText}>Add New Membership</Text>
-          </TouchableOpacity>
-        )*/}
       </View>
     </ScrollView>
   );

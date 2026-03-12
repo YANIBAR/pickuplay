@@ -22,6 +22,12 @@
           }
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow app to access your location."
+        }
+      ],
       "expo-router",
       [
         "expo-camera",

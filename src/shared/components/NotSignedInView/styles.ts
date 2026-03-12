@@ -11,7 +11,6 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: SIZES.width / 2,
-    
   },
   text: {
     fontSize: SIZES.h3,

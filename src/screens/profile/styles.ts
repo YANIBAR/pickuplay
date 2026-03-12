@@ -563,7 +563,8 @@ export default StyleSheet.create({
   gameName: {
     fontSize: 15,
     fontFamily: 'bold',
-    color: '#1A1A2E',
+    color: COLORS.secondary,
+    fontWeight: "700"
   },
   gameSub: {
     fontSize: 10,
@@ -576,7 +577,8 @@ export default StyleSheet.create({
   gamePlayers: {
     fontSize: 15,
     fontFamily: 'bold',
-    color: COLORS.primary,
+    color: COLORS.secondary,
+    fontWeight: "700"
   },
   gamePlayersLabel: {
     fontSize: 11,

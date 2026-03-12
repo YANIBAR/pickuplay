@@ -5,6 +5,7 @@ import Header from './components/Header';
 import DayCard from './components/DayCard';
 import GameModal from './components/GameModal';
 import { authenticatedApi } from '@services/api';
+import { isStoredTokenExpired } from '@utils/api/auth';
 
 interface Participant {
   id: number;
@@ -58,6 +59,7 @@ export default function HomeScreen({ route }) {
   const [startTimeDate, setStartTimeDate] = useState(new Date());
   const [endTimeDate, setEndTimeDate] = useState(new Date());
 
+  const [isLogged, setIsLogged] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     address: '',
     date: null,
@@ -86,7 +88,13 @@ export default function HomeScreen({ route }) {
     } 
   };
   useEffect(() => {
-     fetchMyGames();
+    const checkToken = async () => {
+      const expired = await isStoredTokenExpired();
+      setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+    };
+    
+    checkToken();
+    isLogged ?? fetchMyGames();
   }, []);
   
   const getWeekStart = (date: Date) => {

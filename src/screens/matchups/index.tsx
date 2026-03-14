@@ -1,11 +1,15 @@
 import { images } from '@constants';
-import React from 'react';
+import { Header } from '@components';
+import { useTranslation } from 'react-i18next';
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NoLeaguePage() {
+  const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.container}>
+        
+      <Header title={t('menu.matchups')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
@@ -18,25 +22,28 @@ export default function NoLeaguePage() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          <Text style={styles.mainTitle}>Start a Matchup</Text>
+          <Text style={styles.mainTitle}>{t("matchups.startMatchup")}</Text>
 
           <Text style={styles.subtitle}>
-          No challenges yet
+            {t("matchups.noChallenges")}
           </Text>
 
           <Text style={styles.description}>
-          Challenge another team in your city and compete on the field.
-          Create a matchup, set the time and location, and let the game decide the winner.
+            {t("matchups.description")}
           </Text>
 
           {/* Action Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Create Matchup</Text>
+              <Text style={styles.primaryButtonText}>
+                {t("matchups.createMatchup")}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondaryButton}>
-              <Text style={styles.secondaryButtonText}>Find Teams</Text>
+              <Text style={styles.secondaryButtonText}>
+                {t("matchups.findTeams")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -53,11 +60,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingVertical: 24,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 10,
   },
   logoContainer: {
     marginBottom: 12,
@@ -68,24 +73,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 400,
-    height: 300,
+    height: 270,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  whistleBody: {
-    width: 45,
-    height: 35,
-    backgroundColor: '#1FAC9B',
-    borderRadius: 8,
-    marginTop: 5,
-  },
-  whistleTop: {
-    width: 12,
-    height: 20,
-    backgroundColor: '#1FAC9B',
-    borderRadius: 6,
-    marginLeft: 35,
-    marginTop: -15,
   },
   brandName: {
     fontSize: 24,

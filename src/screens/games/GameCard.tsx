@@ -1,10 +1,9 @@
-  import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
   import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
   import { Button, Icon, NotSignedInView } from '@components';
   import { JAVA_API } from '@env';
   import { COLORS, FONTS, icons, SIZES } from '@constants';
   import { useNavigation } from '@react-navigation/native';
-  import AsyncStorage from '@react-native-async-storage/async-storage';
   import { authenticatedApi } from '@services/api';
 import { useTranslation } from 'react-i18next';
 import { isStoredTokenExpired } from '@utils/api/auth';
@@ -70,7 +69,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 
     const handleConfirmJoin = async () => {
     if (!numPlayers.trim()) {
-      Alert.alert('Please enter number of players');
+      Alert.alert(t('games.pleaseEnterPlayers'));
       return;
     }
 
@@ -85,14 +84,13 @@ import { isStoredTokenExpired } from '@utils/api/auth';
         setPromoCode('');
         
         // Optional: show success message or navigate
-        Alert.alert('Successfully joined game!');
+        Alert.alert(t('games.successJoined'));
         
         // Optional: refresh game state or navigate
         // await fetchGameDetails(game.id);
       }
     } catch (error) {
-      console.error('Failed to join game:', error);
-      const errorMessage = error?.response?.data?.message || 'Failed to join game. Please try again.';
+      const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
       Alert.alert(errorMessage);
     } 
   };
@@ -181,7 +179,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                 size={18} 
                 color="white"
               />
-              <Text style={styles.joinButtonText}>Join our Game</Text>
+              <Text style={styles.joinButtonText}>{t('games.joinButton')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -197,7 +195,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
             {isLogged==true ? (
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Join Game</Text>
+                  <Text style={styles.modalTitle}>{t('games.joinGameTitle')}</Text>
                   <Pressable onPress={handleCloseModal} style={styles.closeButton}>
                     <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
                   </Pressable>
@@ -211,7 +209,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                 <View style={styles.divider} />
 
                 <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>Number of Players</Text>
+                  <Text style={styles.fieldLabel}>{t('games.numberOfPlayers')}</Text>
                   <View style={styles.playerCountContainer}>
                     <TouchableOpacity 
                       style={styles.counterButton}
@@ -258,7 +256,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                 </View>
 
                 <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>Promo Code (Optional)</Text>
+                  <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
                   <View style={styles.inputWrapper}>
                     <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
                     <TextInput

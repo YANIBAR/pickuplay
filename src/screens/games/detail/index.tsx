@@ -13,6 +13,7 @@ import { formatDateLong, formatTime } from '@utils/dateUtils';
 import { useUserData } from '@services/useUserData';
 import { getItem } from '@utils/storage';
 import { isStoredTokenExpired } from '@utils/api/auth';
+import { toTitleCase } from '@utils/helpers';
 
 interface Game {
   id: number;
@@ -244,7 +245,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
                         style={styles.playerImage}
                       />
                       <Text style={styles.playerName} numberOfLines={2}>
-                        {player.userName}
+                        {toTitleCase(player.userName)}
                       </Text>
                     </View>
                   ))}
@@ -334,6 +335,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.transparentPrimary,
   },
@@ -398,6 +400,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: COLORS.grayscale900,
     letterSpacing: -0.3,
+    marginTop: 8
   },
 
   // ── Right side ─────────────────────────────────────────────────────────────
@@ -609,19 +612,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingVertical: 12,
     paddingHorizontal: 8,
-    backgroundColor: '#f5f5f5',
     borderRadius: 8,
   },
   playerImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 40,
+    width: 96,
+    height: 96,
+    borderRadius: 50,
     marginBottom: 8,
     backgroundColor: '#e0e0e0',
   },
   playerName: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
     textAlign: 'center',
     color: '#333',
   },

@@ -1,0 +1,551 @@
+{
+  "AvailableLanguages": "Langues disponibles",
+  "CustomerService": "Service Client",
+  "EnterMessage": "Entrez votre message...",
+  "welcome": {
+    "title": "Bienvenue !",
+    "subtitle": "Bonjour, personnalisez votre tranquillité d'esprit avec pickuplay.",
+    "alreadyHasAccount": "Vous avez déjà un compte ?",
+    "login": "Se connecter",
+    "privacyPolicy": "Politique de confidentialité"
+  },
+  "login": {
+    "invalidCredentialsTitle": "Identifiants invalides",
+    "invalidCredentialsMessage": "Veuillez vérifier votre nom d'utilisateur ou votre mot de passe et réessayer.",
+    "limitReachedTitle": "Limite de connexion atteinte",
+    "limitReachedMessage": "Trop de tentatives de connexion. Veuillez réessayer dans 5 minutes. 😅",
+    "unexpectedErrorTitle": "Échec de la connexion",
+    "unexpectedErrorMessage": "Une erreur imprévu est survenue. Veuillez réessayer plus tard.",
+    "connectionErrorTitle": "Échec de la connexion",
+    "connectionErrorMessage": "Une erreur est survenue. Veuillez vérifier votre connexion Internet et réessayer.",
+    "tokenStorageError": "Erreur lors du stockage du jeton",
+    "userStorageError": "Erreur lors du stockage des informations de l'utilisateur"
+  },
+  "logout": {
+    "title": "Déconnexion",
+    "confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "confirm_button": "Oui, se déconnecter"
+  },
+  "c": {
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "username": "Nom d'utilisateur",
+    "phone": "Téléphone",
+    "email": "Email",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Mot de passe (8 caractères ou plus)",
+    "confirmPasswordPlaceholder": "Confirmer le mot de passe",
+    "country": "Pays",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "send": "Envoyer",
+    "termsOfService": "Conditions d'utilisation",
+    "privacyPolicy": "Politique de confidentialité",
+    "and": "et",
+    "reset": "Réinitialiser",
+    "login": "Se connecter",
+    "logout": "Se déconnecter",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "skip": "Passer",
+    "continue": "Continuer",
+    "biography": "Biographie",
+    "emailAddress": "Adresse email",
+    "phoneNumber": "Numéro de téléphone",
+    "emailPlaceholder": "exemple@gmail.com"
+  },
+  "signUp": {
+    "headerTitle": "S'inscrire",
+    "createAccount": "Créez un compte pour commencer",
+    "termsAcceptance": "En créant un compte, vous acceptez nos",
+    "createMyAccount": "Créer mon compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?"
+  },
+  "signIn": {
+    "forgotPassword": "Mot de passe oublié ?",
+    "usernameOrEmail": "Nom d'utilisateur ou Email",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "signUp.roleCustomer": "Client",
+    "signUp.rolePartner": "Partenaire",
+    "emailOrPhone": "Email ou telephone"
+  },
+  
+  "shipment": {
+    "type.automobileParts": "Pièces automobiles",
+    "type.books": "Livres",
+    "type.clothes": "Vêtements",
+    "type.document": "Document",
+    "type.electronic": "Électronique",
+    "type.food": "Nourriture",
+    "type.jowerly": "Bijoux",
+    "type.homeKitchen": "Maison & Cuisine",
+    "type.makup": "Maquillage",
+    "type.medicine": "Médicaments"
+  },
+  "otpVerification": {
+    "headerTitle": "Vérification OTP",
+    "codeSent": "Le code a été envoyé à",
+    "resendCodeIn": "Renvoi du code dans",
+    "verify": "Vérifier",
+    "resend": "Renvoi",
+    "successTitle": "Succès",
+    "tokenVerifiedMessage": "Jeton vérifié avec succès.",
+    "errorTitle": "Erreur",
+    "tokenFailedWithStatus": "Échec de la vérification du jeton avec le statut : {{status}}.",
+    "tokenVerificationFailed": "Échec de la vérification du jeton. {{message}}",
+    "genericError": "Veuillez réessayer.",
+    "timeExpiredMessage": "Le temps est écoulé. Veuillez demander un nouveau jeton.",
+    "otpResentMessage": "Le code OTP a été renvoyé à {{email}}.",
+    "resendErrorLog": "Erreur lors du renvoi de l'OTP :",
+    "serverError": "Erreur du serveur : {{message}}",
+    "noResponseError": "Pas de réponse du serveur. Veuillez vérifier votre connexion Internet.",
+    "unexpectedResendError": "Une erreur est survenue lors du renvoi de l'OTP. Veuillez réessayer."
+  },
+  "forgotPwd": {
+    "title": "Mot de passe oublié",
+    "subtitle": "Veuillez entrer votre adresse email pour recevoir un code OTP pour réinitialiser votre mot de passe"
+  },"onboarding": {
+  "onboarding1": {
+    "title": "Bienvenue sur M’go Pass !",
+    "description": "🎉 Découvrez le premier pass d'activités tout-en-un du Maroc !\nAvec M’go Pass, profitez des meilleurs lieux — des aires de jeux aux musées en passant par les cours de surf — avec un seul abonnement intelligent.\nQue vous soyez une famille, un jeune aventurier ou un touriste, M’go Pass rend le divertissement simple et abordable."
+  },
+  "onboarding2": {
+    "title": "Comment fonctionne M’go Pass",
+    "description": "🎟️ 1. Choisissez votre abonnement (Enfant, Adulte ou Touriste)\n📍 2. Explorez les lieux partenaires à proximité\n📲 3. Présentez votre pass QR à l’entrée\n✅ 4. Profitez de l’activité — 100 % sans argent liquide et sans tracas !"
+  },
+  "onboarding3": {
+    "title": "Accès malin, vraies économies",
+    "description": "💰 Économisez des centaines de dirhams en quelques visites\n📆 Vous pouvez visiter chaque lieu une ou deux fois par an\n🕒 Les partenaires définissent les horaires valides (comme les matins ou les jours de semaine)\n📍 Tout est géré numériquement — pas de billets papier !"
+  },
+  "onboarding4": {
+    "title": "Approuvé par les meilleurs lieux",
+    "description": "🏅 Nos partenaires sont vérifiés et approuvés\n📸 Vous pouvez prévisualiser chaque activité avant la visite\n🔒 Votre code QR est sécurisé et unique\n🎁 Certains lieux offrent des avantages exclusifs aux membres !"
+  },
+  
+  "previousButton": "Précédent",
+  "nextButton": "Suivant",
+  "finishButton": "Terminer"
+},
+  "errors": {
+  "required": "Ce champ est requis",
+  "invalidEmail": "Veuillez entrer une adresse email valide",
+  "networkError": "Une erreur réseau s'est produite. Veuillez réessayer plus tard.",
+  "firstNameRequired": "Le prénom est requis",
+  "lastNameRequired": "Le nom est requis",
+  "emailAddressRequired": "L'adresse email est requise",
+  "countryRequired": "Le pays est requis",
+  "usernameRequired": "Le nom d'utilisateur est requis",
+  "passwordRequired": "Le mot de passe est requis",
+  "phoneRequired": "Le numéro de téléphone est requis",
+  "confirmPassword": "La confirmation du mot de passe est requise",
+  "usernameOrEmailRequired": "Nom d'utilisateur ou email requis",
+  "phoneNumberRequired": "Le numéro de téléphone est requis",
+  "passwordMinLength": "Trop court, utilisez au moins 8 caractères",
+  "passwordSpecialCharacter": "Le mot de passe doit contenir au moins une lettre et un caractère spécial.",
+  "passwordMatch": "Les mots de passe doivent correspondre"
+},
+"cnp": {
+  "modal": {
+    "congratulations": "Félicitations",
+    "accountReady": "Votre compte est prêt à être utilisé. Vous serez redirigé vers la page d'accueil dans quelques secondes.",
+    "continue": "Continuer"
+  },
+  "header": {
+    "createNewPassword": "Créer un nouveau mot de passe"
+  },
+  "form": {
+    "createYourNewPassword": "Créez votre nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "continue": "Continuer"
+  }
+},
+"forgotPwdEmail": {
+  "title": "Mot de passe oublié ?",
+  "subtitle": "Entrez votre adresse email enregistrée ci-dessous et nous vous enverrons les instructions pour réinitialiser votre mot de passe.",
+  "emailAddress": "Adresse email",
+  "emailPlaceholder": "Entrez votre email",
+  "send": "Envoyer",
+  "dontHaveAccount": "Vous n'avez pas de compte ?",
+  "signUp": "S'inscrire"
+},
+"passwordMethods": {
+  "title": "Mot de passe oublié",
+  "subtitle": "Sélectionnez les coordonnées à utiliser pour réinitialiser votre mot de passe.",
+  "viaSMS": "par SMS :",
+  "viaEmail": "par Email :",
+  "continue": "Continuer"
+},
+"forgotPwdPhone": {
+  "title": "Mot de passe oublié",
+  "enterPhone": "Entrez votre numéro de téléphone",
+  "placeholder": "Entrez votre numéro de téléphone",
+  "rememberMe": "Se souvenir de moi",
+  "resetPassword": "Réinitialiser le mot de passe",
+  "rememberPassword": "Vous vous souvenez du mot de passe ?",
+  "noAccount": "Vous n'avez pas de compte ?",
+  "signUp": "S'inscrire"
+},
+"verifyIdentity": {
+  "title": "Vérifions votre identité",
+  "subtitle": "Nous voulons confirmer votre identité avant que vous puissiez utiliser notre service.",
+  "buttonText": "Vérifier l'identité"
+},
+"editProfile": {
+  "title": "Profil personnel",
+  "phoneNumber": "Entrez votre numéro de téléphone",
+  "streetAddress": "Adresse",
+  "city": "Ville",
+  "state": "État",
+  "zipCode": "Code postal",
+  "updateButton": "Mettre à jour",
+  "saveChanges": "Enregistrer les modifications",
+  "deleteMyAccount": "Supprimer mon compte",
+  "updating": "Mise à jour..."
+},
+"settings": {
+    "invite": "Rejoignez-moi sur cette application géniale ! Utilisez mon lien de parrainage :",
+    "editProfile": "Modifier le profil",
+    "verifyProfile": "Vérifier le profil",
+    "payment": "Paiement",
+    "languageRegion": "Langue et région",
+    "inviteFriends": "Inviter des amis",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsConditions": "Conditions générales",
+    "helpCenter": "Centre d'aide",
+    "logout": "Déconnexion"
+  },
+  "writeReview": {
+    "deliveryCompleted": "Livraison terminée !",
+    "leaveReview": "Merci de laisser un avis pour les autres.",
+    "placeholderReview": "La livraison est super rapide 🔥",
+    "writeReview": "Écrire un avis",
+    "cancel": "Annuler",
+    "errorIncompleteReview": "Veuillez fournir une note et un commentaire.",
+    "accessibilityInput": "Écrivez votre avis ici"
+  },
+  "terms": {
+    "headerTitle": "Conditions générales",
+    "introduction": "En utilisant ce site web et/ou en achetant sur ce site, vous ('vous', 'votre' ou 'acheteur') acceptez l'accord contraignant suivant : 'Nous' fait référence à pickuplay Inc., son conseil d'administration, ses employés, dirigeants, agents, société mère, actionnaires, gestionnaires, membres et filiales.",
+    "sections": {
+      "description": {
+        "title": "Description du service pickuplay",
+        "content": "pickuplay est une plateforme d'expédition peer-to-peer qui connecte acheteurs et voyageurs. Le service devient actif immédiatement après la création du compte."
+      },
+      "purchase": {
+        "title": "Conditions d'achat",
+        "content": "Les utilisateurs doivent avoir 18 ans ou plus pour s'inscrire. Les parents peuvent créer des comptes pour leurs enfants mineurs mais assument l'entière responsabilité de leur conformité à ces conditions."
+      },
+      "membership": {
+        "title": "Conditions d'adhésion",
+        "content": "Les comptes restent actifs sauf résiliation. pickuplay se réserve le droit de suspendre les comptes violant ces conditions."
+      },
+      "venues": {
+        "title": "Prestataires de services",
+        "content": "Les lieux et prestataires participants peuvent changer sans préavis. Les membres actuels ont accès aux nouveaux prestataires automatiquement."
+      },
+      "transferability": {
+        "title": "Transfert de compte",
+        "content": "Les comptes ne sont pas transférables, sauf pour les comptes mineurs gérés par un parent. Chaque compte a une identification unique."
+      },
+      "disclaimers": {
+        "title": "Exclusions de responsabilité",
+        "content": "pickuplay n'offre aucune garantie concernant l'exactitude ou l'adéquation du service. Les utilisateurs assument tous les risques lors de l'utilisation des services connectés."
+      },
+      "liability": {
+        "title": "Limitations de responsabilité",
+        "content": "Les utilisateurs dégagent pickuplay de toute responsabilité pour blessures, dommages ou pertes survenant lors de l'utilisation du service. Cela inclut les membres de la famille et les héritiers."
+      },
+      "indemnification": {
+        "title": "Responsabilités de l'utilisateur",
+        "content": "Vous acceptez d'indemniser pickuplay contre toute réclamation découlant de votre utilisation du service, y compris les incidents sur les lieux et la confiance accordée au site web."
+      },
+      "privacy": {
+        "title": "Pratiques en matière de données",
+        "content": "Bien que les données de transaction soient sécurisées, l'utilisation générale du site n'offre aucune attente de confidentialité. Consultez notre Politique de confidentialité pour plus de détails."
+      },
+      "content": {
+        "title": "Contenu du site web",
+        "content": "Les liens tiers n'impliquent aucune approbation. pickuplay n'est pas responsable de l'exactitude ou de la disponibilité du contenu externe."
+      },
+      "property": {
+        "title": "Propriété intellectuelle",
+        "content": "Tout le contenu du site est la propriété de pickuplay. La reproduction ou distribution non autorisée est interdite."
+      },
+      "communications": {
+        "title": "Consentement aux communications",
+        "content": "Vous consentez à recevoir des communications liées au service par e-mail/SMS. Des options de désabonnement sont disponibles pour les messages promotionnels."
+      },
+      "governance": {
+        "title": "Gouvernance légale",
+        "content": "Le droit de l'Utah régit ces conditions. Les réclamations doivent être déposées dans un délai d'un an devant les tribunaux du comté de Salt Lake."
+      }
+    },
+    "prohibitedItems": {
+      "title": "Articles interdits",
+      "items": [
+        "Armes et objets tranchants",
+        "Matériaux inflammables",
+        "Substances illégales",
+        "Contrefaçons",
+        "Articles périssables",
+        "Animaux vivants",
+        "Matériaux dangereux"
+      ]
+    },
+    "customs": {
+      "title": "Conformité douanière",
+      "content": "Les utilisateurs doivent se conformer à toutes les réglementations douanières. pickuplay ne fournit aucune orientation sur les droits/taxes et n'assume aucune responsabilité pour les violations."
+    },
+    "modifications": {
+      "title": "Modifications des politiques",
+      "content": "pickuplay peut modifier ces conditions avec des dates d'effet mises à jour. L'utilisation continue constitue l'acceptation des changements."
+    }
+  },
+  "PrivacyPolicy": {
+    "EffectiveDate": "Date d'effet",
+    "InformationWeCollect": "1. Informations que nous collectons",
+    "InformationWeCollectDescription": "Nous collectons divers types d'informations pour fournir et améliorer notre service, notamment :",
+    "PersonalData": "Données personnelles : Votre adresse e-mail, nom, numéro de téléphone et adresse physique.",
+    "UsageData": "Données d'utilisation : Informations sur votre utilisation de notre service, comme l'adresse IP, le type de navigateur et les identifiants d'appareil.",
+    "UseOfPersonalData": "2. Utilisation de vos données personnelles",
+    "UseOfPersonalDataDescription": "Nous pouvons utiliser vos données personnelles aux fins suivantes :",
+    "ServiceDelivery": "Prestation de service : Pour fournir et maintenir nos services, y compris le contenu et les fonctionnalités personnalisés.",
+    "Communication": "Communication : Pour communiquer avec vous, répondre à vos demandes et fournir des informations importantes sur nos services.",
+    "Analytics": "Analyse : Pour analyser les modèles d'utilisation, améliorer nos services et personnaliser le contenu en fonction des préférences des utilisateurs.",
+    "TrackingAndCookies": "3. Suivi et cookies",
+    "TrackingAndCookiesDescription": "Nous utilisons des cookies et des technologies de suivi similaires pour améliorer votre expérience et recueillir des données d'utilisation. Vous pouvez désactiver les cookies via votre navigateur, mais cela peut affecter votre capacité à utiliser certaines fonctionnalités de notre service.",
+    "DataSecurity": "4. Sécurité des données",
+    "DataSecurityDescription": "Nous donnons la priorité à la sécurité de vos données personnelles mais ne pouvons pas garantir une protection à 100 %. Nous utilisons des protections commercialement raisonnables pour protéger vos informations.",
+    "DataDeletionRequests": "5. Demandes de suppression de données",
+    "DataDeletionRequestsDescription": "Vous pouvez demander la suppression de vos données personnelles en nous contactant à [Insérer l'e-mail du support]. Les interactions avec d'autres utilisateurs seront anonymisées pour maintenir l'intégrité du service.",
+    "ChangesToPrivacyPolicy": "6. Modifications de cette politique de confidentialité",
+    "ChangesToPrivacyPolicyDescription": "Nous pouvons mettre à jour cette Politique de confidentialité périodiquement. Toute modification sera communiquée par e-mail ou via un avis visible dans notre service.",
+    "ContactUs": "7. Contactez-nous",
+    "ContactUsDescription": "Si vous avez des questions, n'hésitez pas à nous contacter à Support@pickuplay.com."
+  },
+  "faq": {
+    "categories": {
+      "general": "Général",
+      "account": "Compte",
+      "security": "Sécurité",
+      "shopper": "Acheteur",
+      "traveler": "Voyageur",
+      "issues": "Problèmes",
+      "tracking": "Suivi"
+    },
+    "question1": "Combien de temps mon pass est-il valable ?",
+    "answer1": "Les M'go Pass sont valables 1 an à partir de la date d'achat, et non pour une année civile. Si vous achetez votre pass en cours d'année et que des événements sont passés ou hors saison, ils seront disponibles la saison suivante jusqu'à l'expiration de votre pass.",
+    "question2": "Que se passe-t-il si je renouvelle mon abonnement M'go Pass à l'avance ?",
+    "answer2": "Renouveler votre abonnement M'go Pass à l'avance prolonge simplement votre date d'expiration originale d'un an. Toutes les visites dans les lieux avant l'expiration de votre pass original compteront pour votre pass original. Si le nombre de visites dépasse la limite autorisée, elles compteront pour le pass renouvelé. Une fois votre pass original expiré, vos utilisations de pass seront réinitialisées à zéro.",
+    "question3": "Comment réserver mes billets pour un événement sportif ?",
+    "answer3": "L'icône calendrier sur l'application M'go Pass affiche tous les 'Événements' à venir disponibles pour vous en tant que membre M'go Pass. Choisissez l'événement pour enregistrer vos passes. Si vous êtes sur www.M'gopass.com, cliquez sur le lieu pour lequel vous souhaitez réserver des billets et accédez à l'onglet 'Événements' en haut de la page. Les liens d'inscription aux événements apparaissent 2 semaines avant l'événement et disparaissent 48 heures avant le début. Les billets seront soit à retirer sur place le jour de l'événement, soit envoyés par e-mail, selon la méthode de distribution du lieu. Les instructions pour obtenir les billets seront incluses dans l'e-mail de confirmation d'inscription à l'événement.",
+    "question4": "Comment modifier mes informations de contact pour mon M'go Pass ?",
+    "answer4": "Connectez-vous simplement à votre compte et vous pourrez modifier les informations de votre compte.",
+    "question5": "Le M'go Pass est-il transférable ?",
+    "answer5": "Les abonnements M'go Pass ne sont pas transférables. Chaque pass porte le nom du propriétaire et un code-barres individuel qui ne peut être utilisé que par le propriétaire du pass.",
+    "question6": "Les lieux actuels seront-ils toujours disponibles sur le M'go Pass ?",
+    "answer6": "Nous anticipons que les lieux actuels resteront sur le M'go Pass. Cependant, les lieux participants sont susceptibles de changer. De nouveaux lieux sont souvent ajoutés sans frais supplémentaires pour les membres actuels.",
+    "question7": "À quel âge ai-je besoin d'un M'go Pass ?",
+    "answer7": "Nous recommandons que les enfants âgés de 2 ans et plus aient leur propre M'go Pass à leur nom. La plupart des lieux commencent à facturer l'entrée à cet âge. Certains lieux exigent un billet pour les enfants ayant eu un anniversaire. Consultez les pages des lieux pour plus de détails.",
+    "question8": "De nouveaux lieux seront-ils ajoutés ?",
+    "answer8": "Oui. Nous cherchons toujours à ajouter de nouveaux lieux au M'go Pass. Lorsque c'est fait, les détenteurs de pass existants y sont automatiquement inclus.",
+    "question9": "Comment fonctionnent les remboursements ?",
+    "answer9": "M'go Pass rembourse les commandes dans les 30 jours suivant l'achat. Aucun remboursement ne sera effectué pour les abonnements utilisés dans les lieux participants."
+  },
+    "payment": {
+      "cardHolderName": "Nom du titulaire",
+      "cardNumber": "Numéro de carte",
+      "expireDate": "Date d'expiration",
+      "CVV": "Cryptogramme"
+    },
+    "statistics": {
+      "venueAnalytics": {
+        "title": "Analytiques du lieu"
+      },
+      "timeFrame": {
+        "hour": "Heure",
+        "day": "Jour",
+        "month": "Mois"
+      },
+      "stats": {
+        "totalVisitors": "Visiteurs totaux",
+        "peakTime": "Heure d'affluence ({{timeFrame}})",
+        "primaryAge": "Tranche d'âge principale"
+      },
+      "charts": {
+        "visitorsOverTime": "Visiteurs dans le temps",
+        "genderDistribution": "Répartition par genre",
+        "ageDistribution": "Répartition par âge"
+      },
+      "common": {
+        "loading": "Chargement des données..."
+      }
+    },
+    "scanQRCode": {
+      "scan": {
+        "instructionsTop": "Veuillez scanner un QR code pour continuer",
+        "instructionsBottom": "Positionnez le QR code dans le cadre",
+        "tapToScan": "Appuyez pour scanner le QR code"
+      },
+      "common": {
+        "ok": "OK",
+        "confirm": "Confirmer",
+        "cancel": "Annuler"
+      }
+    },
+    "membership": {
+      "memberships": {
+        "header": "Mes abonnements",
+        "emptyState": {
+          "title": "Aucun abonnement trouvé",
+          "subtitle": "Vous n'avez pas encore d'abonnements actifs. Commencez par ajouter votre premier abonnement.",
+          "button": "Ajouter un abonnement"
+        }
+      },
+      "city": "Ville",
+      "type": "Type",
+      "valid_until": "valable jusqu'à",
+      "status": "Statut",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "code": "Code",
+      "types": {
+        "kids": "Enfant",
+        "adults": "Adulte",
+        "golden": "Or",
+        "tourists": "Touriste"
+      },
+      "common": {
+        "loading": "Chargement des abonnements..."
+      },
+      "addMembership": "Ajouter un nouvel abonnement",
+      
+    },
+    "membership_details": "Détails de l'abonnement",
+    "activity": {
+      "location": "Emplacement",
+      "allowedVisits": "Visites autorisées",
+      "visitCount_one": " visite",
+      "visitCount_plural": " visites",
+      "membershipTypes": "Types d'abonnement",
+      "scanButton": "Scanner le QR Code",
+      "qrModal": {
+        "title": "Votre QR Code d'abonnement",
+        "instructions": "Présentez ce QR code à l'entrée"
+      },
+      "activityTypes": {
+        "fitness": "Fitness",
+        "sports": "Sports",
+        "wellness": "Bien-être",
+        "pool": "Piscine",
+        "museum": "Musée",
+        "cinema": "Cinéma",
+        "park": "Parc",
+        "theater": "Théâtre",
+        "restaurant": "Restaurant"
+      }
+    },
+    "event": {
+      "eventTitle": "Événements",
+      "occurrence": "{{count}} fois",
+      "occurrence_plural": "{{count}} fois",
+      "eventsPerYear": "{{count}} Événement/an",
+      "eventsPerYear_plural": "{{count}} Événements/an"
+    },
+  "menu": {
+    "events": "Evenements",
+    "memberships": "Abonnements",
+    "charts": "Graphs",
+    "scan_qr": "Scanner QR",
+    "menu": "Menu"
+  },
+  "edit_activity": {
+    "edit_activity": "Modifier l'activité",
+    "activity_name": "Nom de l'activité",
+    "enter_activity_name": "Entrez le nom de l'activité",
+    "type": "Type",
+    "fitness": "Fitness",
+    "sports": "Sports",
+    "wellness": "Bien-être",
+    "pool": "Piscine",
+    "museum": "Musée",
+    "cinema": "Cinéma",
+    "park": "Parc",
+    "theater": "Théâtre",
+    "restaurant": "Restaurant",
+    "city": "Ville",
+    "casablanca": "Casablanca",
+    "marrakesh": "Marrakech",
+    "tanger": "Tanger",
+    "fes": "Fès",
+    "agadir": "Agadir",
+    "rabat": "Rabat",
+    "location": "Emplacement",
+    "enter_location": "Entrez l'emplacement",
+    "allowed_visits": "Visites autorisées",
+    "active_days_hours": "Jours et heures d'activité",
+    "monday": "Lundi",
+    "tuesday": "Mardi",
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi",
+    "sunday": "Dimanche",
+    "to": "à",
+    "description": "Description",
+    "enter_description": "Entrez la description",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "add_membership": {
+    "addMembership": "Ajouter un abonnement",
+    "memberName": "Nom du membre *",
+    "enterFullName": "Entrez le nom complet",
+    "gender": "Genre *",
+    "male": "Homme",
+    "female": "Femme",
+    "birthDate": "Date de naissance",
+    "city": "Ville *",
+    "selectCity": "Sélectionnez une ville...",
+    "membershipType": "Type d'abonnement *",
+    "adult": "Adulte",
+    "kids": "Enfant",
+    "startDate": "Date de début d'abonnement",
+    "submitButton": "Ajouter l'abonnement"
+  },
+  "scanQRCode": {
+    "scan": {
+      "instructionsTop": "Veuillez scanner un QR code pour continuer",
+      "instructionsBottom": "Positionnez le QR code dans le cadre",
+      "tapToScan": "Appuyez pour scanner le QR code"
+    },
+    "manualInput": {
+      "title": "Entrez l'ID d'adhésion manuellement",
+      "subtitle": "Si le scan du QR code ne fonctionne pas, vous pouvez entrer l'ID d'adhésion manuellement",
+      "placeholder": "Entrez l'ID d'adhésion",
+      "submit": "Vérifier l'adhésion",
+      "backToScanner": "Retour au scanner"
+    },
+    "buttons": {
+      "manualInput": "Entrez l'ID d'adhésion manuellement",
+      "manualInputSubtext": "Utilisez ceci si le scan QR ne fonctionne pas",
+      "closeScanner": "Fermer le scanner"
+    },
+    "errors": {
+      "wrongQR": "Ce QR code n'est pas pour la bonne activité.\nVeuillez scanner le bon QR code.",
+      "invalidQR": "Le format du QR code n'est pas valide. Veuillez réessayer.",
+      "invalidInput": "Entrée invalide",
+      "membershipNotFound": "Aucune adhésion trouvée avec ce code. Veuillez vérifier et réessayer."
+    },
+    "modals": {
+      "confirmRedemption": "Confirmer la validation",
+      "success": "Succès",
+      "error": "Erreur"
+    },
+    "divider": "OU"
+  },
+  
+  "activities_header": "Liste des activités list"
+}

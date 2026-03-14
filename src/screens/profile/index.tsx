@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-virtualized-view';
 import { COLORS, SIZES, icons, images } from '@constants';
 import { useNavigation } from '@react-navigation/native';
-import { Button, Icon, Header } from '@components';
+import { Button, Icon, Header, NotSignedInView } from '@components';
 import RBSheet from "react-native-raw-bottom-sheet";
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,7 +25,6 @@ type Nav = {
 const Profile = () => {
   const { t } = useTranslation();
   const { navigate } = useNavigation<Nav>();
-  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const { userData, error, refreshUserData } = useUserData();
   const [isLogged, setIsLogged] = useState(false);
   const refRBSheet = useRef<any>(null);
@@ -69,24 +68,6 @@ const Profile = () => {
       setGamesLoading(false);
     }
   };
-  // ──────────────────────────────────────────────────────────────
-
-  const handleLogout = async () => {
-    try {
-      const keysToRemove = [
-        'access_token', 'id', 'firstName', 'lastName', 'email',
-        'phone', 'role', 'preferredLanguage', 'profileImage', 'gameId',
-      ];
-      await AsyncStorage.multiRemove(keysToRemove);
-      await refreshUserData();
-      setLogoutModalVisible(false);
-      refRBSheet.current?.close();
-      navigate("login");
-    } catch (e) {
-      console.error('Failed to log out', e);
-      Alert.alert('Error', 'Failed to log out. Please try again.');
-    }
-  };
 
   const renderHeader = () => (
     <TouchableOpacity style={styles.headerContainer}>
@@ -95,8 +76,8 @@ const Profile = () => {
       </View>
       <TouchableOpacity onPress={() => navigate("setting")}>
         <Image
-          source={icons.moreCircle}
-          style={[styles.headerIcon, { tintColor: COLORS.grayscale900 }]}
+          source={icons.settings}
+          style={[styles.headerIcon, { tintColor: COLORS.secondary }]}
         />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -118,37 +99,70 @@ const Profile = () => {
   }, [userData?.id]);
 
   const uploadImage = async (file: any) => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append('picture', {
-      uri: file.uri,
-      name: file.fileName || 'default-image.jpg',
-      type: file.type || 'image/jpeg',
-    });
-    try {
-      const token = await AsyncStorage.getItem('access_token');
-      const response = await fetch(`${JAVA_API}profile/upload-image`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-        body: formData,
-      });
-      if (!response.ok) throw new Error(`HTTP status ${response.status}`);
-      const data = await response.json();
-      setSelectedImage(file.uri);
-      Alert.alert('Success', data.message);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      Alert.alert('Error', 'Upload failed');
-    }
-  };
+  if (!file) return;
 
-  const handleImagePicker = () => {
-    Alert.alert('Select Image', 'Choose how to select an image', [
-      { text: 'Camera', onPress: () => launchCameraForImage() },
-      { text: 'Photo Library', onPress: () => launchGalleryForImage() },
-      { text: 'Cancel', onPress: () => {}, style: 'cancel' },
-    ]);
-  };
+  const formData = new FormData();
+
+  formData.append('picture', {
+    uri: file.uri,
+    name: file.fileName || 'default-image.jpg',
+    type: file.type || 'image/jpeg',
+  });
+
+  try {
+    const token = await AsyncStorage.getItem('access_token');
+
+    const response = await fetch(`${JAVA_API}profile/upload-image`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      },
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+
+    const data = await response.json();
+
+    setSelectedImage(file.uri);
+
+    Alert.alert(
+      t('profile.uploadSuccessTitle'),
+      t('profile.uploadSuccessMessage')
+    );
+
+  } catch (error) {
+    console.error('Upload failed:', error);
+
+    Alert.alert(
+      t('common.error'),
+      t('profile.uploadFailed')
+    );
+  }
+};
+
+const handleImagePicker = () => {
+  Alert.alert(
+    t('profile.selectImageTitle'),
+    t('profile.selectImageDescription'),
+    [
+      {
+        text: t('profile.camera'),
+        onPress: () => launchCameraForImage()
+      },
+      {
+        text: t('profile.photoLibrary'),
+        onPress: () => launchGalleryForImage()
+      },
+      {
+        text: t('common.cancel'),
+        onPress: () => {},
+        style: 'cancel'
+      },
+    ]
+  );
+};
 
   const launchCameraForImage = () => {
     launchCamera({ mediaType: 'photo', cameraType: 'back', quality: 0.8 }, (response) => {
@@ -167,65 +181,73 @@ const Profile = () => {
       }
     });
   };
-
+  
   const renderProfile = () => (
-  <View style={styles.profileContainer}>
-    <View style={styles.avatarContainer}>
-      <Image
-        source={{ uri: `${JAVA_API}profile/${userData?.id}/image` }}
-        resizeMode="contain"
-        style={styles.avatar}
-      />
-      <TouchableOpacity style={styles.pickImage} onPress={handleImagePicker}>
-        <Icon type="materialCommunityIcons" name="pencil-outline" size={24} color={COLORS.white} />
-      </TouchableOpacity>
+    <View style={styles.profileContainer}>
+      <View style={styles.avatarContainer}>
+        <Image
+          source={{ uri: `${JAVA_API}profile/${userData?.id}/image` }}
+          resizeMode="contain"
+          style={styles.avatar}
+        />
+        <TouchableOpacity style={styles.pickImage} onPress={handleImagePicker}>
+          <Icon type="materialCommunityIcons" name="pencil-outline" size={20} color={COLORS.white} />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
+        {toTitleCase(profileInfo?.firstName ?? userData?.firstName)}{" "}
+        {toTitleCase(profileInfo?.lastName ?? userData?.lastName)}
+      </Text>
     </View>
-    <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
-      {toTitleCase(profileInfo?.firstName ?? userData?.firstName)}{' '}
-      {toTitleCase(profileInfo?.lastName ?? userData?.lastName)}
-    </Text>
+  );
 
-  </View>
-);
-
-  // ─── Games section renderer ────────────────────────────────────
   const renderGames = () => {
     if (gamesLoading) {
       return (
-        <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+        <View style={{ alignItems: "center", paddingVertical: 24 }}>
           <ActivityIndicator size="small" color={COLORS.primary} />
         </View>
       );
     }
+
     if (gamesError) {
       return (
-        <View style={{ alignItems: 'center', paddingVertical: 16 }}>
+        <View style={{ alignItems: "center", paddingVertical: 16 }}>
           <Text style={{ color: COLORS.red, marginBottom: 8 }}>{gamesError}</Text>
+
           <TouchableOpacity onPress={fetchGames}>
-            <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Try Again</Text>
+            <Text style={{ color: COLORS.primary, fontWeight: "600" }}>
+              {t("common.tryAgain")}
+            </Text>
           </TouchableOpacity>
         </View>
       );
     }
+
     if (games.length === 0) {
       return (
         <View style={styles.emptyCard}>
           <View style={styles.emptyIconBg}>
             <Text style={styles.emptyIconText}>⚽</Text>
           </View>
+
           <Text style={styles.emptyText}>
-            You have no activity yet.{' '}
+            {t("profile.noActivity")}{" "}
             <Text style={styles.emptyBold}>
-              Check back here once you play your first game. ⚽
+              {t("profile.firstGame")}
             </Text>
           </Text>
         </View>
       );
     }
+
     const visibleGames = showAllGames ? games : games.slice(0, GAMES_PREVIEW);
+
     const handleGamePress = (game: Game) => {
-      navigate('gameDetail', { game });
+      navigate("gameDetail", { game });
     };
+
     return (
       <>
         {visibleGames.map((game) => (
@@ -235,167 +257,120 @@ const Profile = () => {
             onPress={handleGamePress}
           />
         ))}
+
         {games.length > GAMES_PREVIEW && (
           <TouchableOpacity
             onPress={() => navigate("myGames")}
             style={{
-              alignSelf: 'center',
+              alignSelf: "center",
               marginTop: 8,
               marginBottom: 4,
               paddingVertical: 10,
               paddingHorizontal: 32,
               borderRadius: 24,
               borderWidth: 1.5,
-              borderColor: COLORS.primary,
+              borderColor: COLORS.primary
             }}
           >
-            <Text style={{ color: COLORS.primary, fontWeight: '600', fontSize: 14 }}>
-              Show More
+            <Text style={{ color: COLORS.primary, fontWeight: "600", fontSize: 14 }}>
+              {t("common.showMore")}
             </Text>
           </TouchableOpacity>
         )}
       </>
     );
   };
-  // ──────────────────────────────────────────────────────────────
 
   return (
     <SafeAreaView style={[styles.area]}>
       <ScrollView style={[styles.container]}>
         {renderHeader()}
+
         {isLogged ? (
           <View style={[styles.bottomContainer, { backgroundColor: COLORS.white }]}>
+
             {renderProfile()}
 
-            {/* Stats summary */}
+            {/* Stats */}
             <View style={styles.summaryViewContainer}>
-              <View style={styles.viewItemContainer}>
-                <View style={styles.viewIconContainer}>
-                  <Image source={icons.sport2 as ImageSourcePropType} resizeMode='contain' style={styles.viewIcon} />
-                </View>
-                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700" }]}>{profileInfo ? profileInfo.gameStatistics.gameCount : 0} {t("games")}</Text>
-                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Joined")}</Text>
-              </View>
-              <View style={styles.viewItemContainer}>
-                <View style={styles.viewIconContainer}>
-                  <Image source={icons.timeCircle as ImageSourcePropType} resizeMode='contain' style={styles.viewIcon} />
-                </View>
-                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700"  }]}>{profileInfo ? profileInfo.gameStatistics.totalMinutes%60 : 0}  hr</Text>
-                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>{t("Played")}</Text>
-              </View>
-              <View style={styles.viewItemContainer}>
-                <View style={styles.viewIconContainer}>
-                  <Image source={icons.fieldOutline as ImageSourcePropType} resizeMode='contain' style={{ height: 44, width: 44, tintColor: COLORS.primary }} />
-                </View>
-                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700"  }]}>0 fields</Text>
-                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>rented</Text>
-              </View>
-            </View>
 
+              <View style={styles.viewItemContainer}>
+                <View style={styles.viewIconContainer}>
+                  <Image source={icons.sport2} resizeMode="contain" style={styles.viewIcon} />
+                </View>
+
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700" }]}>
+                  {profileInfo ? profileInfo.gameStatistics.gameCount : 0} {t("menu.games")}
+                </Text>
+
+                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>
+                  {t("profile.joined")}
+                </Text>
+              </View>
+
+              <View style={styles.viewItemContainer}>
+                <View style={styles.viewIconContainer}>
+                  <Image source={icons.timeCircle} resizeMode="contain" style={styles.viewIcon} />
+                </View>
+
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700" }]}>
+                  {profileInfo ? Math.floor(profileInfo.gameStatistics.totalMinutes / 60) : 0} hr
+                </Text>
+
+                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>
+                  {t("profile.played")}
+                </Text>
+              </View>
+
+              <View style={styles.viewItemContainer}>
+                <View style={styles.viewIconContainer}>
+                  <Image source={icons.fieldOutline} resizeMode="contain" style={{ height: 44, width: 44, tintColor: COLORS.primary }} />
+                </View>
+
+                <Text style={[styles.viewTitle, { color: COLORS.grayscale900, fontWeight: "700" }]}>
+                  0 {t("profile.fields")}
+                </Text>
+
+                <Text style={[styles.viewSubtitle, { color: COLORS.grayscale700 }]}>
+                  {t("profile.rented")}
+                </Text>
+              </View>
+
+            </View>
 
             {/* Organized Games */}
             <View style={styles.locationItemContainer}>
-              <Text style={styles.sectionTitle}>Organized Games</Text>
+              <Text style={styles.sectionTitle}>
+                {t("profile.organizedGames")}
+              </Text>
+
               {renderGames()}
             </View>
+
           </View>
+
         ) : (
-          <View style={[styles.bottomContainer, { backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', paddingVertical: 60, paddingHorizontal: 24 }]}>
-            {/* Icon */}
-            <View style={{
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              backgroundColor: COLORS.primary + '15',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 20,
-            }}>
-              <Image
-                source={icons.user as ImageSourcePropType}
-                resizeMode='contain'
-                style={{ width: 40, height: 40, tintColor: COLORS.primary }}
-              />
-            </View>
 
-            {/* Heading */}
-            <Text style={{ fontSize: 20, fontWeight: '700', color: COLORS.grayscale900, marginBottom: 8, textAlign: 'center' }}>
-              {t("You're not signed in")}
-            </Text>
-            <Text style={{ fontSize: 14, color: COLORS.grayscale700, textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
-              {t("Sign in to view your profile, stats, and organized games.")}
-            </Text>
+          <View style={[styles.bottomContainer, {
+            backgroundColor: COLORS.white,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 60,
+            paddingHorizontal: 24
+          }]}>
 
-            {/* Sign In Button */}
-            <TouchableOpacity
-              onPress={() => navigate("login")}
-              style={{
-                width: '100%',
-                backgroundColor: COLORS.primary,
-                borderRadius: 12,
-                paddingVertical: 14,
-                alignItems: 'center',
-                marginBottom: 16,
-              }}
-            >
-              <Text style={{ color: COLORS.white, fontSize: 16, fontWeight: '600' }}>
-                {t("Sign In")}
-              </Text>
-            </TouchableOpacity>
+           <NotSignedInView
+            heading="Sign in to join game"
+            description="Access your upcoming and past sessions when signed in."
+            containerStyle={{ flex: 1 }}
+          />
 
-            {/* Sign Up Link */}
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ color: COLORS.grayscale700, fontSize: 14 }}>
-                {t("Don't have an account?")}{"  "}
-              </Text>
-              <TouchableOpacity onPress={() => navigate("register")}>
-                <Text style={{ color: COLORS.primary, fontSize: 14, fontWeight: '600' }}>
-                  {t("Sign Up")}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         )}
       </ScrollView>
-
-      {/* Logout Bottom Sheet */}
-      <RBSheet
-        ref={refRBSheet}
-        closeOnPressMask={true}
-        height={240}
-        customStyles={{
-          wrapper: { backgroundColor: "rgba(0,0,0,0.5)" },
-          draggableIcon: { backgroundColor: COLORS.grayscale200, height: 4 },
-          container: { borderTopRightRadius: 32, borderTopLeftRadius: 32, height: 240, backgroundColor: COLORS.white }
-        }}
-      >
-        <Text style={styles.bottomTitle}>Logout</Text>
-        <View style={[styles.separateLine, { backgroundColor: COLORS.grayscale200 }]} />
-        <Text style={[styles.bottomSubtitle, { color: COLORS.black }]}>
-          {t('logout.confirmation')}
-        </Text>
-        <View style={styles.bottomContainer}>
-          <Button
-            title={t('logout.confirm_button')}
-            filled
-            style={styles.logoutButton}
-            onPress={handleLogout}
-          />
-          <Button
-            title={t('c.cancel')}
-            style={{
-              width: (SIZES.width - 32) / 2 - 8,
-              backgroundColor: COLORS.transparentPrimary,
-              borderRadius: 32,
-              borderColor: COLORS.transparentPrimary
-            }}
-            textColor={COLORS.primary}
-            onPress={() => refRBSheet.current?.close()}
-          />
-        </View>
-      </RBSheet>
     </SafeAreaView>
   );
+  
 };
 
 export default Profile;

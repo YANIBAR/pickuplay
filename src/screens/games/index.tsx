@@ -18,15 +18,16 @@ type Nav = {
 const mockGames: Game[] = [];
 
 const SPORTS = ['1', '2', '3', '5'];
-const SPORT_LABELS = {
-  1: 'Soccer ⚽ ',
-  2: 'Basketball 🏀 ',
-  3: 'Volleyball 🏐 ',
-  5: 'Tennis 🎾 ',
-};
+const getSportLabels = (t: (key: string) => string) => ({
+  1: t('home.sports.soccer'),
+  2: t('home.sports.basketball'),
+  3: t('home.sports.volleyball'),
+  5: t('home.sports.tennis'),
+});
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const SPORT_LABELS = getSportLabels(t);
   const [games, setGames] = useState<Game[]>([]);
   const { userData, error, refreshUserData } = useUserData();
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
@@ -59,46 +60,46 @@ export default function HomeScreen() {
     }
   };
 
-  // Get unique cities from games
- // Add this near your other state declarations
-const [cities, setCities] = useState<string[]>([]);
+    // Get unique cities from games
+  // Add this near your other state declarations
+  const [cities, setCities] = useState<string[]>([]);
 
-// Replace your getCities function with this
-const getCities = async (): Promise<void> => {
-  try {
-    const response = await publicApi.get('cities');
-    const cityList: City[] = response.result.data;
+  // Replace your getCities function with this
+  const getCities = async (): Promise<void> => {
+    try {
+      const response = await publicApi.get('cities');
+      const cityList: City[] = response.result.data;
 
-    const dbCities = cityList.map((city) => city.name);
+      const dbCities = cityList.map((city) => city.name);
 
-    let updatedCities = [...dbCities];
+      let updatedCities = [...dbCities];
 
-    if (currentCity) {
-      const userCity = extractCity(currentCity);
+      if (currentCity) {
+        const userCity = extractCity(currentCity);
 
-      // Add city if not in DB
-      if (!dbCities.includes(userCity)) {
-        updatedCities.unshift(userCity);
-      } else {
-        // Move it to first position
-        updatedCities = [
-          userCity,
-          ...dbCities.filter((c) => c !== userCity),
-        ];
+        // Add city if not in DB
+        if (!dbCities.includes(userCity)) {
+          updatedCities.unshift(userCity);
+        } else {
+          // Move it to first position
+          updatedCities = [
+            userCity,
+            ...dbCities.filter((c) => c !== userCity),
+          ];
+        }
+
+        // Select it by default
+        setSelectedCities([userCity]);
       }
 
-      // Select it by default
-      setSelectedCities([userCity]);
+      setCities(updatedCities);
+    } catch (error) {
+      const errorMessage = (error as any).response?.data?.message;
+      Alert.alert('Error', errorMessage);
+      console.error('Cities fetch failed:', error);
+      setCities([]);
     }
-
-    setCities(updatedCities);
-  } catch (error) {
-    const errorMessage = (error as any).response?.data?.message;
-    Alert.alert('Error', errorMessage);
-    console.error('Cities fetch failed:', error);
-    setCities([]);
-  }
-};
+  };
   // Filter games based on selected filters
   const applyFilters = () => {
     let filtered = [...games];
@@ -286,4 +287,3 @@ const getCities = async (): Promise<void> => {
     </SafeAreaView>
   );
 }
-

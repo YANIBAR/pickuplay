@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SIZES, icons, images } from '@constants';
 import { useNavigation } from '@react-navigation/native';
 import { messsagesData } from '../../shared/data';
-import { FlatList } from 'react-native-gesture-handler';
 import styles from './styles';
+import { FlatList } from '@components';
 
 // inbox tabs
 const Inbox = () => {

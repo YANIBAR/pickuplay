@@ -3,8 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Icon } from '@components';
 import { COLORS, SIZES } from '@constants';
-import { authenticatedApi } from '@services/api';
-import { useRef, useState } from 'react';
 import styles from './styles';
 import { formatDateLong, formatTime } from '@utils/dateUtils';
 
@@ -74,7 +72,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
           <Text style={styles.gamePlayers}>
             {game.participants ? game.participants.length : 0}/{game.nbrSpots}
           </Text>
-          <Text style={styles.gamePlayersLabel}>players</Text>
+          <Text style={styles.gamePlayersLabel}>{t('profile.players')}</Text>
         </View>
     </TouchableOpacity>
     

@@ -1,7 +1,6 @@
 import { View } from '@components';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Text } from 'react';
 import { StyleSheet, FlatList } from 'react-native';
-import { Text } from 'react-native-gesture-handler';
 
 type GameGridProps = {
   games: Game[];

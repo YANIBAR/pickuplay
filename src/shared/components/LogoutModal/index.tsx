@@ -2,7 +2,8 @@ import React from 'react';
 import { Button, Modal, ModalBase, Text, View } from '@components';
 import { useTranslation } from 'react-i18next';
 import styles from './styles';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import { TouchableOpacity } from 'react-native';
 
 interface Props {
   visible: boolean;

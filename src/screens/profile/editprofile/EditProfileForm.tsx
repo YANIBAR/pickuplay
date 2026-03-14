@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Button, Icon, Text } from '@components';
-import { COLORS, screens } from '@constants';
+import { COLORS, screens, SIZES } from '@constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -123,10 +123,11 @@ useEffect(() => {
               data={city}
               labelField="label"
               valueField="value"
+              search={true}
               placeholder={t('edit_game.select_city') }
               value={user.city}
               onChange={item => handleChange('city', item.value)}
-              style={[styles.dropdown && styles.disabledDropdown]}
+              style={[styles.dropdown ]}
             />
         </View>
 
@@ -212,6 +213,22 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#aaa',
   },
+  dropdown: {
+    width: '100%',
+    paddingHorizontal: SIZES.padding,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.grayscale300,
+    marginVertical: 5,
+    flexDirection: 'row',
+    height: SIZES.InputHeight,
+    alignItems: 'center',
+  },
+  disabledDropdown: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+    opacity: 0.6,
+  }
 });
 
 export default EditProfileForm;

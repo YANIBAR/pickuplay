@@ -3,12 +3,12 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 import en from '@assets/translations/en.json';
-import fr from '@assets/translations/fr.json';
+import es from '@assets/translations/es.json';
 import ar from '@assets/translations/ar.json';
 
 const languageResources = {
   en: { translation: en },
-  fr: { translation: fr },
+  es: { translation: es },
   ar: { translation: ar },
 };
 
@@ -25,7 +25,7 @@ i18n
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
       convertDetectedLanguage: (lng) => {
-        // Convert 'en-US' to 'en', 'fr-CA' to 'fr', etc.
+        // Convert 'en-US' to 'en', 'es-ES' to 'es', etc.
         return lng.split('-')[0];
       }
     },

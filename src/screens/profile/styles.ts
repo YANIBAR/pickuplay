@@ -3,17 +3,16 @@ import { COLORS, SIZES } from '@constants';
 
 export default StyleSheet.create({
     area: {
-            
-            flex: 1,
-            backgroundColor: COLORS.white,
-            minHeight: SIZES.height
-        },
-        container: {
-            flex: 1,
-            backgroundColor: COLORS.white,
-        },
-        headerContainer: {
-            paddingHorizontal:16,
+        flex: 1,
+        backgroundColor: COLORS.white,
+        minHeight: SIZES.height
+    },
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.white,
+    },
+    headerContainer: {
+        paddingHorizontal:16,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between"
@@ -37,185 +36,185 @@ export default StyleSheet.create({
         width: 24,
         tintColor: COLORS.grayscale900
       },
-  backIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 16,
-  },
-        bottomContainer: {
-            width: "100%",
-            paddingHorizontal: 16,
-            paddingVertical: 20,
-            alignItems: "center",
-        },
-        btn: {
-            width: SIZES.width - 32,
-            marginTop: 12
-        },
-        locationMapContainer: {
-            height: 226,
-            width: "100%",
-            borderRadius: 12,
-            marginVertical: 16
-        },
-        mapContainer: {
-            ...StyleSheet.absoluteFillObject,
-            flex: 1,
-            borderRadius: 12,
-            backgroundColor: COLORS.dark2
-        },
-        viewMapContainer: {
-            height: 50,
-            backgroundColor: COLORS.gray,
-            alignItems: "center",
-            justifyContent: "center",
-            borderBottomLeftRadius: 25,
-            borderBottomRightRadius: 25
-        },
-        bubble: {
-            flexDirection: 'column',
-            alignSelf: 'flex-start',
-            backgroundColor: '#fff',
-            borderRadius: 6,
-            borderColor: '#ccc',
-            borderWidth: 0.5,
-            padding: 15,
-            width: 'auto',
-        },
-        // Arrow below the bubble
-        arrow: {
-            backgroundColor: 'transparent',
-            borderColor: 'transparent',
-            borderTopColor: '#fff',
-            borderWidth: 16,
-            alignSelf: 'center',
-            marginTop: -32,
-        },
-        arrowBorder: {
-            backgroundColor: 'transparent',
-            borderColor: 'transparent',
-            borderTopColor: '#007a87',
-            borderWidth: 16,
-            alignSelf: 'center',
-            marginTop: -0.5,
-        },
-        bottomTopContainer: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "100%",
-            marginTop: 22,
-        },
-        bottomTopTitle: {
-            fontSize: 18,
-            fontFamily: "bold",
-            color: COLORS.black
-        },
-        bottomTopSubtitle: {
-            fontSize: 16,
-            color: COLORS.grayscale900,
-            fontFamily: "regular"
-        },
-        separateLine: {
-            height: .4,
-            width: SIZES.width - 32,
-            backgroundColor: COLORS.grayscale300,
-            marginVertical: 12
-        },
-        addressItemContainer: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            marginBottom: 12
-        },
-        addressItemLeftContainer: {
-            flexDirection: "row",
-            alignItems: "center"
-        },
-        driverInfoContainer: {
-            width: "100%",
-            justifyContent: "space-between",
-            flexDirection: "row",
-            alignItems: "center"
-        },
-        driverLeftInfo: {
-            flexDirection: "row",
-            alignItems: "center"
-        },
-        driverImage: {
-            width: 52,
-            height: 52,
-            borderRadius: 999,
-            marginRight: 12
-        },
-        driverName: {
-            fontSize: 18,
-            fontFamily: "bold",
-            color: COLORS.grayscale900,
-            marginBottom: 4
-        },
-        driverCar: {
-            fontSize: 14,
-            color: COLORS.grayscale700,
-            fontFamily: "regular",
-            marginTop: 6
-        },
-        driverRightContainer: {
-            flexDirection: "row",
-            alignItems: "center"
-        },
-        driverRightReview: {
-            flexDirection: "row",
-            alignItems: "center"
-        },
-        starIcon: {
-            height: 18,
-            width: 18,
-            tintColor: COLORS.primary,
-            marginRight: 6
-        },
-        starNum: {
-            fontSize: 16,
-            color: COLORS.grayscale900,
-            fontFamily: "regular"
-        },
-        taxiID: {
-            fontSize: 14,
-            color: COLORS.grayscale900,
-            fontFamily: "medium",
-            marginTop: 6
-        },
-        actionContainer: {
-            flexDirection: "row",
-            marginTop: 22
-        },
-        actionBtn: {
-            width: 64,
-            height: 64,
-            borderRadius: 999,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: COLORS.primary,
-            marginHorizontal: 12
-        },
-        profileContainer: {
+    backIcon: {
+        width: 24,
+        height: 24,
+        marginRight: 16,
+    },
+    bottomContainer: {
+        width: "100%",
+        paddingHorizontal: 16,
+        paddingVertical: 20,
         alignItems: "center",
-      },
+    },
+    btn: {
+        width: SIZES.width - 32,
+        marginTop: 12
+    },
+    locationMapContainer: {
+        height: 226,
+        width: "100%",
+        borderRadius: 12,
+        marginVertical: 16
+    },
+    mapContainer: {
+        ...StyleSheet.absoluteFillObject,
+        flex: 1,
+        borderRadius: 12,
+        backgroundColor: COLORS.dark2
+    },
+    viewMapContainer: {
+        height: 50,
+        backgroundColor: COLORS.gray,
+        alignItems: "center",
+        justifyContent: "center",
+        borderBottomLeftRadius: 25,
+        borderBottomRightRadius: 25
+    },
+    bubble: {
+        flexDirection: 'column',
+        alignSelf: 'flex-start',
+        backgroundColor: '#fff',
+        borderRadius: 6,
+        borderColor: '#ccc',
+        borderWidth: 0.5,
+        padding: 15,
+        width: 'auto',
+    },
+    // Arrow below the bubble
+    arrow: {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        borderTopColor: '#fff',
+        borderWidth: 16,
+        alignSelf: 'center',
+        marginTop: -32,
+    },
+    arrowBorder: {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        borderTopColor: '#007a87',
+        borderWidth: 16,
+        alignSelf: 'center',
+        marginTop: -0.5,
+    },
+    bottomTopContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+        marginTop: 22,
+    },
+    bottomTopTitle: {
+        fontSize: 18,
+        fontFamily: "bold",
+        color: COLORS.black
+    },
+    bottomTopSubtitle: {
+        fontSize: 16,
+        color: COLORS.grayscale900,
+        fontFamily: "regular"
+    },
+    separateLine: {
+        height: .4,
+        width: SIZES.width - 32,
+        backgroundColor: COLORS.grayscale300,
+        marginVertical: 12
+    },
+    addressItemContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: 12
+    },
+    addressItemLeftContainer: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    driverInfoContainer: {
+        width: "100%",
+        justifyContent: "space-between",
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    driverLeftInfo: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    driverImage: {
+        width: 52,
+        height: 52,
+        borderRadius: 999,
+        marginRight: 12
+    },
+    driverName: {
+        fontSize: 18,
+        fontFamily: "bold",
+        color: COLORS.grayscale900,
+        marginBottom: 4
+    },
+    driverCar: {
+        fontSize: 14,
+        color: COLORS.grayscale700,
+        fontFamily: "regular",
+        marginTop: 6
+    },
+    driverRightContainer: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    driverRightReview: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    starIcon: {
+        height: 18,
+        width: 18,
+        tintColor: COLORS.primary,
+        marginRight: 6
+    },
+    starNum: {
+        fontSize: 16,
+        color: COLORS.grayscale900,
+        fontFamily: "regular"
+    },
+    taxiID: {
+        fontSize: 14,
+        color: COLORS.grayscale900,
+        fontFamily: "medium",
+        marginTop: 6
+    },
+    actionContainer: {
+        flexDirection: "row",
+        marginTop: 22
+    },
+    actionBtn: {
+        width: 64,
+        height: 64,
+        borderRadius: 999,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: COLORS.primary,
+        marginHorizontal: 12
+    },
+    profileContainer: {
+        alignItems: "center",
+    },
   avatarContainer: {
     marginVertical: 12,
     alignItems: "center",
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    width: 130,
+    height: 130,
+    borderRadius: 100,
   },
   avatar: {
-    height: 160,
-    width: 160,
-    borderRadius: 80,
+    height: 140,
+    width: 140,
+    borderRadius: 100,
   },
   pickImage: {
-    height: 36,
-    width: 36,
+    height: 32,
+    width: 32,
     borderRadius: 21,
     backgroundColor: COLORS.primary,
     alignItems: 'center',

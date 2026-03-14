@@ -6,8 +6,12 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "error": "Error",
-    "copied": "Copied!"
-
+    "copied": "Copied!",
+    "search": "Search...",
+    "next": "Next",
+    "back": "Back",
+    "showMore": "Show More",
+    "tryAgain": "Try Again"
   },
   "AvailableLanguages": "Available Languages",
   "CustomerService": "Customer Survice",
@@ -337,50 +341,109 @@
   "menu": {
     "chat": "Chat",
     "leagues": "Leagues",
-    "matchups": "Matchups",
     "schedule": "Schedule",
     "games": "Games",
     "user": "Profile",
     "menu": "Menu",
     "matchups": "Matchups"
   },
-  "faq": {
-  "categories": {
-    "general": "General",
-    "account": "Account",
-    "games": "Games",
-    "participation": "Participation",
-    "notifications": "Notifications",
-    "location": "Location",
-    "issues": "Issues"
+  "games": {
+    "joinButton": "Join",
+    "joinGameTitle": "Join Game",
+    "numberOfPlayers": "Number of players",
+    "pleaseEnterPlayers": "Please enter number of players",
+    "successJoined": "Successfully joined the game",
+    "failedToJoin": "Failed to join the game",
+    "invalidPromoCode": "Invalid promo code",
+    "enterPromoCode": "Enter promo code",
+    "pricePerGuest": "Price per guest",
+    "totalGuests": "Total ({{count}} guests)",
+    "signInToJoin": "Sign in to join game",
+    "signInDescription": "Access your upcoming and past sessions when signed in."
   },
-  "question1": "What is Pickuplay?",
-  "answer1": "Pickuplay is a platform that helps players easily find, create, and join pickup sports games in their city. You can connect with other players and organize games in just a few taps.",
+  "schedule": {
+    "createGame": "Create Game",
+    "title": "Title",
+    "enterTitle": "Enter game title",
 
-  "question2": "How do I join a game?",
-  "answer2": "Open the Games section, choose a game that fits your schedule, and tap Join Game. If there are available spots, you will immediately be added to the participants list.",
+    "sportType": "Sport type",
+    "selectSport": "Select sport",
+    "search": "Search...",
 
-  "question3": "How do I create a game?",
-  "answer3": "Go to the Create Game screen, select the sport, location, date, and number of players, then publish the game. Other players will be able to see and join it.",
+    "selectImage": "Select Image",
+    "changeImage": "Change Image",
+    "removeImage": "Remove",
 
-  "question4": "Can I add guests to a game?",
-  "answer4": "Yes. When joining a game, you can add guests if the organizer allows it and if there are available spots remaining.",
+    "description": "Description",
+    "enterDescription": "Enter description...",
 
-  "question5": "How do I cancel my participation in a game?",
-  "answer5": "Open the game you joined and tap Leave Game. Your spot will become available for other players.",
+    "address": "Address",
+    "enterAddress": "Enter game address",
 
-  "question6": "How do I update my profile information?",
-  "answer6": "Go to your Profile screen and tap Edit Profile. You can update your photo, city, bio, and other personal information.",
+    "startTime": "Start Time",
+    "endTime": "End Time",
 
-  "question7": "How do notifications work?",
-  "answer7": "Pickuplay sends notifications for important updates such as new players joining your game, game reminders, or changes made by the organizer.",
+    "numberOfPlayers": "Number of Players",
+    "selectPlayers": "Select players",
 
-  "question8": "Why does the app ask for my location?",
-  "answer8": "Your location helps Pickuplay show games happening near you so you can easily find and join local games.",
+    "pricePerPlayer": "Price Per Player",
 
-  "question9": "What should I do if I experience a problem in the app?",
-  "answer9": "If you encounter a technical issue or unexpected behavior, please contact support through the Help Center or report the problem in the app."
-},
+    "signInToCreate": "Sign in to create a game",
+    "signInDescription": "Access your upcoming and past sessions when signed in.",
+
+    "noGamesScheduled": "No games scheduled",
+    "players": "Players",
+    "player": "player",
+    "free": "Free",
+    "cancelled": "Cancelled",
+    "addGame": "Add Game",
+    "players_one": "1 player",
+    "players_other": "{{count}} players"
+  },
+  "matchups": {
+    "startMatchup": "Start a Matchup",
+    "noChallenges": "No challenges yet",
+    "description": "Challenge another team in your city and compete on the field. Create a matchup, set the time and location, and let the game decide the winner.",
+    "createMatchup": "Create Matchup",
+    "findTeams": "Find Teams"
+  },
+  "faq": {
+    "categories": {
+      "general": "General",
+      "account": "Account",
+      "games": "Games",
+      "participation": "Participation",
+      "notifications": "Notifications",
+      "location": "Location",
+      "issues": "Issues"
+    },
+    "question1": "What is Pickuplay?",
+    "answer1": "Pickuplay is a platform that helps players easily find, create, and join pickup sports games in their city. You can connect with other players and organize games in just a few taps.",
+
+    "question2": "How do I join a game?",
+    "answer2": "Open the Games section, choose a game that fits your schedule, and tap Join Game. If there are available spots, you will immediately be added to the participants list.",
+
+    "question3": "How do I create a game?",
+    "answer3": "Go to the Create Game screen, select the sport, location, date, and number of players, then publish the game. Other players will be able to see and join it.",
+
+    "question4": "Can I add guests to a game?",
+    "answer4": "Yes. When joining a game, you can add guests if the organizer allows it and if there are available spots remaining.",
+
+    "question5": "How do I cancel my participation in a game?",
+    "answer5": "Open the game you joined and tap Leave Game. Your spot will become available for other players.",
+
+    "question6": "How do I update my profile information?",
+    "answer6": "Go to your Profile screen and tap Edit Profile. You can update your photo, city, bio, and other personal information.",
+
+    "question7": "How do notifications work?",
+    "answer7": "Pickuplay sends notifications for important updates such as new players joining your game, game reminders, or changes made by the organizer.",
+
+    "question8": "Why does the app ask for my location?",
+    "answer8": "Your location helps Pickuplay show games happening near you so you can easily find and join local games.",
+
+    "question9": "What should I do if I experience a problem in the app?",
+    "answer9": "If you encounter a technical issue or unexpected behavior, please contact support through the Help Center or report the problem in the app."
+  },
   "payment": {
     "cardHolderName": "Card holder name",
     "cardNumber": "Card number",
@@ -410,32 +473,21 @@
       "loading": "Loading data..."
     }
   },
-  "membership": {
-    "memberships": {
-      "header": "My Memberships",
-      "emptyState": {
-        "title": "No Memberships Found",
-        "subtitle": "You don't have any active memberships yet. Get started by adding your first membership.",
-        "button": "Add Membership"
-      }
-    },
-    "city": "City",
-    "type": "Type",
-    "valid_until": "Valid until",
-    "status": "Status",
-    "active": "Actif",
-    "inactive": "Inactif",
-    "code": "Code",
-    "types": {
-      "kids": "Kid",
-      "adults": "Adult",
-      "golden": "Golden",
-      "tourists": "Tourist"
-    },
-    "common": {
-      "loading": "Loading memberships..."
-    },
-    "addMembership": "Add New Membership"
+  "profile": {
+    "joined": "Joined",
+    "played": "Played",
+    "fields": "Fields",
+    "rented": "Rented",
+    "organizedGames": "Organized Games",
+    "noActivity": "You have no activity yet.",
+    "firstGame": "Check back here once you play your first game. ⚽",
+    "uploadSuccessTitle": "Success",
+    "uploadSuccessMessage": "Profile image updated successfully.",
+    "uploadFailed": "Upload failed. Please try again.",
+    "selectImageTitle": "Select Image",
+    "selectImageDescription": "Choose how to select an image",
+    "camera": "Camera",
+    "photoLibrary": "Photo Library"
   },
   "event": {
     "eventTitle":"Events",

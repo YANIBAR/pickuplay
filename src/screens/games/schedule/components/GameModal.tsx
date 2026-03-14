@@ -9,7 +9,6 @@
     Image as RNImage,
     Pressable,
   } from 'react-native';
-  import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
   import { useForm, Controller } from 'react-hook-form';
   import DateTimePickerModal from 'react-native-modal-datetime-picker';
   import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
@@ -23,8 +22,8 @@
   import { parseTime } from '@utils/dateUtils';
   import { JAVA_API } from '@env';
   import AsyncStorage from '@react-native-async-storage/async-storage';
-  import axios from 'axios';
-import { isStoredTokenExpired } from '@utils/api/auth';
+  import { isStoredTokenExpired } from '@utils/api/auth';
+import { useTranslation } from 'react-i18next';
 
 
   interface FormData {
@@ -78,27 +77,27 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       mode: 'onBlur',
     });
   const [currentStep, setCurrentStep] = useState(1);
-    const isPrivate = watch('isPrivate');
-    const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
-    const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
-    const [sportTypeFocus, setSportTypeFocus] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [sports, setSports] = useState<string[]>([]);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [isLogged, setIsLogged] = useState(false);
-    const PLAYER_OPTIONS = [
-      { label: '2v2', value: '4' },
-      { label: '3v3', value: '6' },
-      { label: '4v4', value: '8' },
-      { label: '5v5', value: '10' },
-      { label: '6v6', value: '12' },
-      { label: '7v7', value: '14' },
-      { label: '8v8', value: '16' },
-      { label: '9v9', value: '18' },
-      { label: '10v10', value: '20' },
-      { label: '11v11', value: '22' },
-    ]; 
-
+  const isPrivate = watch('isPrivate');
+  const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
+  const [sportTypeFocus, setSportTypeFocus] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [sports, setSports] = useState<string[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+  const PLAYER_OPTIONS = [
+    { label: '2v2', value: '4' },
+    { label: '3v3', value: '6' },
+    { label: '4v4', value: '8' },
+    { label: '5v5', value: '10' },
+    { label: '6v6', value: '12' },
+    { label: '7v7', value: '14' },
+    { label: '8v8', value: '16' },
+    { label: '9v9', value: '18' },
+    { label: '10v10', value: '20' },
+    { label: '11v11', value: '22' },
+  ]; 
+  const { t } = useTranslation();
   const getSports = async (): Promise<void> => {
     try {
       const response = await publicApi.get('games/sports');
@@ -428,7 +427,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     };
     return (
       <Modal
-        title={isLogged==false ? " "  : (`Create Game ${selectedDate ? formatDate(selectedDate) : ''}`)}
+        title={isLogged==false ? " "  : (`${t('schedule.createGame')} ${selectedDate ? formatDate(selectedDate) : ''}`)}
         visible={visible}
         animationType="slide"
         onClose={onClose}
@@ -450,7 +449,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                     style={styles.backButton}
                     disabled={isSubmitting}
                   >
-                    <Text style={styles.backButtonText}>Back</Text>
+                    <Text style={styles.backButtonText}>{t('common.back')}</Text>
                   </TouchableOpacity>
                 )}
 
@@ -460,7 +459,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                     style={styles.cancelButton}
                     disabled={isSubmitting}
                   >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                    <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
                   </TouchableOpacity>
                 )}
 
@@ -470,7 +469,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                     style={[styles.createButton, isSubmitting && { opacity: 0.5 }]}
                     disabled={isSubmitting}
                   >
-                    <Text style={styles.createButtonText}>Next</Text>
+                    <Text style={styles.createButtonText}>{t('common.next')}</Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -481,7 +480,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                     {isSubmitting ? (
                       <ActivityIndicator color="#fff" />
                     ) : (
-                      <Text style={styles.createButtonText}>Create Game</Text>
+                      <Text style={styles.createButtonText}>{t('schedule.createGame')}</Text>
                     )}
                   </TouchableOpacity>
                 )}
@@ -492,14 +491,14 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                 <View>
                   {/* Title */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>Title *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.title')}</Text>
                     <Controller
                       key="title"
                       name="title"
                       control={control}
                       rules={{
-                        required: 'Title is required',
-                        minLength: { value: 3, message: 'Title must be at least 3 characters' },
+                        required: t('schedule.enterTitle'),
+                        minLength: { value: 3, message: t('Title must be at least 3 characters') },
                       }}
                       render={({ field: { onChange, onBlur, value } }) => (
                         <View>
@@ -512,7 +511,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                             onChangeText={(text) => {
                               onChange(text);
                             }}
-                            placeholder="Enter game title"
+                            placeholder={t('schedule.enterTitle')}
                             placeholderTextColor={COLORS.black}
                             keyboardType="default"
                             style={[
@@ -534,13 +533,13 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                     <Controller
                       name="sportType"
                       control={control}
-                      rules={{ required: 'Please select a sport type' }}
+                      rules={{ required: t('Please select a sport type') }}
                       render={({ field: { onChange, value } }) => (
                         <View>
                           <Dropdown
                             style={[
                               styles.dropdown,
-                              sportTypeFocus && { borderColor: 'blue' },
+                              sportTypeFocus && { borderColor: COLORS.primary },
                               errors?.sportType && { borderColor: 'red' },
                             ]}
                             placeholderStyle={styles.placeholderStyle}
@@ -552,8 +551,8 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
-                            placeholder={!sportTypeFocus ? 'Select sport' : '...'}
-                            searchPlaceholder="Search..."
+                            placeholder={!sportTypeFocus ? t('schedule.selectSport') : '...'}
+                            searchPlaceholder={t('schedule.search')}
                             value={value}
                             onFocus={() => setSportTypeFocus(true)}
                             onBlur={async () => {
@@ -576,7 +575,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                   
                   {/* Image Selection */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>Select Image *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.selectImage')} *</Text>
                     <Controller
                       name="image"
                       control={control}
@@ -593,7 +592,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                             onPress={handleImagePicker}
                           >
                             <Text style={styles.imageButtonText}>
-                              {value ? 'Change Image' : 'Select Image'}
+                              {value ? t('schedule.changeImage') : t('schedule.selectImage')}
                             </Text>
                           </TouchableOpacity>
                           {value && (
@@ -606,7 +605,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                                 style={styles.removeImageButton}
                                 onPress={handleRemoveImage}
                               >
-                                <Text style={styles.removeImageButtonText}>Remove</Text>
+                                <Text style={styles.removeImageButtonText}>{t('schedule.removeImage')}</Text>
                               </TouchableOpacity>
                             </View>
                           )}
@@ -622,12 +621,12 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 
                   {/* Description */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>Description *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.description')} *</Text>
                     <Controller
                       name="description"
                       control={control}
                       rules={{
-                        required: 'Description is required',
+                        required: t('schedule.enterDescription'),
                         minLength: {
                           value: 10,
                           message: 'Description must be at least 10 characters',
@@ -644,7 +643,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                             onChangeText={(text) => {
                               onChange(text);
                             }}
-                            placeholder="Enter description..."
+                            placeholder={t('schedule.enterDescription')}
                             placeholderTextColor={COLORS.black}
                             multiline
                             numberOfLines={10}
@@ -675,7 +674,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 
                   {/* Address */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>Address *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.address')} *</Text>
                     <Controller
                       key="address"
                       name="address"
@@ -692,7 +691,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                             onChangeText={(text) => {
                               onChange(text);
                             }}
-                            placeholder="Enter game address"
+                            placeholder={t('schedule.enterAddress') }
                             placeholderTextColor={COLORS.black}
                             keyboardType="default"
                             style={[
@@ -712,7 +711,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                       {/* Start Time */}
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.formLabel}>Start Time *</Text>
+                        <Text style={styles.formLabel}>{t('schedule.startTime')} *</Text>
                         <Controller
                           name="startTime"
                           control={control}
@@ -746,7 +745,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                       </View>
                       {/* End Time */}
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.formLabel}>End Time *</Text>
+                        <Text style={styles.formLabel}>{t('schedule.endTime')}  *</Text>
                         <Controller
                           name="endTime"
                           control={control}
@@ -787,7 +786,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                       {/* Number of Players */}
                       <View style={{ flex: 1 }}>
                         <View style={styles.formGroup}>
-                          <Text style={styles.formLabel}>Number of Players *</Text>
+                          <Text style={styles.formLabel}>{t('schedule.numberOfPlayers')}  *</Text>
                           <Controller
                             name="numPlayers"
                             control={control}
@@ -805,7 +804,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                                 >
                                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Text style={{ color: value ? COLORS.black : COLORS.gray }}>
-                                      {PLAYER_OPTIONS.find(opt => opt.value === value)?.label || 'Select players'}
+                                      {PLAYER_OPTIONS.find(opt => opt.value === value)?.label || t('schedule.selectPlayers')}
                                     </Text>
                                     <Icon
                                       size={20}
@@ -867,7 +866,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                       {/* Price Per Player */}
                       <View style={{ flex: 1 }}>
                         <View style={styles.formGroup}>
-                          <Text style={styles.formLabel}>Price Per Player *</Text>
+                          <Text style={styles.formLabel}>{t('schedule.pricePerPlayer')} *</Text>
                           <Controller
                             name="pricePerPlayer"
                             control={control}
@@ -917,8 +916,8 @@ import { isStoredTokenExpired } from '@utils/api/auth';
               <>
               
                 <NotSignedInView
-                  heading="Sign in to join game"
-                  description="Access your upcoming and past sessions when signed in."
+                  heading={t('schedule.signInToCreate')}
+                  description={t('schedule.signInDescription')}
                   containerStyle={{ flex: 1 }}
                 />
               </>

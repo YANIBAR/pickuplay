@@ -9,7 +9,6 @@ import RBSheet from "react-native-raw-bottom-sheet";
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
-import { FlatList } from 'react-native-gesture-handler';
 import { useUserData } from '@services/useUserData';
 import { isStoredTokenExpired } from '@utils/api/auth';
 
@@ -132,7 +131,14 @@ const Profile = () => {
         {/* Profile Items */}      
         {isLogged==true && (
           <>
-          
+
+            <SettingsItem
+              icon={icons.user}
+              name={t('settings.editProfile')}
+              onPress={() => navigate('editProfile')}
+              hasArrowRight={false}
+            />
+
             {/* Language & Region */}
             <TouchableOpacity
               onPress={() => navigate('LanguageItem')}
@@ -269,47 +275,6 @@ const Profile = () => {
           />
         </View>
       </RBSheet>
-
-      {/* More Options Modal */}
-      <MoreModal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onClose={handleClose}
-      >
-        <FlatList
-          data={dropdownItems}
-          keyExtractor={(item) => item.value}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: 'center',
-                marginVertical: 12
-              }}
-              onPress={() => handleDropdownSelect(item)}
-            >
-              <Image
-                source={item.icon as ImageSourcePropType}
-                resizeMode='contain'
-                style={{
-                  width: 20,
-                  height: 20,
-                  marginRight: 16,
-                  tintColor: COLORS.black
-                }}
-              />
-              <Text style={{
-                fontSize: 14,
-                fontFamily: "semiBold",
-                color: COLORS.black
-              }}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </MoreModal>
     </SafeAreaView>
   );
 };

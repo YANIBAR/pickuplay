@@ -3,10 +3,9 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Modal,
-  Alert,
 } from 'react-native';
 import styles from '../styles';
+import { useTranslation } from 'react-i18next';
 
 interface Game {
   id: number;
@@ -38,7 +37,7 @@ export default function DayCard({
 }: DayCardProps) {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-
+  const { t } = useTranslation();
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
@@ -78,7 +77,9 @@ export default function DayCard({
       <Text style={styles.dayCardTitle}>{formatDate(date)}</Text>
 
       {games.length === 0 ? (
-        <Text style={styles.emptyText}>No games scheduled</Text>
+        <Text style={styles.emptyText}>
+          {t('schedule.noGamesScheduled')}
+        </Text>
       ) : (
         games.map((game) => (
           <TouchableOpacity
@@ -86,7 +87,7 @@ export default function DayCard({
             onPress={() => handleGamePress(game)}
             style={[
               styles.gameItem,
-              game.status=="CANCELED" && {
+              game.status == "CANCELED" && {
                 backgroundColor: '#fee2e2',
                 borderLeftColor: '#dc2626',
                 borderLeftWidth: 4,
@@ -105,6 +106,7 @@ export default function DayCard({
             >
               {game.address}
             </Text>
+
             <Text
               style={[
                 styles.gameTime,
@@ -116,6 +118,7 @@ export default function DayCard({
             >
               {game.startTime} - {game.endTime}
             </Text>
+
             <Text
               style={[
                 styles.gamePlayers,
@@ -125,21 +128,26 @@ export default function DayCard({
                 },
               ]}
             >
-              Players: {/*game.participants.length*/}{' 2'}
-              {game.isFree ? '(Free)' : `($${game.price}/player)`}
+              {t('schedule.players')}: {/*game.participants.length*/}{' 2'}{" "}
+              {game.isFree
+                ? `(${t('schedule.free')})`
+                : `($${game.price}/${t('schedule.player')})`}
             </Text>
+
             {isCancelled(game.id) && (
               <Text style={{ color: '#dc2626', fontWeight: 'bold', marginTop: 8 }}>
-                Cancelled
+                {t('schedule.cancelled')}
               </Text>
             )}
           </TouchableOpacity>
         ))
       )}
-      
+
       {!isPastDay && (
         <TouchableOpacity onPress={handleAddGamePress}>
-          <Text style={styles.addGameText}>+ Add Game</Text>
+          <Text style={styles.addGameText}>
+            + {t('schedule.addGame')}
+          </Text>
         </TouchableOpacity>
       )}
     </View>

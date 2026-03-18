@@ -11,9 +11,9 @@ import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import { formatDateLong, formatTime } from '@utils/dateUtils';
 import { useUserData } from '@services/useUserData';
-import { getItem } from '@utils/storage';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import { toTitleCase } from '@utils/helpers';
+import { Linking, Platform } from 'react-native';
 
 interface Game {
   id: number;
@@ -45,7 +45,18 @@ interface Game {
   updatedAt: string;
   canceledAt: string;
 }
-
+const getGameIcon = (type: string) => {
+    const iconMap: Record<string, string> = {
+      1: 'soccer',
+      2: 'basketball',
+      3: 'volleyball',
+      5: 'tennis',
+      4: 'hockey-sticks',
+      6: 'table-tennis',
+      7: 'football'
+    };
+    return iconMap[type] || 'sports';
+  };
 export default function GameDetailsScreen({ route }: { route: any }) {
     const { t } = useTranslation();
   const { gameId } = route.params || {};
@@ -58,7 +69,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const [isLogged, setIsLogged] = useState(false);
   const { userData, error, refreshUserData } = useUserData(); 
   // Generate multiple images for the slider using our AI API
-  const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [expandedDay, setExpandedDay] = useState<string | null>('all');
 
   // Generate multiple images for the slider using our AI API
   const toggleDay = (day: string) => {
@@ -127,7 +138,21 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   Clipboard.setString(link);
   Alert.alert(t('common.copied'), t('game.shareModal.linkCopied'));
 };
+const handleGetDirections = () => {
+  const address = encodeURIComponent(game.address);
+  const url = Platform.OS === 'ios'
+    ? `maps://app?daddr=${address}`
+    : `google.navigation:q=${address}`;
 
+  Linking.canOpenURL(url).then((supported) => {
+    if (supported) {
+      Linking.openURL(url);
+    } else {
+      // Fallback to Google Maps in browser
+      Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${address}`);
+    }
+  });
+};
   return (
     <SafeAreaView style={styles.area}>
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
@@ -175,9 +200,9 @@ export default function GameDetailsScreen({ route }: { route: any }) {
       </View>
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         <View style={styles.content}>
-          <View style={styles.header}>
+          <View style={styles.row}>
             <Text style={styles.title}>
-              {game.title} {game?.creatorId}
+              {toTitleCase(game?.title ?? '')}
             </Text>
             {/*<Text style={styles.originalPrice}>$12.99</Text>*/}
             <Text style={styles.discountPrice}>${game.price}</Text>
@@ -192,10 +217,11 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               label={t('game.Orginazer')} 
               value={game.creatorName} 
             />
-            <InfoRow 
-              icon="map-marker" 
-              label={t('game.location')} 
-              value={game.address} 
+            <InfoRow
+              icon="map-marker"
+              label={t('game.location')}
+              value={game.address}
+              isAddress
             />
             <InfoRow 
               icon="lock" 
@@ -209,7 +235,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               value={`${formatDateLong(new Date(game.startTime))}, (${formatTime(game.startTime)} - ${formatTime(game.endTime)})`}
             />
             <InfoRow 
-              icon="map-marker" 
+              icon={getGameIcon(game?.sportType?.id)} 
               label={t('game.sportType')} 
               value={sportType} 
             />
@@ -217,28 +243,19 @@ export default function GameDetailsScreen({ route }: { route: any }) {
             
             {/* Players Section */}
             <View style={styles.section}>
-              <Icon type="materialCommunityIcons" name="account-multiple" size={24} color="#666" />
+              <Icon type="materialCommunityIcons" name="account-multiple" size={24} color={COLORS.secondary}/>
               <View style={styles.textContainer}>
                 <Text style={styles.label}>{t('game.players')} {participants.length}/{game.nbrSpots}</Text>
                 <TouchableOpacity 
                   onPress={() => setExpandedDay(expandedDay ? null : 'all')}
                   style={styles.expandAllButton}
                 >
-                  <Icon
-                    type="feather" 
-                    name={expandedDay ? "chevron-down" : "chevron-up"} 
-                    size={22} 
-                    color="#1976D2"
-                  />
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Players Grid */}
-            {expandedDay && (
               <View style={styles.playersContainer}>
                 <View style={styles.playersGrid}>
-                  {game?.participants.map((player, index) => (
+                  {game?.participants?.map((player, index) => (
                     <View key={index} style={styles.playerCard}>
                       <Image
                         source={{ uri: `${JAVA_API}profile/${player?.userId}/image` }}
@@ -251,7 +268,6 @@ export default function GameDetailsScreen({ route }: { route: any }) {
                   ))}
                 </View>
               </View>
-            )}
 
         </View>
       </ScrollView>
@@ -340,6 +356,12 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.transparentPrimary,
   },
 
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   // ── Left side ──────────────────────────────────────────────────────────────
   backGroup: {
     flexDirection: "row",
@@ -396,7 +418,7 @@ const styles = StyleSheet.create({
     marginBottom: 1,
   },
   title: {
-    fontSize: 20,
+    fontSize: SIZES.h2,
     fontWeight: "800",
     color: COLORS.grayscale900,
     letterSpacing: -0.3,
@@ -434,6 +456,8 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     marginBottom: 6,
+    borderTopWidth: 2,
+    borderTopColor: '#eee',
   },
   button: {
     backgroundColor: COLORS.primary,
@@ -538,7 +562,7 @@ const styles = StyleSheet.create({
   discountPrice: {
     color: COLORS.primary,
     fontWeight: 'bold',
-    fontSize: FONTS.h3.fontSize,
+    fontSize: SIZES.h2,
   },
   section: {
     flexDirection: 'row',
@@ -562,6 +586,7 @@ const styles = StyleSheet.create({
   },
   expandAllButton: {
     padding: 5,
+    tintColor: COLORS.primary
   },
   daysContainer: {
     borderRadius: 8,

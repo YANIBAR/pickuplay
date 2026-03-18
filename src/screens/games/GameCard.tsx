@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-  import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
-  import { Button, Icon, NotSignedInView } from '@components';
-  import { JAVA_API } from '@env';
-  import { COLORS, FONTS, icons, SIZES } from '@constants';
-  import { useNavigation } from '@react-navigation/native';
-  import { authenticatedApi } from '@services/api';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
+import { Button, Icon, NotSignedInView } from '@components';
+import { JAVA_API } from '@env';
+import { COLORS, FONTS, icons, SIZES } from '@constants';
+import { useNavigation } from '@react-navigation/native';
+import { authenticatedApi } from '@services/api';
 import { useTranslation } from 'react-i18next';
 import { isStoredTokenExpired } from '@utils/api/auth';
 
@@ -49,8 +49,6 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       const players = parseInt(numPlayers) || 1;
       if (discount) {
         const pricePerPlayer = game.price * (1 - discount);
-      console.log("pricePerPlayer", pricePerPlayer);
-
         setDiscountPrice((pricePerPlayer * players).toFixed(2)); // 👈 multiply by players
       } else {
         Alert.alert('Invalid promo code');
@@ -130,9 +128,9 @@ import { isStoredTokenExpired } from '@utils/api/auth';
             <Text style={styles.usedText}>{game.participants.length}/{game.nbrSpots}</Text>
           </View>
           <View style={styles.content}>
-            <View style={styles.titleRow}>
+            <View style={styles.row}>
               <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-                {game.title.charAt(0).toUpperCase() + game.title.slice(1)} 
+                {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
               </Text>
               <Icon 
                 type="materialCommunityIcons" 
@@ -144,28 +142,21 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 
             <View style={styles.infoContainer}>
               <Text style={styles.address} numberOfLines={1}>
-                <Icon type="materialCommunityIcons" name="map-marker" size={16} color={COLORS.grayscale600} />
-                {' ' + game.city}
+                {game.address}
               </Text>
               <View style={styles.row}>
                 <Text style={styles.time}>
-                  <Icon type="materialCommunityIcons" name="clock" size={16} color={COLORS.grayscale600} />
-                  {' ' + (
+                  {(
                     new Date(game.startTime).toLocaleTimeString('en-US', 
                     { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm') 
                     + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US', 
                     { hour: 'numeric', minute: '2-digit', hour12: true  })
                     + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
                 </Text>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
-                    <Text style={styles.originalPrice}>${game.price}</Text>
-                    {game.discount && (
-                      <Text style={styles.discountPrice}>${game.price-game.discount}</Text>
-                    )}
-                    
-                  </Text>
-                </View>
+                <Text style={styles.originalPrice}>${game.price}</Text>
+                {game.discount && (
+                  <Text style={styles.discountPrice}>${game.price-game.discount}</Text>
+                )}
               </View>
             </View>
 
@@ -354,12 +345,6 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     content: {
       padding: SIZES.padding,
     },
-    titleRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
     row: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -367,23 +352,20 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       marginBottom: 8,
     },
     title: {
-      fontSize: FONTS.h3.fontSize,
-      fontWeight: '800',
       marginTop: 8,
       flex: 1,
-      color: COLORS.secondary
     },
     infoContainer: {
       marginBottom: 10,
       gap: 4,
     },
     address: {
-      fontSize: 12,
-      color: '#333',
+      fontSize: 14,
+      color: COLORS.secondary,
     },
     time: {
-      fontSize: 12,
-      color: '#666',
+      fontSize: 14,
+      color: COLORS.secondary,
       flex: 1,
     },
     description: {
@@ -436,7 +418,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     },
     originalPrice: {
       //textDecorationLine: 'line-through',
-      color: COLORS.primary,
+      color: COLORS.secondary,
       fontSize: FONTS.h3.fontSize,
       fontWeight: "700"
     },

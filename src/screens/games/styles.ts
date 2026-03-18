@@ -119,25 +119,40 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     marginHorizontal: 4,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: COLORS.grayscale600,
-    minHeight: SIZES.InputHeight-6,
+    borderColor: COLORS.grayscale400,
   },
   filterButtonActive: {
-    backgroundColor: COLORS.transparentPrimary,
+    backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
-    color: COLORS.black
+    color: COLORS.white
   },
   filterButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.grayscale600,
+    fontSize: 13,
+    color: COLORS.grayscale500,
   },
   filterButtonTextActive: {
-    color: COLORS.grayscale600,
+    color: COLORS.white,
+  },
+  filterBadge: {
+    backgroundColor: COLORS.white, // or your green/active color
+    borderRadius: 99,
+    minWidth: 15,
+    height: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    marginLeft: 4,
+    marginRight: 8,
+  },
+  filterBadgeText: {
+    color: COLORS.primary,
+    fontSize: 11,
+    fontWeight: '600',
+    lineHeight: 12,
   },
   clearButton: {
     flexDirection: 'row',

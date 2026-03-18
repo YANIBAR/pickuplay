@@ -119,59 +119,60 @@ import { isStoredTokenExpired } from '@utils/api/auth';
           style={[styles.card, (game.currentParticipants < 0 ? styles.usedCard : {})]} 
           onPress={() => handleGamePress(game.id)}
         >
-          <Image 
-            source={{ uri: `${JAVA_API}games/${game.id}/image` }}
-            style={styles.image}
-          />
 
-          <View style={game.nbrSpots >= game.participants.length ? styles.leftBadge : styles.fullBadge}>
-            <Text style={styles.usedText}>{game.participants.length}/{game.nbrSpots}</Text>
+          <View style={{ backgroundColor: COLORS.red }}>
+            <Image 
+              source={{ uri: `${JAVA_API}games/${game.id}/image` }}
+              style={styles.image}
+              />
+            <View style={[styles.participantsBadgeBase, game.nbrSpots >= game.participants.length ? styles.participantsBadge : styles.participantsBadgeFull]}>
+                  <Text style={styles.usedText}>{game.participants.length} / {game.nbrSpots}</Text>
+            </View>
+
           </View>
           <View style={styles.content}>
             <View style={styles.row}>
               <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
                 {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
               </Text>
-              <Icon 
+             {/*  <Icon 
                 type="materialCommunityIcons" 
                 name={getGameIcon(game.sportType.id)} 
                 size={24} 
                 color={COLORS.secondary}
-              />
+              /> */}
             </View>
 
             <View style={styles.infoContainer}>
               <Text style={styles.address} numberOfLines={1}>
                 {game.address}
               </Text>
-              <View style={styles.row}>
-                <Text style={styles.time}>
-                  {(
-                    new Date(game.startTime).toLocaleTimeString('en-US', 
-                    { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm') 
-                    + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US', 
-                    { hour: 'numeric', minute: '2-digit', hour12: true  })
-                    + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
-                </Text>
-                <Text style={styles.originalPrice}>${game.price}</Text>
-                {game.discount && (
-                  <Text style={styles.discountPrice}>${game.price-game.discount}</Text>
-                )}
-              </View>
+              <Text style={styles.time}>
+                {(
+                  new Date(game.startTime).toLocaleTimeString('en-US',
+                  { hour: 'numeric', minute: '2-digit', hour12: true  }) || '10pm - 12pm')
+                  + ' - ' + new Date(game.endTime).toLocaleTimeString('en-US',
+                  { hour: 'numeric', minute: '2-digit', hour12: true  })
+                  + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
+              </Text>
             </View>
 
-            <TouchableOpacity 
-              style={styles.joinButton}
-              onPress={handleJoinGame}
-            >
-              <Icon 
-                type="materialCommunityIcons" 
-                name="plus-circle" 
-                size={18} 
-                color="white"
-              />
-              <Text style={styles.joinButtonText}>{t('games.joinButton')}</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <View style={styles.priceContainer}>
+                <Text style={[styles.originalPrice]}>${game.price.toFixed(2)}</Text>
+                <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
+                {game.discount && (
+                  <Text style={styles.discountPrice}>${(game.price - game.discount).toFixed(2)}</Text>
+                )}
+              </View>
+
+              <TouchableOpacity
+                style={styles.joinButton}
+                onPress={handleJoinGame}
+              >
+                <Text style={styles.joinButtonText}>{t('games.joinButton')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -266,7 +267,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
                     <Text style={styles.priceLabel}>Price per guest:</Text>
-                    <Text style={styles.originalPriceText}>${game.price}</Text>
+                    <Text style={styles.originalPriceText}>${game.price.toFixed(2)}</Text>
                   </View>
                   <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                     <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
@@ -343,7 +344,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       height: 200,
     },
     content: {
-      padding: SIZES.padding,
+      padding: SIZES.padding2,
     },
     row: {
       flexDirection: 'row',
@@ -354,6 +355,9 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     title: {
       marginTop: 8,
       flex: 1,
+      fontWeight: '600',
+      textTransform: 'capitalize',
+      fontSize: FONTS.h3.fontSize,
     },
     infoContainer: {
       marginBottom: 10,
@@ -381,8 +385,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     priceContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      flex: 1,
-      alignSelf: "flex-end"
+      gap: 4
     },
     locationContainer: {
       flexDirection: 'row',
@@ -395,32 +398,30 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       color: '#666',
       flex: 1,
     },
-    fullBadge: {
-      backgroundColor: COLORS.red,
+    participantsBadgeBase: {
+      position: 'absolute',
+      right: 12,
+      bottom: 12,
       paddingHorizontal: 6,
-      paddingVertical: 2,
+      paddingVertical: 4,
       borderRadius: 4,
-      marginLeft: 4,
+      zIndex: 1,
     },
-    leftBadge: {
-      position: "absolute",
-      alignSelf: 'flex-end',
-      backgroundColor: COLORS.secondary,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-      margin: 4,
+    participantsBadgeFull: {
+      backgroundColor: COLORS.red,
+    },
+    participantsBadge: {
+      backgroundColor: COLORS.transparentGray,
     },
     usedText: {
       color: 'white',
-      fontSize: 10,
-      fontWeight: 'bold',
+      fontSize: 12,
     },
     originalPrice: {
       //textDecorationLine: 'line-through',
-      color: COLORS.secondary,
+      color: COLORS.black,
       fontSize: FONTS.h3.fontSize,
-      fontWeight: "700"
+      fontWeight: '600',
     },
     discountPrice: {
       color: '#999',
@@ -428,14 +429,12 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       fontSize: FONTS.h3.fontSize,
     },
     joinButton: {
-      flexDirection: 'row',
       backgroundColor: COLORS.primary,
       paddingVertical: 10,
-      paddingHorizontal: 12,
-      borderRadius: 8,
+      paddingHorizontal: 37,
+      borderRadius: 20,
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 6,
     },
     joinButtonText: {
       color: 'white',

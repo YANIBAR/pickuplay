@@ -35,6 +35,7 @@ export const COLORS = {
   grayscale200: '#EEEEEE',
   grayscale100: '#F5F5F5',
   transparentPrimary: '#22BB9C15',
+  transparentGray: 'rgba(0, 0, 0, 0.5)',
   transparentDarkPrimary: 'rgba(34, 187, 156, 0.7)',
   transparentSecondary: 'rgba(108,77,218, .15)',
   transparentTertiary: 'rgba(51, 94, 247, .1)',

@@ -5,7 +5,7 @@ import GameGrid from './GamesGrid';
 import { useEffect, useState } from 'react';
 import { Checkbox, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
-import { icons } from '@constants';
+import { COLORS, icons } from '@constants';
 import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
@@ -17,23 +17,28 @@ type Nav = {
 }
 const mockGames: Game[] = [];
 
-const SPORTS = ['1', '2', '3', '5'];
-const getSportLabels = (t: (key: string) => string) => ({
-  1: t('home.sports.soccer'),
-  2: t('home.sports.basketball'),
-  3: t('home.sports.volleyball'),
-  5: t('home.sports.tennis'),
-});
-
+type Sport = {
+  id: string;
+  name: string;
+};
+ 
+type City = {
+  name: string;
+};
+ 
+type SportOption = {
+  label: string;
+  value: string;
+};
+ 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const SPORT_LABELS = getSportLabels(t);
   const [games, setGames] = useState<Game[]>([]);
   const { userData, error, refreshUserData } = useUserData();
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { navigate } = useNavigation<Nav>();
-
+  const [Sports, setSports] = useState<SportOption[]>([]);
   const [currentCity, setCurrentCity] = useState<string | null>(null);
   // Filter states
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
@@ -60,6 +65,18 @@ export default function HomeScreen() {
     }
   };
 
+  const getSports = async (): Promise<void> => {
+    try {
+      const response = await publicApi.get('games/sports');
+      const sportsList: Sport[] = response.result.data;
+      setSports(sportsList.map((sport) => ({ label: sport.name, value: sport.id }))) 
+    } catch (error) {
+      const errorMessage = (error as any).response?.data?.message;
+      Alert.alert('Error', errorMessage);
+      console.error('sport type fetch failed:', error);
+      setSports([]); // fallback to empty array
+    }
+  };
     // Get unique cities from games
   // Add this near your other state declarations
   const [cities, setCities] = useState<string[]>([]);
@@ -103,9 +120,8 @@ export default function HomeScreen() {
   // Filter games based on selected filters
   const applyFilters = () => {
     let filtered = [...games];
-
     if (selectedSports.length > 0) {
-      filtered = filtered.filter(game => selectedSports.includes(String(game.sportType.id)));
+      filtered = filtered.filter(game => selectedSports.includes(game.sportType.id));
     }
     // Use selected cities, or default to user's city if no city filter is active
     const citiesToFilter = selectedCities.length > 0 
@@ -142,6 +158,7 @@ export default function HomeScreen() {
     if (currentCity) {
       fetchRequests();
       getCities();
+      getSports();
     }
   }, [currentCity]);
 
@@ -181,8 +198,14 @@ export default function HomeScreen() {
               onPress={() => setSportModalVisible(true)}
             >
               <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
-                {selectedSports.length > 0 ? `${selectedSports.length} Sports` : 'Sport'}
+                City
               </Text>
+              {selectedSports.length > 0 && (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>{selectedSports.length}</Text>
+                </View>
+              )}
+              <Icon type="fontAwesome" name="caret-down" size={16} color={COLORS.white}/>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -190,8 +213,14 @@ export default function HomeScreen() {
               onPress={() => setCityModalVisible(true)}
             >
               <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
-                {selectedCities.length > 0 ? `${selectedCities.length} Cities` : 'City'}
+                City
               </Text>
+              {selectedCities.length > 0 && (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>{selectedCities.length}</Text>
+                </View>
+              )}
+              <Icon type="fontAwesome" name="caret-down" size={16} color={COLORS.white}/>
             </TouchableOpacity>
             
             {hasActiveFilters && (
@@ -233,20 +262,18 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
 
-            {SPORTS.map(sport => (
-              <TouchableOpacity
-                key={sport}
-                style={styles.filterOption}
-                onPress={() => handleSportToggle(sport)}
-              >
-                <Checkbox
-                  checked={selectedSports.includes(sport)}
-                  onValueChange={() => handleSportToggle(sport)}
-                />
+            {Sports.map(sport => (
+              <View style={styles.filterOption} key={sport.value}>
+                <TouchableOpacity onPress={() => handleSportToggle(sport.value)}>
+                  <Checkbox
+                    checked={selectedSports.includes(sport.value)}
+                    onValueChange={() => handleSportToggle(sport.value)}
+                  />
+                </TouchableOpacity>
                 <Text style={styles.filterOptionText}>
-                  {SPORT_LABELS[sport as keyof typeof SPORT_LABELS] || sport}
+                  {sport.label}
                 </Text>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         </View>

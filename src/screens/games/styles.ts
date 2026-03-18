@@ -133,6 +133,7 @@ export default StyleSheet.create({
   filterButtonText: {
     fontSize: 13,
     color: COLORS.grayscale500,
+    marginRight: 4,
   },
   filterButtonTextActive: {
     color: COLORS.white,
@@ -145,7 +146,6 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
-    marginLeft: 4,
     marginRight: 8,
   },
   filterBadgeText: {

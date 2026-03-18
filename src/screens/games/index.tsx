@@ -205,7 +205,8 @@ export default function HomeScreen() {
                   <Text style={styles.filterBadgeText}>{selectedSports.length}</Text>
                 </View>
               )}
-              <Icon type="fontAwesome" name="caret-down" size={16} color={COLORS.white}/>
+              <Icon type="fontAwesome" name="caret-down" size={16} color={COLORS.gray}/>
+
             </TouchableOpacity>
 
             <TouchableOpacity 

@@ -120,13 +120,13 @@ import { isStoredTokenExpired } from '@utils/api/auth';
           onPress={() => handleGamePress(game.id)}
         >
 
-          <View style={{ backgroundColor: COLORS.red }}>
+          <View style={{ backgroundColor: COLORS.transparentPrimary }}>
             <Image 
               source={{ uri: `${JAVA_API}games/${game.id}/image` }}
               style={styles.image}
               />
             <View style={[styles.participantsBadgeBase, game.nbrSpots >= game.participants.length ? styles.participantsBadge : styles.participantsBadgeFull]}>
-                  <Text style={styles.usedText}>{game.participants.length} / {game.nbrSpots}</Text>
+              <Text style={styles.usedText}>{game.participants.length} / {game.nbrSpots}</Text>
             </View>
 
           </View>
@@ -135,12 +135,12 @@ import { isStoredTokenExpired } from '@utils/api/auth';
               <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
                 {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
               </Text>
-             {/*  <Icon 
+              <Icon 
                 type="materialCommunityIcons" 
                 name={getGameIcon(game.sportType.id)} 
                 size={24} 
                 color={COLORS.secondary}
-              /> */}
+              />
             </View>
 
             <View style={styles.infoContainer}>
@@ -159,8 +159,13 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 
             <View style={styles.footer}>
               <View style={styles.priceContainer}>
-                <Text style={[styles.originalPrice]}>${game.price.toFixed(2)}</Text>
-                <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
+                {game.price ? (
+                  <>
+                    <Text style={[styles.originalPrice]}>${game.price.toFixed(2)}</Text>
+                    <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
+                  </>
+                ) : ( <Text style={[styles.free]}>Free</Text>)
+                }
                 {game.discount && (
                   <Text style={styles.discountPrice}>${(game.price - game.discount).toFixed(2)}</Text>
                 )}
@@ -267,7 +272,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
                     <Text style={styles.priceLabel}>Price per guest:</Text>
-                    <Text style={styles.originalPriceText}>${game.price.toFixed(2)}</Text>
+                    <Text style={styles.originalPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
                   </View>
                   <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                     <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
@@ -334,7 +339,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       elevation: 1,
       overflow: 'hidden',
       borderWidth: 0.1,
-      marginBottom: 15,
+      marginBottom: 5,
     },
     usedCard: {
       opacity: 0.5,
@@ -342,9 +347,11 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     image: {
       width: '100%',
       height: 200,
+      backgroundColor: COLORS.primary
     },
     content: {
-      padding: SIZES.padding2,
+      paddingHorizontal: SIZES.padding2,
+      paddingTop: SIZES.padding2
     },
     row: {
       flexDirection: 'row',
@@ -420,6 +427,12 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     originalPrice: {
       //textDecorationLine: 'line-through',
       color: COLORS.black,
+      fontSize: FONTS.h3.fontSize,
+      fontWeight: '600',
+    },
+    free: {
+      //textDecorationLine: 'line-through',
+      color: COLORS.primary,
       fontSize: FONTS.h3.fontSize,
       fontWeight: '600',
     },

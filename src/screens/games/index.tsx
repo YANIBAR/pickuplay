@@ -187,9 +187,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      {/* Filters Bar */}
-
       <View style={styles.content}>
         <View style={styles.filtersRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>
@@ -198,7 +195,7 @@ export default function HomeScreen() {
               onPress={() => setSportModalVisible(true)}
             >
               <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
-                City
+                Sport
               </Text>
               {selectedSports.length > 0 && (
                 <View style={styles.filterBadge}>
@@ -271,7 +268,7 @@ export default function HomeScreen() {
                     onValueChange={() => handleSportToggle(sport.value)}
                   />
                 </TouchableOpacity>
-                <Text style={styles.filterOptionText}>
+                <Text onPress={() => handleSportToggle(sport.value)} style={styles.filterOptionText}>
                   {sport.label}
                 </Text>
               </View>
@@ -306,7 +303,7 @@ export default function HomeScreen() {
                   checked={selectedCities.includes(city)}
                   onValueChange={() => handleCityToggle(city)}
                 />
-                <Text style={styles.filterOptionText}>{city}</Text>
+                <Text style={styles.filterOptionText}>{city==currentCity ? "Nearby" : city}</Text>
               </TouchableOpacity>
             ))}
           </View>

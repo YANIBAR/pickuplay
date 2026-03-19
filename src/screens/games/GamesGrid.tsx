@@ -37,5 +37,6 @@ export default function GameGrid({ games, refreshing = false, onRefresh }: GameG
 const styles = StyleSheet.create({
   container: {
     padding: 8,
+    paddingBottom: 70
   }
 });

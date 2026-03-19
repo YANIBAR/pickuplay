@@ -9,7 +9,6 @@ import { COLORS, icons } from '@constants';
 import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
-import { useUserData } from '@services/useUserData';
 import { getCurrentCity } from '@utils/helpers';
 
 type Nav = {
@@ -30,11 +29,27 @@ type SportOption = {
   label: string;
   value: string;
 };
- 
+ const getWeekDays = () => {
+  const days = [];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date();
+
+  const daysUntilThursday = (4 - today.getDay() + 7) % 7 || 7;
+
+  for (let i = 0; i <= daysUntilThursday; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    days.push({
+      label: i === 0 ? 'Today' : dayNames[date.getDay()],
+      date: date.toISOString().split('T')[0], // ← YYYY-MM-DD
+      dayObj: date,
+    });
+  }
+  return days;
+};
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const [games, setGames] = useState<Game[]>([]);
-  const { userData, error, refreshUserData } = useUserData();
+  const [games, setGames] = useState<Game[]>([]); 
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { navigate } = useNavigation<Nav>();
@@ -43,10 +58,13 @@ export default function HomeScreen() {
   // Filter states
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   
   // Modal states
   const [sportModalVisible, setSportModalVisible] = useState(false);
   const [cityModalVisible, setCityModalVisible] = useState(false);
+
+  const weekDays = getWeekDays();
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -54,7 +72,7 @@ export default function HomeScreen() {
   };
   const fetchRequests = async () => {
     try {
-      const response = await publicApi.get(`games`);
+      const response = await publicApi.get(`games`, { params: { date: new Date().toISOString().split('T')[0] } });
       setGames(response.result.data.games);
     } catch (error) {
       const errorMessage = error.response?.data?.message;
@@ -132,6 +150,14 @@ export default function HomeScreen() {
         citiesToFilter.includes(extractCity(game.city))
       );
     }
+    
+    // Filter by selected weekdays
+    if (selectedDays.length > 0) {
+      filtered = filtered.filter(game => {
+        const gameDate = new Date(game.startTime).toISOString().split('T')[0]; // ← YYYY-MM-DD
+        return selectedDays.includes(gameDate);
+      });
+    }
 
     setFilteredGames(filtered);
   };
@@ -140,7 +166,7 @@ export default function HomeScreen() {
   useEffect(() => {
     applyFilters();
     setRefreshing(false);
-  }, [selectedSports, selectedCities, games]);
+  }, [selectedSports, selectedCities, selectedDays, games]);
 
   useEffect(() => {
     const fetchCity = async () => {
@@ -178,13 +204,20 @@ export default function HomeScreen() {
     );
   };
 
+  const handleDayToggle = (dateString: string) => {
+    setSelectedDays(prev =>
+      prev.includes(dateString) ? prev.filter(d => d !== dateString) : [...prev, dateString]
+    );
+  };
+
   const clearAllFilters = () => {
     setSelectedSports([]);
     setSelectedCities([]);
+    setSelectedDays([]);
   };
 
   const hasActiveFilters = selectedSports.length > 0 || selectedCities.length > 0;
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -220,7 +253,6 @@ export default function HomeScreen() {
               )}
               <Icon type="fontAwesome" name="caret-down" size={16} color={selectedCities.length > 0 ? COLORS.white : COLORS.gray}/>
             </TouchableOpacity>
-            
             {hasActiveFilters && (
               <TouchableOpacity 
                 style={styles.clearButton}
@@ -231,7 +263,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
           </ScrollView>
-
+            
           {/* Bell icon fixed to the right, outside the ScrollView */}
           <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
             <Image
@@ -240,7 +272,26 @@ export default function HomeScreen() {
             />
           </TouchableOpacity>
         </View>
-
+        <View style={styles.daysFiltersRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysFiltersBar}>
+            {/* Weekday filter buttons */}
+            {weekDays.map((day) => {
+              const isSelected = selectedDays.includes(day.date);
+              return (
+                <TouchableOpacity
+                  key={day.date}
+                  style={[styles.filterButton, isSelected && styles.filterButtonActive]}
+                  onPress={() => handleDayToggle(day.date)}
+                >
+                  <Text style={[styles.filterButtonText, isSelected && styles.filterButtonTextActive]}>
+                    {day.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+        
         <GameGrid games={filteredGames} refreshing={refreshing} onRefresh={onRefresh}/>
       </View>
 

@@ -115,6 +115,13 @@ export default StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 12,
   },
+  daysFiltersBar:{
+
+    flex: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -171,6 +178,11 @@ export default StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     maxHeight: 60,
+  },
+  daysFiltersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 50,
   },
   headerRight: {
     paddingHorizontal: 12,

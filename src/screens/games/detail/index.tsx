@@ -160,20 +160,22 @@ const handleGetDirections = () => {
         {/* Back + Title */}
         <TouchableOpacity
           onPress={() => navigate("welcome")}
-          style={styles.backGroup}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
+
+          <View style={styles.backIconContainer}>
           <Image
               source={icons.back as ImageSourcePropType}
               resizeMode="contain"
               style={styles.backIcon}
             />
-
-          <View style={styles.headerLeft}>
-            <Text style={[styles.headerTitle, { color: COLORS.grayscale900 }]}>{t('game.details.title')}</Text>
           </View>
         </TouchableOpacity>
+
+         <View>
+            <Text style={[FONTS.title, {fontSize: 22}]}>{t('game.details.title')}</Text>
+          </View>
 
         {/* Action Buttons */}
         <View style={styles.actions}>
@@ -183,7 +185,7 @@ const handleGetDirections = () => {
             activeOpacity={0.75}
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
           >
-            <Icon type="materialCommunityIcons" name="share-variant" size={20} color={COLORS.primary} />
+            <Icon type="materialCommunityIcons" name="share-variant" size={SIZES.h2} color={COLORS.primary} />
           </TouchableOpacity>
         {(userData?.id == game?.creatorId && isLogged) && (
           <TouchableOpacity
@@ -366,49 +368,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   // ── Left side ──────────────────────────────────────────────────────────────
-  backGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    gap: 12,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center"
-  },
   logo: {
     height: 32,
     width: 32
   },
-  headerTitle: {
-    fontSize: 22,
-    fontFamily: "bold",
-    color: COLORS.grayscale900,
-    marginLeft: 12
-  },
-  backIcon: {
-    width: 28,
-    height: 28,
-    marginRight: 16,
-    padding: 4,
-    borderRadius: 16,
+  backIconContainer: {
+    padding: 6,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.1)', // optional, helps define edge
-
-    // iOS shadow
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-
-    // Android shadow
-    elevation: 5,
-
-    // CRITICAL: background color required for shadow to show
     backgroundColor: '#fff', // or whatever your icon background should be
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
   },
   titleBlock: {
     flex: 1,

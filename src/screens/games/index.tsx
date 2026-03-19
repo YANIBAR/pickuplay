@@ -202,7 +202,7 @@ export default function HomeScreen() {
                   <Text style={styles.filterBadgeText}>{selectedSports.length}</Text>
                 </View>
               )}
-              <Icon type="fontAwesome" name="caret-down" size={16} color={COLORS.gray}/>
+              <Icon type="fontAwesome" name="caret-down" size={16} color={selectedSports.length > 0 ? COLORS.white : COLORS.gray}/>
 
             </TouchableOpacity>
 
@@ -218,7 +218,7 @@ export default function HomeScreen() {
                   <Text style={styles.filterBadgeText}>{selectedCities.length}</Text>
                 </View>
               )}
-              <Icon type="fontAwesome" name="caret-down" size={16} color={COLORS.white}/>
+              <Icon type="fontAwesome" name="caret-down" size={16} color={selectedCities.length > 0 ? COLORS.white : COLORS.gray}/>
             </TouchableOpacity>
             
             {hasActiveFilters && (

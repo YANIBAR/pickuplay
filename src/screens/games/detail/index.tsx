@@ -201,12 +201,15 @@ const handleGetDirections = () => {
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         <View style={styles.content}>
           <View style={styles.row}>
-            <Text style={styles.title}>
+            <Text style={FONTS.title}>
               {toTitleCase(game?.title ?? '')}
             </Text>
-            {/*<Text style={styles.originalPrice}>$12.99</Text>*/}
-            <Text style={styles.discountPrice}>${game.price}</Text>
-            
+            <Text style={[FONTS.originalPrice]}>${game.price ? game.price.toFixed(2) : 'Free'}</Text>
+            <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
+          
+            {game.discount && (
+              <Text style={FONTS.originalPrice}>${(game.price - game.discount).toFixed(2)}</Text>
+            )}
           </View>
 
           <Text style={styles.description}>{game.description}</Text>
@@ -417,13 +420,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 1,
   },
-  title: {
-    fontSize: SIZES.h2,
-    fontWeight: "800",
-    color: COLORS.grayscale900,
-    letterSpacing: -0.3,
-    marginTop: 8
-  },
 
   // ── Right side ─────────────────────────────────────────────────────────────
   actions: {
@@ -453,6 +449,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     lineHeight: 24,
+    marginBottom: 12,
   },
   infoContainer: {
     marginBottom: 6,
@@ -552,17 +549,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 8,
-  },
-  originalPrice: {
-    textDecorationLine: 'line-through',
-    color: COLORS.error,
-    fontSize: FONTS.h5.fontSize,
-    marginRight: 12,
-  },
-  discountPrice: {
-    color: COLORS.primary,
-    fontWeight: 'bold',
-    fontSize: SIZES.h2,
   },
   section: {
     flexDirection: 'row',

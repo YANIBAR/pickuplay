@@ -131,6 +131,19 @@ export const FONTS = {
     lineHeight: 16,
     color: 'black',
   },
+  title: {
+      marginTop: 8,
+      flex: 1,
+      fontWeight: '600',
+      textTransform: 'capitalize',
+      fontSize: SIZES.h3,
+    },
+  originalPrice: {
+    //textDecorationLine: 'line-through',
+    color: COLORS.black,
+    fontSize: SIZES.h3,
+    fontWeight: '600',
+  },
   body1: {
     fontFamily: 'regular',
     fontSize: SIZES.body1,

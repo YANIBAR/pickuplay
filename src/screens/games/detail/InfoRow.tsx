@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
 import { Icon } from '@components';
-import { COLORS } from '@constants';
+import { COLORS, FONTS } from '@constants';
 
 interface InfoRowProps {
   icon: string;
@@ -30,17 +30,14 @@ export default function InfoRow({ icon, label, value, isAddress }: InfoRowProps)
     <View style={styles.container}>
       <Icon type="materialCommunityIcons" name={icon as any} size={24} color={COLORS.secondary} />
       <View style={styles.textContainer}>
-        <View style={styles.labelRow}>
-          <Text style={styles.label}>{label}</Text>
-          
-        </View>
-        <Text style={styles.value}>{value} 
-        {isAddress && (
-            <TouchableOpacity onPress={handleGetDirections}>
-              <Icon type="materialCommunityIcons" name="directions" size={20} color={COLORS.primary} />
-            </TouchableOpacity>
-          )}</Text>
+        <Text style={styles.label}>{label}</Text>
+        <Text style={styles.value}>{value}</Text>
       </View>
+      {isAddress && (
+        <TouchableOpacity onPress={handleGetDirections}>
+            <Icon type="materialCommunityIcons" name="directions" size={28} color={COLORS.primary}/>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -54,19 +51,16 @@ const styles = StyleSheet.create({
   textContainer: {
     marginLeft: 12,
     flex: 1,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
   },
   label: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.black,
   },
   value: {
     fontSize: 16,
-    color: '#000',
+    color: COLORS.gray3,
     marginTop: 2,
+    textTransform: 'capitalize',
   },
 });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
 import { Button, Icon, NotSignedInView } from '@components';
 import { JAVA_API } from '@env';
-import { COLORS, FONTS, icons, SIZES } from '@constants';
+import { COLORS, FONTS, icons,SIZES } from '@constants';
 import { useNavigation } from '@react-navigation/native';
 import { authenticatedApi } from '@services/api';
 import { useTranslation } from 'react-i18next';
@@ -349,8 +349,8 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     },
     image: {
       width: '100%',
-      height: 200,
-      backgroundColor: COLORS.primary
+      height: 200
+      
     },
     content: {
       paddingHorizontal: SIZES.padding2,

@@ -132,7 +132,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
           </View>
           <View style={styles.content}>
             <View style={styles.row}>
-              <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+              <Text style={FONTS.title} numberOfLines={1} ellipsizeMode="tail">
                 {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
               </Text>
               <Icon 
@@ -161,13 +161,16 @@ import { isStoredTokenExpired } from '@utils/api/auth';
               <View style={styles.priceContainer}>
                 {game.price ? (
                   <>
-                    <Text style={[styles.originalPrice]}>${game.price.toFixed(2)}</Text>
+                    <Text style={[FONTS.originalPrice]}>${game.price.toFixed(2)}</Text>
                     <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
                   </>
-                ) : ( <Text style={[styles.free]}>Free</Text>)
+                  ) : ( <Text style={[FONTS.originalPrice, { color: COLORS.tertiary }]}>Free</Text>)
                 }
                 {game.discount && (
                   <Text style={styles.discountPrice}>${(game.price - game.discount).toFixed(2)}</Text>
+                )}
+                {game.discount && (
+                  <Text style={FONTS.originalPrice}>${(game.price - game.discount).toFixed(2)}</Text>
                 )}
               </View>
 
@@ -359,13 +362,6 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       alignItems: 'center',
       marginBottom: 8,
     },
-    title: {
-      marginTop: 8,
-      flex: 1,
-      fontWeight: '600',
-      textTransform: 'capitalize',
-      fontSize: FONTS.h3.fontSize,
-    },
     infoContainer: {
       marginBottom: 10,
       gap: 4,
@@ -423,23 +419,6 @@ import { isStoredTokenExpired } from '@utils/api/auth';
     usedText: {
       color: 'white',
       fontSize: 12,
-    },
-    originalPrice: {
-      //textDecorationLine: 'line-through',
-      color: COLORS.black,
-      fontSize: FONTS.h3.fontSize,
-      fontWeight: '600',
-    },
-    free: {
-      //textDecorationLine: 'line-through',
-      color: COLORS.primary,
-      fontSize: FONTS.h3.fontSize,
-      fontWeight: '600',
-    },
-    discountPrice: {
-      color: '#999',
-      fontWeight: 'bold',
-      fontSize: FONTS.h3.fontSize,
     },
     joinButton: {
       backgroundColor: COLORS.primary,

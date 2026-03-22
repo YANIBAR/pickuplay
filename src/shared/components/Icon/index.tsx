@@ -10,6 +10,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { COLORS } from '@constants';
 
 export type IconType =
   | 'entypo'
@@ -47,8 +48,8 @@ const ICONS = {
 const Component: React.FC<Props> = ({
   type,
   name,
-  size = 18,
-  color,
+  size = 20,
+  color = COLORS.black,
   style,
 }: Props) => {
   const Icon = useMemo(() => ICONS[type], [type]);

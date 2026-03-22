@@ -94,50 +94,50 @@ export const FONTS = {
     fontSize: SIZES.largeTitle,
     lineHeight: 55,
     color: 'black',
+    textTransform: 'capitalize'
   },
   h1: {
-    fontFamily: 'bold',
+    fontWeight: 'bold',
     fontSize: SIZES.h1,
     lineHeight: 36,
     color: 'black',
+    textTransform: 'capitalize'
   },
   h2: {
-    fontFamily: 'bold',
+    fontWeight: 'bold',
     fontSize: SIZES.h2,
     lineHeight: 30,
     color: 'black',
+    textTransform: 'capitalize'
   },
   h3: {
-    fontFamily: 'bold',
+    fontWeight: 'bold',
     fontSize: SIZES.h3,
     lineHeight: 22,
     color: 'black',
+    textTransform: 'capitalize'
   },
   h4: {
-    fontFamily: 'bold',
+    fontWeight: 'bold',
     fontSize: SIZES.h4,
     lineHeight: 20,
     color: 'black',
+    textTransform: 'capitalize'
   },
   h5: {
-    fontFamily: 'bold',
+    fontWeight: 'bold',
     fontSize: SIZES.h5,
     lineHeight: 18,
     color: 'black',
+    textTransform: 'capitalize'
   },
   h6: {
-    fontFamily: 'bold',
+    fontWeight: 'bold',
     fontSize: SIZES.h6,
     lineHeight: 16,
     color: 'black',
+    textTransform: 'capitalize'
   },
-  title: {
-      marginTop: 8,
-      flex: 1,
-      fontWeight: '600',
-      textTransform: 'capitalize',
-      fontSize: SIZES.h3,
-    },
   originalPrice: {
     //textDecorationLine: 'line-through',
     color: COLORS.black,

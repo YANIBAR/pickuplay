@@ -156,50 +156,8 @@ const handleGetDirections = () => {
   return (
     <SafeAreaView style={styles.area}>
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
-       <View style={styles.wrapper}>
-        {/* Back + Title */}
-        <TouchableOpacity
-          onPress={() => navigate("welcome")}
-          activeOpacity={0.7}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-
-          <View style={styles.backIconContainer}>
-          <Image
-              source={icons.back as ImageSourcePropType}
-              resizeMode="contain"
-              style={styles.backIcon}
-            />
-          </View>
-        </TouchableOpacity>
-
-         <View>
-            <Text style={[FONTS.title, {fontSize: 22}]}>{t('game.details.title')}</Text>
-          </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={() => setShareModalVisible(true)}
-            style={styles.iconBtn}
-            activeOpacity={0.75}
-            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-          >
-            <Icon type="materialCommunityIcons" name="share-variant" size={SIZES.h2} color={COLORS.primary} />
-          </TouchableOpacity>
-        {(userData?.id == game?.creatorId && isLogged) && (
-          <TouchableOpacity
-            onPress={() => navigate("editGame", { game })}
-            style={styles.iconBtn}
-            activeOpacity={0.75}
-            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-          >
-            <Icon type="feather" name="edit" size={20} color={COLORS.primary} />
-          </TouchableOpacity>
-        )}
-          
-        </View>
-      </View>
+        <Header title={t('game.details.title')} game={game} userData={userData} isLogged={isLogged} target="welcome" />
+      
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         <View style={styles.content}>
           <View style={styles.row}>
@@ -351,15 +309,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
   },
-  wrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.transparentPrimary,
-  },
 
   row: {
     flexDirection: 'row',
@@ -368,24 +317,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   // ── Left side ──────────────────────────────────────────────────────────────
-  logo: {
-    height: 32,
-    width: 32
-  },
-  backIconContainer: {
-    padding: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)', // optional, helps define edge
-    backgroundColor: '#fff', // or whatever your icon background should be
-  },
-  backIcon: {
-    width: 20,
-    height: 20,
-  },
-  titleBlock: {
-    flex: 1,
-  },
   eyebrow: {
     fontSize: 10,
     letterSpacing: 1.6,
@@ -395,17 +326,6 @@ const styles = StyleSheet.create({
   },
 
   // ── Right side ─────────────────────────────────────────────────────────────
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  iconBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   badge: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: 12,

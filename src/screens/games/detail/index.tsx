@@ -156,7 +156,27 @@ const handleGetDirections = () => {
   return (
     <SafeAreaView style={styles.area}>
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
-        <Header title={t('game.details.title')} game={game} userData={userData} isLogged={isLogged} target="welcome" />
+        <Header title={t('game.details.title')} target="welcome">
+          <TouchableOpacity
+              //onPress={() => setShareModalVisible(true)}
+              style={styles.iconBtn}
+              activeOpacity={0.75}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            >
+              <Icon type="materialCommunityIcons" name="share-variant" />
+          </TouchableOpacity>
+          
+          {(userData?.id == game?.creatorId && isLogged) && (
+            <TouchableOpacity
+              onPress={() => navigate("editGame", { game })}
+              style={styles.iconBtn}
+              activeOpacity={0.75}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            >
+              <Icon type="feather" name="edit" />
+            </TouchableOpacity>
+        )}
+        </Header>
       
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         <View style={styles.content}>
@@ -326,6 +346,9 @@ const styles = StyleSheet.create({
   },
 
   // ── Right side ─────────────────────────────────────────────────────────────
+  iconBtn: {
+    marginHorizontal: 8
+  },
   badge: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: 12,

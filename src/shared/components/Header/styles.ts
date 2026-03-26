@@ -22,7 +22,4 @@ export default StyleSheet.create({
     overflow: "hidden",
     justifyContent: "center"
   },
-  iconBtn: {
-    marginHorizontal: 8
-  },
 });

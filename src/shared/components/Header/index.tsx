@@ -18,12 +18,10 @@ interface NavigationTarget {
 interface HeaderProps {
   title?: string;
   target?: NavigationTarget | string;
-  game?: any; // Replace with actual game type
-  userData?: any; // Replace with actual user data type
-  isLogged?: boolean;
+  children?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, target, game, userData, isLogged }) => {
+const Header: React.FC<HeaderProps> = ({ title, target, children }) => {
   const navigation = useNavigation<NavigationProp<any>>();
 
   const handleBack = () => {
@@ -49,26 +47,7 @@ const Header: React.FC<HeaderProps> = ({ title, target, game, userData, isLogged
 
       {/* Action Buttons */}
       <View style={styles.actions}>
-        <TouchableOpacity
-          //onPress={() => setShareModalVisible(true)}
-          style={styles.iconBtn}
-          activeOpacity={0.75}
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-        >
-          <Icon type="materialCommunityIcons" name="share-variant" />
-        </TouchableOpacity>
-
-        {(userData?.id == game?.creatorId && isLogged) && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("editGame", { game })}
-            style={styles.iconBtn}
-            activeOpacity={0.75}
-            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-          >
-            <Icon type="feather" name="edit" />
-          </TouchableOpacity>
-        )}
-
+        {children}
       </View>
     </View>
   );

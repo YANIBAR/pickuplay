@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "236406479353",
+    "project_id": "pickuplay-8557b",
+    "storage_bucket": "pickuplay-8557b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:236406479353:android:70e1fc1e1cc43bdd050528",
+        "android_client_info": {
+          "package_name": "com.pickuplay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqe-opm4yfQdxRsIoKHGi0a8Y0JmaiHfE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

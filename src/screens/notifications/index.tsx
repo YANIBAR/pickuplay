@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, icons } from '@constants';
 
@@ -8,10 +8,26 @@ import { ScrollView } from 'react-native-virtualized-view';
 import { notifications } from '@data';
 import NotificationCard from '@components/NotificationCard';
 import { useNavigation } from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 const Notifications = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+    useEffect(() => {
+    requestPermission();
+    const token =  getToken();
+    console.log(token);
+    }, []);
 
+  async function requestPermission() {
+    await messaging().requestPermission();
+  }
+
+  async function getToken() {
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+
+    // 🔥 Send this token to your backend
+  }
   /**
   * render header
   */

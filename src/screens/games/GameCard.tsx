@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { authenticatedApi } from '@services/api';
 import { useTranslation } from 'react-i18next';
 import { isStoredTokenExpired } from '@utils/api/auth';
+import PriceTag from '@components/PriceTag';
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
@@ -132,7 +133,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
           </View>
           <View style={styles.content}>
             <View style={styles.row}>
-              <Text style={FONTS.title} numberOfLines={1} ellipsizeMode="tail">
+              <Text style={FONTS.h3} numberOfLines={1} ellipsizeMode="tail">
                 {game.title.charAt(0).toUpperCase() + game.title.slice(1)}
               </Text>
               <Icon 
@@ -158,21 +159,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
             </View>
 
             <View style={styles.footer}>
-              <View style={styles.priceContainer}>
-                {game.price ? (
-                  <>
-                    <Text style={[FONTS.originalPrice]}>${game.price.toFixed(2)}</Text>
-                    <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
-                  </>
-                  ) : ( <Text style={[FONTS.originalPrice, { color: COLORS.tertiary }]}>Free</Text>)
-                }
-                {game.discount && (
-                  <Text style={styles.discountPrice}>${(game.price - game.discount).toFixed(2)}</Text>
-                )}
-                {game.discount && (
-                  <Text style={FONTS.originalPrice}>${(game.price - game.discount).toFixed(2)}</Text>
-                )}
-              </View>
+              <PriceTag game={game} />
 
               <TouchableOpacity
                 style={styles.joinButton}
@@ -384,11 +371,6 @@ import { isStoredTokenExpired } from '@utils/api/auth';
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 12,
-    },
-    priceContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4
     },
     locationContainer: {
       flexDirection: 'row',

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
 import { Header, Icon } from '@components';
+import PriceTag from '@components/PriceTag';
 import { COLORS, FONTS, icons, images, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { JAVA_API } from '@env';
@@ -181,15 +182,13 @@ const handleGetDirections = () => {
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
         <View style={styles.content}>
           <View style={styles.row}>
-            <Text style={FONTS.title}>
+            <Text style={FONTS.h3}>
               {toTitleCase(game?.title ?? '')}
             </Text>
-            <Text style={[FONTS.originalPrice]}>${game.price ? game.price.toFixed(2) : 'Free'}</Text>
-            <Text style={{ fontSize: 12, color: COLORS.secondary}}>/ player</Text>
+
+            <PriceTag game={game} />
           
-            {game.discount && (
-              <Text style={FONTS.originalPrice}>${(game.price - game.discount).toFixed(2)}</Text>
-            )}
+            
           </View>
 
           <Text style={styles.description}>{game.description}</Text>

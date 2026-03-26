@@ -138,12 +138,6 @@ export const FONTS = {
     color: 'black',
     textTransform: 'capitalize'
   },
-  originalPrice: {
-    //textDecorationLine: 'line-through',
-    color: COLORS.black,
-    fontSize: SIZES.h3,
-    fontWeight: '600',
-  },
   body1: {
     fontFamily: 'regular',
     fontSize: SIZES.body1,

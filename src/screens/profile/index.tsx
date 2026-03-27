@@ -2,7 +2,7 @@ import { View, Text, Alert, ImageSourcePropType, TouchableOpacity, Image, Activi
 import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-virtualized-view';
-import { COLORS, SIZES, icons, images } from '@constants';
+import { COLORS, FONTS, SIZES, icons, images } from '@constants';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Icon, Header, NotSignedInView } from '@components';
 import RBSheet from "react-native-raw-bottom-sheet";
@@ -195,9 +195,9 @@ const handleImagePicker = () => {
         </TouchableOpacity>
       </View>
 
-      <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
-        {toTitleCase(profileInfo?.firstName ?? userData?.firstName)}{" "}
-        {toTitleCase(profileInfo?.lastName ?? userData?.lastName)}
+      <Text style={[FONTS.h3]}>
+        {profileInfo?.firstName ?? userData?.firstName}{" "}
+        {profileInfo?.lastName ?? userData?.lastName}
       </Text>
     </View>
   );

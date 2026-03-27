@@ -183,7 +183,7 @@ const handleGetDirections = () => {
         <View style={styles.content}>
           <View style={styles.row}>
             <Text style={FONTS.h3}>
-              {toTitleCase(game?.title ?? '')}
+              {game?.title ?? ''}
             </Text>
 
             <PriceTag game={game} />

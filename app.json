@@ -52,10 +52,11 @@
     "android": {
       "permissions": [
         "CAMERA"
-      ]
+      ],
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.pickuplay"
     },
     "ios": {
-
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.pickuplay",
       "infoPlist": {

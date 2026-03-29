@@ -10,7 +10,7 @@ import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
 import { getCurrentCity } from '@utils/helpers';
-
+import { useNotifications } from '@contexts/NotificationContext';
 type Nav = {
   navigate: (value: string) => void
 }
@@ -49,6 +49,7 @@ type SportOption = {
 };
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const { unreadCount } = useNotifications();
   const [games, setGames] = useState<Game[]>([]); 
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -266,10 +267,16 @@ export default function HomeScreen() {
             
           {/* Bell icon fixed to the right, outside the ScrollView */}
           <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
-            <Image
-              source={icons.bellOutline}
-              style={styles.headerIcon}
-            />
+            <View>
+              <Image source={icons.bellOutline} style={styles.headerIcon} />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           </TouchableOpacity>
         </View>
         <View style={styles.daysFiltersRow}>

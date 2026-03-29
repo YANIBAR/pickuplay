@@ -1,68 +1,73 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, PermissionsAndroid, Platform } from 'react-native';
 import React, { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, icons } from '@constants';
 
 import { NavigationProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-virtualized-view';
-import { notifications } from '@data';
+import { useNotifications } from '@contexts/NotificationContext';
 import NotificationCard from '@components/NotificationCard';
 import { useNavigation } from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
+import { getMessaging, requestPermission, getToken, onMessage } from '@react-native-firebase/messaging';
+import { getApp } from '@react-native-firebase/app';
+import { Header } from '@components';
 
 const Notifications = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-    useEffect(() => {
-    requestPermission();
-    const token =  getToken();
-    console.log(token);
-    }, []);
 
-  async function requestPermission() {
-    await messaging().requestPermission();
-  }
+  const { notifications, addNotification, markAllAsRead } = useNotifications();
 
-  async function getToken() {
-    const token = await messaging().getToken();
+  useEffect(() => {
+    requestPerm();
+    fetchToken();
+
+    // Listen for foreground notifications and add to list
+    const unsubscribe = onMessage(getMessaging(getApp()), remoteMessage => {
+      const newNotif = {
+        id: Date.now().toString(),
+        title: remoteMessage.notification?.title ?? 'New notification',
+        description: remoteMessage.notification?.body ?? '',
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: remoteMessage.data?.type as string ?? 'general',
+        isNew: true,
+      };
+      addNotification(newNotif);
+    });
+
+    // Mark all as read when screen is opened
+    markAllAsRead();
+
+    return () => unsubscribe();
+  }, []);
+
+  async function requestPerm() {
+    try {
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+        const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+        console.log('Android POST_NOTIFICATIONS:', granted);
+        }
+
+        const authStatus = await requestPermission(getMessaging(getApp()));
+        console.log('Firebase auth status:', authStatus);
+    } catch (error) {
+        console.error('Permission error:', error);
+    }
+    }
+
+  async function fetchToken() {
+    const token = await getToken(getMessaging(getApp()));
     console.log('FCM Token:', token);
-
     // 🔥 Send this token to your backend
   }
-  /**
-  * render header
-  */
-  const renderHeader = () => {
-      return (
-          <View style={styles.headerContainer}>
-              <View style={styles.headerLeft}>
-                  <TouchableOpacity
-                      onPress={() => navigation.goBack()}>
-                      <Image
-                          source={icons.back}
-                          style={[styles.backIcon, {
-                              tintColor: COLORS.black
-                          }]} />
-                  </TouchableOpacity>
-                  <Text style={[styles.headerTitle, {
-                      color: COLORS.black
-                  }]}>Notification</Text>
-              </View>
-              {/*<TouchableOpacity>
-                  <Image
-                      source={icons.setting2Outline}
-                      style={[styles.moreIcon, {
-                          tintColor: COLORS.black
-                      }]}
-                  />
-              </TouchableOpacity>*/}
-          </View>
-      )
-  };
+
 
   return (
       <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
           <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-              {renderHeader()}
+              <Header title='Notifications'/>
               <ScrollView showsVerticalScrollIndicator={false}>
                   <FlatList
                       data={notifications}

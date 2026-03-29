@@ -16,6 +16,7 @@ module.exports = {
           '@services': './src/services/',
           '@data': './src/shared/data/',
           '@hooks': './src/shared/hooks',
+          '@contexts': './src/shared/contexts',
           '@hocs': './src/shared/hocs',
           '@styles': './src/styles',
           '@utils': './src/utils/',

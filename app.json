@@ -3,6 +3,17 @@
   "displayName": "pickuplay",
   "expo": {
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/crashlytics",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
       [
         "@react-native-community/datetimepicker",
         {
@@ -41,9 +52,13 @@
     "android": {
       "permissions": [
         "CAMERA"
-      ]
+      ],
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.pickuplay"
     },
     "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.pickuplay",
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to scan QR codes."
       }

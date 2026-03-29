@@ -24,7 +24,10 @@ linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
+  $RNFirebaseAsStaticFramework = true
 end
+
+pod 'GoogleUtilities', :modular_headers => true
 
 target 'pickuplay' do
   config = use_native_modules!
@@ -34,6 +37,10 @@ target 'pickuplay' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
+  # Firebase pods
+  pod 'Firebase/Core'
+  pod 'Firebase/Messaging'
 
   post_install do |installer|
     react_native_post_install(

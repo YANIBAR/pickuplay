@@ -8,7 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
 import { Linking } from 'react-native';
 import { createNavigationContainerRef } from '@react-navigation/native';
-
+import { NotificationProvider } from '@contexts/NotificationContext';
+import { notifications as initialNotifications } from '@data';
 const navigationRef = createNavigationContainerRef();
 
 const App: FC = () => {
@@ -69,11 +70,13 @@ const App: FC = () => {
   }
 
   return (
-    <NavigationContainer linking={linking}>
-      <AuthProvider>
-        <AppStack initialRouteName={initialRoute} />
-      </AuthProvider>
-    </NavigationContainer>
+    <NotificationProvider initialData={initialNotifications}>
+      <NavigationContainer linking={linking} ref={navigationRef}>
+        <AuthProvider>
+          <AppStack initialRouteName={initialRoute} />
+        </AuthProvider>
+      </NavigationContainer>
+    </NotificationProvider>
   );
 };
 export default withProviders(App);

@@ -256,4 +256,21 @@ export default StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10
   },
+  badge: {
+  position: 'absolute',
+  top: -4,
+  right: -4,
+  backgroundColor: 'red',
+  borderRadius: 10,
+  minWidth: 18,
+  height: 18,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: 4,
+},
+badgeText: {
+  color: 'white',
+  fontSize: 10,
+  fontFamily: 'bold',
+},
 });

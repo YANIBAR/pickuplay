@@ -23,6 +23,7 @@ const Notifications = () => {
 
     // Listen for foreground notifications and add to list
     const unsubscribe = onMessage(getMessaging(getApp()), remoteMessage => {
+      console.log('Received FCM:', remoteMessage.data); // Debug log
       const newNotif = {
         id: Date.now().toString(),
         title: remoteMessage.notification?.title ?? 'New notification',
@@ -43,24 +44,31 @@ const Notifications = () => {
 
   async function requestPerm() {
     try {
-        if (Platform.OS === 'android' && Platform.Version >= 33) {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
         const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
         );
         console.log('Android POST_NOTIFICATIONS:', granted);
-        }
-
-        const authStatus = await requestPermission(getMessaging(getApp()));
-        console.log('Firebase auth status:', authStatus);
+      }
+      // Register for remote messages before requesting permission or getting token
+      await getMessaging(getApp()).registerDeviceForRemoteMessages();
+      const authStatus = await requestPermission(getMessaging(getApp()));
+      console.log('Firebase auth status:', authStatus);
     } catch (error) {
-        console.error('Permission error:', error);
+      console.error('Permission error:', error);
     }
-    }
+  }
 
   async function fetchToken() {
-    const token = await getToken(getMessaging(getApp()));
-    console.log('FCM Token:', token);
-    // 🔥 Send this token to your backend
+    try {
+      // Register for remote messages before getting token (safe to call again)
+      await getMessaging(getApp()).registerDeviceForRemoteMessages();
+      const token = await getToken(getMessaging(getApp()));
+      console.log('FCM Token:', token);
+      // 🔥 Send this token to your backend
+    } catch (error) {
+      console.error('FCM Token error:', error);
+    }
   }
 
 

@@ -21,14 +21,17 @@ const NotificationContext = createContext<NotificationContextType | null>(null);
 
 export const NotificationProvider = ({ children, initialData }: {
   children: ReactNode;
-  initialData: AppNotification[];
+  initialData?: AppNotification[]; // Make initialData optional
 }) => {
-  const [notifications, setNotifications] = useState<AppNotification[]>(initialData);
+  const [notifications, setNotifications] = useState<AppNotification[]>(initialData || []);
 
   const unreadCount = notifications.filter(n => n.isNew).length;
-
   const addNotification = useCallback((n: AppNotification) => {
-    setNotifications(prev => [n, ...prev]);
+    setNotifications(prev => {
+      // Prevent duplicate notifications by id
+      if (prev.some(item => item.id === n.id)) return prev;
+      return [n, ...prev];
+    });
   }, []);
 
   const markAllAsRead = useCallback(() => {

@@ -97,7 +97,7 @@ const Login = () => {
         console.log('User logged in successfully:', fcmToken, (await deviceId).toString);
         await authenticatedApi.post('notifications/register-device', {
             token: fcmToken,
-            device_id: deviceId
+            device_id: deviceId._j
         });
       } catch (regErr) {
         console.error('Device registration failed:', regErr);

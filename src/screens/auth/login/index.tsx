@@ -17,6 +17,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@utils/validators';
+import messaging from '@react-native-firebase/messaging';
+import DeviceInfo from 'react-native-device-info';
+import { authenticatedApi } from '@services/api';
 
 const defaultValues = {
   identifier: '', // Changed from 'username' to 'email'
@@ -85,16 +88,23 @@ const Login = () => {
       }
       await storeToken(accessToken);
       await storeUser(userData);
-      //const storedRole = await AsyncStorage.getItem('role');
-      /*const storedId = await AsyncStorage.getItem('id');
       
-      if (!storedId) {
-        throw new Error('Failed to store user data properly');
-      }*/
+      // Register device for notifications
+      try {
+        await messaging().registerDeviceForRemoteMessages();
+        const fcmToken = await messaging().getToken();
+        const deviceId = DeviceInfo.getUniqueId();
+        console.log('User logged in successfully:', fcmToken, (await deviceId).toString);
+        await authenticatedApi.post('notifications/register-device', {
+            token: fcmToken,
+            //deviceId
+        });
+      } catch (regErr) {
+        console.error('Device registration failed:', regErr);
+      }
+
       await new Promise(resolve => setTimeout(resolve, 100));
-      navigation.navigate("welcome", {
-        screen: "Games"  // Specify which tab to show
-      });
+      navigation.navigate("welcome", { screen: "Games"});
       
     } catch (error: any) {
       setIsLoading(false);

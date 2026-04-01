@@ -361,7 +361,7 @@ export default function HomeScreen() {
                   checked={selectedCities.includes(city)}
                   onValueChange={() => handleCityToggle(city)}
                 />
-                <Text style={styles.filterOptionText}>{city==currentCity ? "Nearby" : city}</Text>
+                <Text style={styles.filterOptionText}>{city==currentCity ? "Nearby (" + currentCity + ")" : city}</Text>
               </TouchableOpacity>
             ))}
           </View>

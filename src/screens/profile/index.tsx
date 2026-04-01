@@ -195,9 +195,9 @@ const handleImagePicker = () => {
         </TouchableOpacity>
       </View>
 
-      <Text style={[styles.title, { color: COLORS.grayscale900 }]}>
-        {toTitleCase(profileInfo?.firstName ?? userData?.firstName)}{" "}
-        {toTitleCase(profileInfo?.lastName ?? userData?.lastName)}
+      <Text style={[styles.title, { color: COLORS.grayscale900}]}>
+        <Text style={{ textTransform: "capitalize" }}>{profileInfo?.firstName ?? userData?.firstName}</Text>{" "}
+        <Text style={{ textTransform: "capitalize" }}>{profileInfo?.lastName ?? userData?.lastName}</Text>
       </Text>
     </View>
   );

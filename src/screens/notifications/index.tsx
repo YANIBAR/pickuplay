@@ -12,6 +12,8 @@ import { getMessaging, requestPermission, getToken, onMessage } from '@react-nat
 import { getApp } from '@react-native-firebase/app';
 import { Header } from '@components';
 
+import messaging from '@react-native-firebase/messaging';
+import DeviceInfo from 'react-native-device-info';
 const Notifications = () => {
   const navigation = useNavigation<NavigationProp<any>>();
 
@@ -30,6 +32,7 @@ const Notifications = () => {
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         type: remoteMessage.data?.type as string ?? 'general',
+        game_id: remoteMessage.data?.game_id as string ?? '30',
         isNew: true,
       };
       addNotification(newNotif);
@@ -43,24 +46,31 @@ const Notifications = () => {
 
   async function requestPerm() {
     try {
-        if (Platform.OS === 'android' && Platform.Version >= 33) {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
         const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
         );
         console.log('Android POST_NOTIFICATIONS:', granted);
-        }
-
-        const authStatus = await requestPermission(getMessaging(getApp()));
-        console.log('Firebase auth status:', authStatus);
+      }
+      // Register for remote messages before requesting permission or getting token
+      await getMessaging(getApp()).registerDeviceForRemoteMessages();
+      const authStatus = await requestPermission(getMessaging(getApp()));
+      console.log('Firebase auth status:', authStatus);
     } catch (error) {
-        console.error('Permission error:', error);
+      console.error('Permission error:', error);
     }
-    }
+  }
 
   async function fetchToken() {
-    const token = await getToken(getMessaging(getApp()));
-    console.log('FCM Token:', token);
-    // 🔥 Send this token to your backend
+    try {
+      // Register for remote messages before getting token (safe to call again)
+      await getMessaging(getApp()).registerDeviceForRemoteMessages();
+      const token = await getToken(getMessaging(getApp()));
+      console.log('FCM Token:', token);
+      // 🔥 Send this token to your backend
+    } catch (error) {
+      console.error('FCM Token error:', error);
+    }
   }
 
 
@@ -70,19 +80,25 @@ const Notifications = () => {
               <Header title='Notifications'/>
               <ScrollView showsVerticalScrollIndicator={false}>
                   <FlatList
-                      data={notifications}
-                      keyExtractor={item => item.id}
-                      renderItem={({ item, index }) => (
-                          <NotificationCard
-                              title={item.title}
-                              description={item.description}
-                              date={item.date}
-                              time={item.time}
-                              type={item.type}
-                              isNew={item.isNew}
-                          />
-                      )}
-                  />
+                    data={notifications}
+                    keyExtractor={item => item.id}
+                    renderItem={({ item }) => (
+                    <NotificationCard
+                        title={item.title}
+                        description={item.description}
+                        date={item.date}
+                        time={item.time}
+                        type={item.type}
+                        isNew={item.isNew}
+                        onPress={() => {
+                            if (item.type === "Update") {
+                                navigation.navigate('detail', { gameId: item.game_id });
+                            }
+                            // Optionally handle other notification types here
+                        }}
+                        />
+                    )}
+                    />
               </ScrollView>
           </View>
       </SafeAreaView>

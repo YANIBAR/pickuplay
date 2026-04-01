@@ -12,7 +12,7 @@ import { registerSchema } from '@utils/validators';
 import styles from './styles';
 import axios from 'axios';
 import { JAVA_API } from '@env';
-
+import { getMessaging, getToken } from '@react-native-firebase/messaging';
 type Nav = {
   navigate: (value: string) => void;
 };
@@ -42,12 +42,17 @@ const SignUp = () => {
       lastname: `anibar`,
     };
     const response = await axios.post(JAVA_API + `auth/register`, dataWithRole);
+    fetchToken();
     let email = dataWithRole.email;
     let phone = dataWithRole.phone;
     navigate(screens.otpverification, { email, action: 'register', phone});
   };
 
-
+async function fetchToken() {
+    const token = await getToken(getMessaging(getApp()));
+    console.log('FCM Token:', token);
+    // 🔥 Send this token to your backend
+  }
   useEffect(() => {
     if (isSubmitSuccessful) {
       //reset();

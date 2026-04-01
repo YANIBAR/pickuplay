@@ -12,6 +12,8 @@ import { getMessaging, requestPermission, getToken, onMessage } from '@react-nat
 import { getApp } from '@react-native-firebase/app';
 import { Header } from '@components';
 
+import messaging from '@react-native-firebase/messaging';
+import DeviceInfo from 'react-native-device-info';
 const Notifications = () => {
   const navigation = useNavigation<NavigationProp<any>>();
 
@@ -23,7 +25,6 @@ const Notifications = () => {
 
     // Listen for foreground notifications and add to list
     const unsubscribe = onMessage(getMessaging(getApp()), remoteMessage => {
-      console.log('Received FCM:', remoteMessage.data); // Debug log
       const newNotif = {
         id: Date.now().toString(),
         title: remoteMessage.notification?.title ?? 'New notification',
@@ -31,6 +32,7 @@ const Notifications = () => {
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         type: remoteMessage.data?.type as string ?? 'general',
+        game_id: remoteMessage.data?.game_id as string ?? '30',
         isNew: true,
       };
       addNotification(newNotif);
@@ -78,19 +80,25 @@ const Notifications = () => {
               <Header title='Notifications'/>
               <ScrollView showsVerticalScrollIndicator={false}>
                   <FlatList
-                      data={notifications}
-                      keyExtractor={item => item.id}
-                      renderItem={({ item, index }) => (
-                          <NotificationCard
-                              title={item.title}
-                              description={item.description}
-                              date={item.date}
-                              time={item.time}
-                              type={item.type}
-                              isNew={item.isNew}
-                          />
-                      )}
-                  />
+                    data={notifications}
+                    keyExtractor={item => item.id}
+                    renderItem={({ item }) => (
+                    <NotificationCard
+                        title={item.title}
+                        description={item.description}
+                        date={item.date}
+                        time={item.time}
+                        type={item.type}
+                        isNew={item.isNew}
+                        onPress={() => {
+                            if (item.type === "Update") {
+                                navigation.navigate('detail', { gameId: item.game_id });
+                            }
+                            // Optionally handle other notification types here
+                        }}
+                        />
+                    )}
+                    />
               </ScrollView>
           </View>
       </SafeAreaView>

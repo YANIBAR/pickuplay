@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image } from 'react-native';
+import { Image, TouchableOpacity } from 'react-native';
 import { Text, View } from '@components';
 import { COLORS, icons } from '@constants';
 import moment from 'moment';
@@ -12,6 +12,7 @@ type NotificationCardProps = {
   time: string;
   type: string;
   isNew: boolean;
+  onPress: () => void;
 };
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
@@ -21,6 +22,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   time,
   type,
   isNew,
+  onPress,
 }) => {
   const getIcon = (type: NotificationCardProps['type']) => {
     switch (type) {
@@ -77,7 +79,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
+      <TouchableOpacity onPress={onPress} style={styles.headerContainer}>
         <View style={styles.headerLeftContainer}>
           <View
             style={[
@@ -98,7 +100,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                   color: COLORS.grayscale900,
                 },
               ]}>
-              {title}
+              {title} 
             </Text>
             <Text
               style={[
@@ -116,7 +118,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             <Text style={styles.headerText}>New</Text>
           </View>
         )}
-      </View>
+      </TouchableOpacity>
       <Text
         style={[
           styles.description,

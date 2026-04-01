@@ -7,7 +7,6 @@ import { authenticatedApi } from '@services/api';
 import { useRef, useState } from 'react';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { formatDateLong, formatTime, parseTime } from '@utils/dateUtils';
-import { JAVA_API } from '@env';
 
 export type Game = {
   id: number;
@@ -36,22 +35,34 @@ type GameCardProps = {
 export default function GameCard({ game, onPress }: GameCardProps) {
   const { t } = useTranslation();
   const navigation = useNavigation();
-
+  const [gameStatus, setGameStatus] = useState(game.status);
   const refRBSheet = useRef<any>(null);
-  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const handleGamePress = (game: Game) => {
     navigation.navigate('gameDetail', { game });
   };
 
   const handleCancel = async () => {
-  try {
-    const response = await authenticatedApi.patch(`games/${game.id}`, JSON.stringify({ status: "CANCELED" }));
-    Alert.alert("Success", "Game cancelled successfully");
-  } catch (error: any) {
-    const message = error?.response?.data?.message || error?.message || "Something went wrong";
-    Alert.alert("Cannot Cancel Game", message);
-  }
-};
+    try {
+      await authenticatedApi.patch(`games/${game.id}`, JSON.stringify({ status: "CANCELED" }));
+      setGameStatus("CANCELED");
+      refRBSheet.current?.close();
+      Alert.alert("Success", "Game cancelled successfully");
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || "Something went wrong";
+      Alert.alert("Cannot Cancel Game", message);
+    }
+  };
+
+  const handleActivate = async () => {
+    try {
+      await authenticatedApi.patch(`games/${game.id}`, JSON.stringify({ status: "ACTIVE" }));
+      setGameStatus("ACTIVE");
+      Alert.alert("Success", "Game activated successfully");
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || "Something went wrong";
+      Alert.alert("Cannot Activate Game", message);
+    }
+  };
 
   const handleEdit = () => {
     // Add your edit logic here
@@ -169,12 +180,17 @@ export default function GameCard({ game, onPress }: GameCardProps) {
             <Text style={styles.editButtonText}>{t('common.edit')}</Text>
           </TouchableOpacity>
         )}
-        {game.status == 'ACTIVE' ? (
+        {gameStatus === 'ACTIVE' ? (
           <TouchableOpacity style={styles.cancelButton} onPress={() => refRBSheet.current?.open()}>
             <Icon type="materialCommunityIcons" name="close" size={18} color="#fff" />
             <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
-        ) : null}
+        ) : (
+          <TouchableOpacity style={styles.editButton} onPress={handleActivate}>
+            <Icon type="materialCommunityIcons" name="check" size={18} color="#fff" />
+            <Text style={styles.editButtonText}>{t('common.activate')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <RBSheet
         ref={refRBSheet}

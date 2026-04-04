@@ -93,11 +93,10 @@ const Login = () => {
       try {
         await messaging().registerDeviceForRemoteMessages();
         const fcmToken = await messaging().getToken();
-        const deviceId = DeviceInfo.getUniqueId();
-        console.log('User logged in successfully:', fcmToken, (await deviceId).toString);
+        const deviceId = await DeviceInfo.getUniqueId();
         await authenticatedApi.post('notifications/register-device', {
             token: fcmToken,
-            device_id: deviceId._j
+            device_id: deviceId
         });
       } catch (regErr) {
         console.error('Device registration failed:', regErr);

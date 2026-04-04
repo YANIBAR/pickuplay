@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, PermissionsAndroid, Platform } from 'react-native';
-import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, PermissionsAndroid, Platform, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, icons } from '@constants';
-
 import { NavigationProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-virtualized-view';
 import { useNotifications } from '@contexts/NotificationContext';
@@ -11,18 +10,24 @@ import { useNavigation } from '@react-navigation/native';
 import { getMessaging, requestPermission, getToken, onMessage } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { Header } from '@components';
+import { authenticatedApi } from '@services/api';
 
-import messaging from '@react-native-firebase/messaging';
-import DeviceInfo from 'react-native-device-info';
+export type Notification = {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  type: string;
+  isRead: boolean;
+};
 const Notifications = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-
-  const { notifications, addNotification, markAllAsRead } = useNotifications();
-
+  const { notifications, addNotification, markAllAsRead, initializeNotifications, isLoading } = useNotifications();
+  const [storedNotifications, setStoredNotifications] = useState<Notification[]>([]); 
   useEffect(() => {
     requestPerm();
     fetchToken();
-
+    initializeNotifications();
     // Listen for foreground notifications and add to list
     const unsubscribe = onMessage(getMessaging(getApp()), remoteMessage => {
       const newNotif = {
@@ -31,10 +36,13 @@ const Notifications = () => {
         description: remoteMessage.notification?.body ?? '',
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: remoteMessage.data?.type as string ?? 'general',
-        game_id: remoteMessage.data?.game_id as string ?? '30',
+        type: remoteMessage.data?.icon_type as string ?? 'general',
+        attributes: JSON.parse(remoteMessage.data?.attributes as string ?? '30'),
+
         isNew: true,
       };
+
+      console.log('Received foreground mssggs:', newNotif);
       addNotification(newNotif);
     });
 
@@ -66,41 +74,35 @@ const Notifications = () => {
       // Register for remote messages before getting token (safe to call again)
       await getMessaging(getApp()).registerDeviceForRemoteMessages();
       const token = await getToken(getMessaging(getApp()));
-      console.log('FCM Token:', token);
       // 🔥 Send this token to your backend
     } catch (error) {
       console.error('FCM Token error:', error);
     }
   }
 
-
   return (
       <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
-          <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-              <Header title='Notifications'/>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                  <FlatList
-                    data={notifications}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                    <NotificationCard
-                        title={item.title}
-                        description={item.description}
-                        date={item.date}
-                        time={item.time}
-                        type={item.type}
-                        isNew={item.isNew}
-                        onPress={() => {
-                            if (item.type === "Update") {
-                                navigation.navigate('detail', { gameId: item.game_id });
-                            }
-                            // Optionally handle other notification types here
-                        }}
-                        />
-                    )}
-                    />
-              </ScrollView>
-          </View>
+        <Header title='Notifications'/>
+        <ScrollView showsVerticalScrollIndicator={false}>
+            <FlatList
+              data={notifications}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+              <NotificationCard
+                  title={item.title}
+                  description={item.body}
+                  date={item.createdAt}
+                  type={item.type}
+                  isNew={item.isRead}
+                  onPress={() => {
+                    if (item?.attributes) {
+                        navigation.navigate('detail', JSON.parse(item?.attributes));
+                    }
+                  }}
+                  />
+              )}
+              />
+        </ScrollView>
       </SafeAreaView>
   )
 };

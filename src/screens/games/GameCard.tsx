@@ -189,8 +189,8 @@ import PriceTag from '@components/PriceTag';
                 </View>
 
                 <View style={styles.gameInfoSection}>
-                  <Text style={styles.gameNameModal}>{game.name}</Text>
-                  <Text style={styles.gameType}>{game.sportType.name.toUpperCase()}</Text>
+                  <Text style={styles.gameNameModal}>{game.title}</Text>
+                  <Text style={styles.gameType}>{game.sportType?.name?.toUpperCase() ?? ''}</Text>
                 </View>
 
                 <View style={styles.divider} />
@@ -253,7 +253,7 @@ import PriceTag from '@components/PriceTag';
                       value={promoCode}
                       onChangeText={setPromoCode}
                     />
-                    <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}>  {/* 👈 Add this */}
+                    <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}> 
                       <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
                     </TouchableOpacity>
                   </View>

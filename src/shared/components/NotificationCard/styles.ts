@@ -3,8 +3,8 @@ import { COLORS, SIZES } from '@constants';
 
 export default StyleSheet.create({
   container: {
-    width: SIZES.width - 32,
-    marginBottom: 12,
+    width: SIZES.width,
+    padding: 16,
   },
   headerContainer: {
     flexDirection: 'row',

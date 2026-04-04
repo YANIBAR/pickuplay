@@ -1,3 +1,4 @@
+import { authenticatedApi } from '@services/api';
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 export type AppNotification = {
@@ -13,22 +14,25 @@ export type AppNotification = {
 type NotificationContextType = {
   notifications: AppNotification[];
   unreadCount: number;
+  isLoading: boolean;
   addNotification: (n: AppNotification) => void;
   markAllAsRead: () => void;
+  initializeNotifications: (fetchFn: () => Promise<AppNotification[]>) => Promise<void>;
 };
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
 export const NotificationProvider = ({ children, initialData }: {
   children: ReactNode;
-  initialData?: AppNotification[]; // Make initialData optional
+  initialData?: AppNotification[];
 }) => {
   const [notifications, setNotifications] = useState<AppNotification[]>(initialData || []);
+  const [isLoading, setIsLoading] = useState(false);
 
   const unreadCount = notifications.filter(n => n.isNew).length;
+
   const addNotification = useCallback((n: AppNotification) => {
     setNotifications(prev => {
-      // Prevent duplicate notifications by id
       if (prev.some(item => item.id === n.id)) return prev;
       return [n, ...prev];
     });
@@ -38,8 +42,25 @@ export const NotificationProvider = ({ children, initialData }: {
     setNotifications(prev => prev.map(n => ({ ...n, isNew: false })));
   }, []);
 
+  const initializeNotifications = useCallback(async  () => {
+    setIsLoading(true);
+    try {
+      const response = await authenticatedApi.get(`notifications/unread`);
+      console.log('Fetched notifications:', response.result.data);
+      setNotifications(prev => {
+        const existingIds = new Set(prev.map(n => n.id));
+        const newOnes = response.result.data.filter(n => !existingIds.has(n.id));
+        return [...newOnes, ...prev];
+      });
+    } catch (error) {
+      console.error('Failed to initialize notifications:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAllAsRead }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, isLoading, addNotification, markAllAsRead, initializeNotifications }}>
       {children}
     </NotificationContext.Provider>
   );

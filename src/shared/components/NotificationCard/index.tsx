@@ -9,7 +9,6 @@ type NotificationCardProps = {
   title: string;
   description: string;
   date: string | Date;
-  time: string;
   type: string;
   isNew: boolean;
   onPress: () => void;
@@ -19,7 +18,6 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   title,
   description,
   date,
-  time,
   type,
   isNew,
   onPress,
@@ -78,7 +76,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: isNew ? COLORS.white : COLORS.transparentPrimary }]}>
       <TouchableOpacity onPress={onPress} style={styles.headerContainer}>
         <View style={styles.headerLeftContainer}>
           <View
@@ -109,7 +107,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                   color: COLORS.grayscale700,
                 },
               ]}>
-              {moment(date).format('DD/MM/YYYY')} | {time}
+              {moment(date).format('DD/MM/YYYY')} | {new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
           </View>
         </View>

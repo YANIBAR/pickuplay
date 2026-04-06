@@ -21,7 +21,7 @@ import {
   MatchupsScreen,
   ScheduleScreen,
   GamesScreen,
-  DetailScreen,
+  GameScreen,
   LoginScreen,
   MyGamesScreen,
   EditGameScreen,
@@ -55,7 +55,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="myGames" component={MyGamesScreen} />
       <Stack.Screen name="editGame" component={EditGameScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
-      <Stack.Screen name="detail" component={DetailScreen} />
+      <Stack.Screen name="game" component={GameScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="forgotpasswordmethods"component={ForgotPasswordMethodsScreen}/>
       <Stack.Screen name="forgotpasswordemail"component={ForgotPasswordEmailScreen}/>

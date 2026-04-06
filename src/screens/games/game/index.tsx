@@ -3,18 +3,19 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
-import { Header, Icon } from '@components';
+import { Button, Header, Icon, NotSignedInView } from '@components';
 import PriceTag from '@components/PriceTag';
 import { COLORS, FONTS, icons, images, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { JAVA_API } from '@env';
-import { publicApi } from '@services/api';
+import { authenticatedApi, publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import { formatDateLong, formatTime } from '@utils/dateUtils';
 import { useUserData } from '@services/useUserData';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import { toTitleCase } from '@utils/helpers';
 import { Linking, Platform } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
 
 interface Game {
   id: number;
@@ -59,8 +60,8 @@ const getGameIcon = (type: string) => {
     return iconMap[type] || 'sports';
   };
 export default function GameDetailsScreen({ route }: { route: any }) {
-    const { t } = useTranslation();
-  const { gameId } = route.params || {};
+  const { t } = useTranslation();
+  const gameId = route.params.game_id || {};
   const { navigate } = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
@@ -135,10 +136,10 @@ export default function GameDetailsScreen({ route }: { route: any }) {
 
   // Copy deep link to clipboard
   const handleCopyDeepLink = () => {
-  const link = generateDeepLink();
-  Clipboard.setString(link);
-  Alert.alert(t('common.copied'), t('game.shareModal.linkCopied'));
-};
+    const link = generateDeepLink();
+    Clipboard.setString(link);
+    Alert.alert(t('common.copied'), t('game.shareModal.linkCopied'));
+  };
 const handleGetDirections = () => {
   const address = encodeURIComponent(game.address);
   const url = Platform.OS === 'ios'
@@ -154,6 +155,67 @@ const handleGetDirections = () => {
     }
   });
 };
+
+    const [joinModalVisible, setJoinModalVisible] = useState(false);
+
+        const [numPlayers, setNumPlayers] = useState('');
+        const [promoCode, setPromoCode] = useState('');
+
+        const [discountPrice, setDiscountPrice] = useState('');
+
+    const handleCloseModal = () => {
+      setJoinModalVisible(false);
+      setNumPlayers('');
+      setPromoCode('');
+    };
+        const handleConfirmJoin = async () => {
+            if (!numPlayers.trim()) {
+              Alert.alert(t('games.pleaseEnterPlayers'));
+              return;
+            }
+        
+            try {
+              
+              const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
+        
+              if (response.status === 200) {
+                // Success - clear form and close modal
+                setJoinModalVisible(false);
+                setNumPlayers('');
+                setPromoCode('');
+                
+                // Optional: show success message or navigate
+                Alert.alert(t('games.successJoined'));
+                
+                // Optional: refresh game state or navigate
+                // await fetchGameDetails(game.id);
+              }
+            } catch (error) {
+              const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
+              Alert.alert(errorMessage);
+            } 
+          };
+        const ApplyDiscount = (code: string) => {
+              const promoCodes: Record<string, number> = {
+                "PUP10%": 0.1,
+                "PUP20%": 0.2,
+                "PUP50%": 0.5,
+              };
+        
+              const discount = promoCodes[code];
+              const players = parseInt(numPlayers) || 1;
+              if (discount) {
+                const pricePerPlayer = game.price * (1 - discount);
+                setDiscountPrice((pricePerPlayer * players).toFixed(2)); // 👈 multiply by players
+              } else {
+                Alert.alert('Invalid promo code');
+                setDiscountPrice('');
+              }
+            };
+            const handleJoinGame = (e: any) => {
+              e.stopPropagation();
+              setJoinModalVisible(true);
+            };
   return (
     <SafeAreaView style={styles.area}>
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
@@ -253,7 +315,13 @@ const handleGetDirections = () => {
 
         </View>
       </ScrollView>
-
+      <View style={styles.joinButton}>
+        <Button
+          title={t('games.joinGameTitle')}
+          filled
+          onPress={handleJoinGame}
+        />
+      </View>
 
       {/* Share Game Modal */}
       <Modal
@@ -311,6 +379,150 @@ const handleGetDirections = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Join Game Modal */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={joinModalVisible}
+          onRequestClose={handleCloseModal}
+        >
+          <View style={styles.modalOverlay}>
+            {isLogged==true ? (
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>{t('games.joinGameTitle')}</Text>
+                  <Pressable onPress={handleCloseModal} style={styles.closeButton}>
+                    <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                  </Pressable>
+                </View>
+
+                <View style={styles.gameInfoSection}>
+                  <Text style={styles.gameNameModal}>{game.title}</Text>
+                  <Text style={styles.gameType}>{game.sportType?.name?.toUpperCase() ?? ''}</Text>
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>{t('games.numberOfPlayers')}</Text>
+                  <View style={styles.playerCountContainer}>
+                    <TouchableOpacity 
+                      style={styles.counterButton}
+                      onPress={() => {
+                        const current = parseInt(numPlayers) || 0;
+                        if (current > 0) {
+                          setNumPlayers((current - 1).toString());
+                        }
+                      }}
+                    >
+                      <Icon 
+                        type="materialCommunityIcons" 
+                        name="minus" 
+                        size={24} 
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                    <View style={styles.playerCountDisplay}>
+                      <Icon 
+                        type="materialCommunityIcons" 
+                        name="account-multiple" 
+                        size={16} 
+                        color={COLORS.primary}
+                      />
+                      <Text style={styles.playerCountText}>
+                        {numPlayers || '0'}
+                      </Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.counterButton}
+                      onPress={() => {
+                        const current = parseInt(numPlayers) || 0;
+                        setNumPlayers((current + 1).toString());
+                      }}
+                    >
+                      <Icon 
+                        type="materialCommunityIcons" 
+                        name="plus" 
+                        size={24} 
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
+                  <View style={styles.inputWrapper}>
+                    <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter promo code"
+                      placeholderTextColor="#999"
+                      value={promoCode}
+                      onChangeText={setPromoCode}
+                    />
+                    <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}> 
+                      <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.priceInfo}>
+                  <View style={styles.priceRow}>
+                    <Text style={styles.priceLabel}>Price per guest:</Text>
+                    <Text style={styles.originalPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
+                  </View>
+                  <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
+                    <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
+                      Total ({numPlayers || 0} guests):
+                    </Text>
+                    <Text style={styles.discountedPriceText}>
+                      ${discountPrice || (game.price * (parseInt(numPlayers) || 0)).toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.buttonContainer}>
+                  <Button
+                    title="Cancel"
+                    style={{
+                      width: (SIZES.width) / 3,
+                      backgroundColor: COLORS.transparentPrimary,
+                      borderRadius: 32,
+                      borderColor: COLORS.transparentPrimary
+                    }}
+                    textColor={COLORS.primary}
+                    onPress={handleCloseModal}
+                  />
+                  <Button
+                    title="Confirm"
+                    filled
+                    style={styles.confirmButton}
+                    onPress={handleConfirmJoin}
+                  />
+                </View>
+              </View>
+            ) : (
+              
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}></Text>
+                  <Pressable onPress={handleCloseModal} style={styles.closeButton}>
+                    <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                  </Pressable>
+                </View>
+              
+                <NotSignedInView
+                  heading="Sign in to join game"
+                  description="Access your upcoming and past sessions when signed in."
+                  containerStyle={{ flex: 1 }}
+                  onNavigate={() => setJoinModalVisible(false)}  // or however you close your modal
+                />
+              </View>
+            )}
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 }
@@ -604,4 +816,142 @@ const styles = StyleSheet.create({
     fontFamily: 'Courier',
     lineHeight: 18,
   },
+  joinButton: {
+      backgroundColor: COLORS.primary,
+      marginHorizontal: 30,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    joinButtonText: {
+      color: 'white',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    gameInfoSection: {
+      marginBottom: 16,
+    },
+    gameNameModal: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: COLORS.primary,
+      marginBottom: 4,
+    },
+    gameType: {
+      fontSize: 12,
+      color: '#999',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: '#eee',
+      marginBottom: 16,
+    },
+    fieldContainer: {
+      marginBottom: 16,
+    },
+    fieldLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: '#333',
+      marginBottom: 8,
+    },
+    inputWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#e0e0e0',
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      backgroundColor: '#f9f9f9',
+    },
+    input: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      fontSize: 14,
+      color: '#333',
+    },
+    priceInfo: {
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 16,
+    },
+    priceRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    priceLabel: {
+      fontSize: 14,
+      color: '#666',
+      fontWeight: '500',
+    },
+    originalPriceText: {
+      fontSize: 14,
+      color: COLORS.error,
+      fontWeight: '600',
+      textDecorationLine: 'line-through',
+    },
+    discountedPriceText: {
+      fontSize: 14,
+      color: COLORS.primary,
+      fontWeight: '700',
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    cancelButton: {
+      width: (SIZES.width - 32) / 2 - 8,
+      backgroundColor: COLORS.transparentPrimary,
+      borderRadius: 32
+    },
+    confirmButton: {
+      width: (SIZES.width) / 3,
+      backgroundColor: COLORS.primary,
+      borderRadius: 32
+    },
+    confirmButtonText: {
+      fontSize: 14,
+      fontWeight: '900',
+      color: 'white',
+    },
+    playerCountContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    counterButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 25,
+      backgroundColor: COLORS.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: COLORS.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      elevation: 3,
+    },
+    playerCountDisplay: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 6,
+      backgroundColor: COLORS.grayscale100,
+      borderRadius: 8,
+    },
+    playerCountText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: COLORS.grayTie,
+    }
 });

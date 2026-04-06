@@ -56,7 +56,7 @@ export default function GamesScreen() {
   };
 
   const handleGamePress = (game: Game) => {
-    navigation.navigate('gameDetail', { game });
+    navigation.navigate('game', { game_id: game.id });
   };
 
   const handleLoginPress = () => {

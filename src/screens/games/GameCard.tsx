@@ -58,7 +58,7 @@ import PriceTag from '@components/PriceTag';
     };
 
     const handleGamePress = (gameId: gameId) => {
-      navigation.navigate('detail', { gameId: game.id});
+      navigation.navigate('game', { game_id: game.id});
     };
 
     const handleJoinGame = (e: any) => {

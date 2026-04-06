@@ -245,7 +245,7 @@ const handleImagePicker = () => {
     const visibleGames = showAllGames ? games : games.slice(0, GAMES_PREVIEW);
 
     const handleGamePress = (game: Game) => {
-      navigate("gameDetail", { game });
+      navigate("game", { game_id: game.id });
     };
 
     return (

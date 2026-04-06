@@ -127,7 +127,7 @@ const EditGameScreen = ({ route }) => {
       const response = await authenticatedApi.patch(`games/${gameId}`, gameData);
       uploadImage(game.id, selectedImage);
       Alert.alert(t('common.success'), t('edit_game.game_updated'));
-      navigate("detail", { game: game });
+      navigate("game", { game_id: game.id });
     } catch (error) {
       console.error('Error saving game:', error);
       const status = error?.response?.status;

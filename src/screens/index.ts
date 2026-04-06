@@ -27,6 +27,6 @@ export { default as GamesScreen } from './games';
 export { default as MyGamesScreen } from './games/myGames';
 export { default as EditGameScreen } from './games/edit';
 export { default as ScheduleScreen  } from './games/schedule';
-export { default as DetailScreen  } from './games/detail';
+export { default as GameScreen  } from './games/game';
 export { default as EditProfileScreen } from './profile/editprofile';
 export { default as Notificationcreen } from './notifications';

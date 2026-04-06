@@ -2,15 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, PermissionsAndroid,
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, icons } from '@constants';
-import { NavigationProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-virtualized-view';
 import { useNotifications } from '@contexts/NotificationContext';
 import NotificationCard from '@components/NotificationCard';
-import { useNavigation } from '@react-navigation/native';
 import { getMessaging, requestPermission, getToken, onMessage } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { Header } from '@components';
-import { authenticatedApi } from '@services/api';
 
 export type Notification = {
   id: string;
@@ -21,9 +18,7 @@ export type Notification = {
   isRead: boolean;
 };
 const Notifications = () => {
-  const navigation = useNavigation<NavigationProp<any>>();
   const { notifications, addNotification, markAllAsRead, initializeNotifications, isLoading } = useNotifications();
-  const [storedNotifications, setStoredNotifications] = useState<Notification[]>([]); 
   useEffect(() => {
     requestPerm();
     fetchToken();
@@ -33,16 +28,14 @@ const Notifications = () => {
       const newNotif = {
         id: Date.now().toString(),
         title: remoteMessage.notification?.title ?? 'New notification',
-        description: remoteMessage.notification?.body ?? '',
+        body: remoteMessage.notification?.body ?? '',
         date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         type: remoteMessage.data?.icon_type as string ?? 'general',
-        attributes: JSON.parse(remoteMessage.data?.attributes as string ?? '30'),
-
+        attributes: remoteMessage.data?.attributes as string,
+        screen: remoteMessage.data?.screen as string ?? '',
         isNew: true,
       };
 
-      console.log('Received foreground mssggs:', newNotif);
       addNotification(newNotif);
     });
 
@@ -90,15 +83,12 @@ const Notifications = () => {
               renderItem={({ item }) => (
               <NotificationCard
                   title={item.title}
-                  description={item.body}
+                  body={item.body}
                   date={item.createdAt}
                   type={item.type}
                   isNew={item.isRead}
-                  onPress={() => {
-                    if (item?.attributes) {
-                        navigation.navigate('detail', JSON.parse(item?.attributes));
-                    }
-                  }}
+                  screen={item.screen}
+                  attributes={item.attributes}
                   />
               )}
               />

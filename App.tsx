@@ -10,6 +10,8 @@ import { Linking } from 'react-native';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import { NotificationProvider } from '@contexts/NotificationContext';
 import { notifications as initialNotifications } from '@data';
+import messaging from '@react-native-firebase/messaging';
+
 const navigationRef = createNavigationContainerRef();
 
 const App: FC = () => {
@@ -31,6 +33,30 @@ const App: FC = () => {
       },
     },
   };
+
+  useEffect(() => {
+  // Handle when app is opened from background by tapping a notification
+  const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+    if (remoteMessage?.data?.screen === 'detail' && remoteMessage.data.attributes) {
+      const attrs = JSON.parse(remoteMessage.data?.attributes as string ?? '30');
+      navigationRef.current?.navigate(remoteMessage.data?.screen, attrs);
+    }
+  });
+
+  // Handle when app is opened from quit state by tapping a notification
+  messaging().getInitialNotification().then(remoteMessage => {
+    if (remoteMessage?.data?.screen === 'detail' && remoteMessage.data.attributes) {
+      const attrs = JSON.parse(remoteMessage.data?.attributes as string ?? '30');
+      console.log("ddjjdj", remoteMessage.data?.screen, attrs);
+      navigationRef.current?.navigate(remoteMessage.data?.screen, attrs);
+    }
+  });
+
+  // ...existing code...
+  // ...initializeApp and Linking...
+
+  return () => unsubscribe();
+}, []);
 
   useEffect(() => {
     const initializeApp = async () => {

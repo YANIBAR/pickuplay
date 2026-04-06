@@ -48,7 +48,7 @@ export default function GameCard({ game, onPress }: GameCardProps) {
   };
 
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('detail', { gameId: game.id})} key={game.id} style={styles.gameCard}>
+    <TouchableOpacity onPress={() => navigation.navigate('game', { game_id: game.id})} key={game.id} style={styles.gameCard}>
         <View style={styles.gameIconBg}>
           <Icon 
             type="materialCommunityIcons" 

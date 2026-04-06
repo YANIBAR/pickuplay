@@ -11,6 +11,9 @@ import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
 import { getCurrentCity } from '@utils/helpers';
 import { useNotifications } from '@contexts/NotificationContext';
+import { getMessaging, onMessage } from '@react-native-firebase/messaging';
+import { getApp } from '@react-native-firebase/app';
+import { isStoredTokenExpired } from '@utils/api/auth';
 type Nav = {
   navigate: (value: string) => void
 }
@@ -34,9 +37,9 @@ type SportOption = {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const today = new Date();
 
-  const daysUntilThursday = (4 - today.getDay() + 7) % 7 || 7;
+  const daysUntil= 7;
 
-  for (let i = 0; i <= daysUntilThursday; i++) {
+  for (let i = 0; i <= daysUntil; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     days.push({
@@ -49,7 +52,8 @@ type SportOption = {
 };
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const { unreadCount } = useNotifications();
+  const [isLogged, setIsLogged] = useState(false);
+  const { unreadCount, addNotification } = useNotifications();
   const [games, setGames] = useState<Game[]>([]); 
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -165,6 +169,12 @@ export default function HomeScreen() {
 
   // Apply filters whenever filter state changes
   useEffect(() => {
+    const checkToken = async () => {
+          const expired = await isStoredTokenExpired();
+          setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+        };
+    
+        checkToken();
     applyFilters();
     setRefreshing(false);
   }, [selectedSports, selectedCities, selectedDays, games]);
@@ -218,7 +228,28 @@ export default function HomeScreen() {
   };
 
   const hasActiveFilters = selectedSports.length > 0 || selectedCities.length > 0;
-  
+  const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onMessage(getMessaging(getApp()), remoteMessage => {
+      const { messageId, notification, sentTime } = remoteMessage;
+
+      addNotification({
+        id: messageId ?? Date.now().toString(),
+        title: notification?.title ?? '',
+        body: notification?.body ?? '',
+        date: new Date().toLocaleDateString(),
+        type: remoteMessage.data?.type ?? 'general',
+        isNew: true,
+      });
+
+      // Show toast
+      setToast({ title: notification?.title ?? '', body: notification?.body ?? '' });
+      setTimeout(() => setToast(null), 10000);
+    });
+
+    return () => unsubscribe();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -264,30 +295,32 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
           </ScrollView>
-            
-          {/* Bell icon fixed to the right, outside the ScrollView */}
-          <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
-            <View>
-              <Image source={icons.bellOutline} style={styles.headerIcon} />
-              {unreadCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </Text>
+            {/* Bell icon fixed to the right, outside the ScrollView */}
+            {isLogged && (
+          
+              <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
+                <View>
+                  <Image source={icons.bellOutline} style={styles.headerIcon} />
+                  {unreadCount > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Text>
+                    </View>
+                  )}
                 </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.daysFiltersRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysFiltersBar}>
-            {/* Weekday filter buttons */}
-            {weekDays.map((day) => {
-              const isSelected = selectedDays.includes(day.date);
-              return (
-                <TouchableOpacity
-                  key={day.date}
-                  style={[styles.filterButton, isSelected && styles.filterButtonActive]}
+              </TouchableOpacity>
+            )}
+      </View>
+      <View style={styles.daysFiltersRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysFiltersBar}>
+          {/* Weekday filter buttons */}
+          {weekDays.map((day) => {
+            const isSelected = selectedDays.includes(day.date);
+            return (
+              <TouchableOpacity
+                key={day.date}
+                style={[styles.filterButton, isSelected && styles.filterButtonActive]}
                   onPress={() => handleDayToggle(day.date)}
                 >
                   <Text style={[styles.filterButtonText, isSelected && styles.filterButtonTextActive]}>
@@ -301,6 +334,13 @@ export default function HomeScreen() {
         
         <GameGrid games={filteredGames} refreshing={refreshing} onRefresh={onRefresh}/>
       </View>
+
+      {toast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastTitle}>{toast.title}</Text>
+          <Text style={styles.toastBody}>{toast.body}</Text>
+        </View>
+      )}
 
       {/* Sport Filter Modal */}
       <Modal

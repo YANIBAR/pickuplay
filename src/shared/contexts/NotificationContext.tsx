@@ -4,9 +4,8 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 export type AppNotification = {
   id: string;
   title: string;
-  description: string;
+  body: string;
   date: string;
-  time: string;
   type: string;
   isNew: boolean;
 };
@@ -17,7 +16,7 @@ type NotificationContextType = {
   isLoading: boolean;
   addNotification: (n: AppNotification) => void;
   markAllAsRead: () => void;
-  initializeNotifications: (fetchFn: () => Promise<AppNotification[]>) => Promise<void>;
+  initializeNotifications: () => Promise<void>;
 };
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
@@ -28,7 +27,7 @@ export const NotificationProvider = ({ children, initialData }: {
 }) => {
   const [notifications, setNotifications] = useState<AppNotification[]>(initialData || []);
   const [isLoading, setIsLoading] = useState(false);
-
+  
   const unreadCount = notifications.filter(n => n.isNew).length;
 
   const addNotification = useCallback((n: AppNotification) => {
@@ -45,8 +44,7 @@ export const NotificationProvider = ({ children, initialData }: {
   const initializeNotifications = useCallback(async  () => {
     setIsLoading(true);
     try {
-      const response = await authenticatedApi.get(`notifications/unread`);
-      console.log('Fetched notifications:', response.result.data);
+      const response = await authenticatedApi.get(`notifications/latest`);
       setNotifications(prev => {
         const existingIds = new Set(prev.map(n => n.id));
         const newOnes = response.result.data.filter(n => !existingIds.has(n.id));

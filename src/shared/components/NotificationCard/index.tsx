@@ -4,28 +4,33 @@ import { Text, View } from '@components';
 import { COLORS, icons } from '@constants';
 import moment from 'moment';
 import styles from './styles';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 type NotificationCardProps = {
   title: string;
-  description: string;
+  body: string;
   date: string | Date;
   type: string;
   isNew: boolean;
-  onPress: () => void;
+  screen: string;
+  attributes: string;
 };
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
   title,
-  description,
+  body,
   date,
   type,
   isNew,
-  onPress,
+  screen,
+  attributes,
 }) => {
+
+  const navigation = useNavigation<NavigationProp<any>>();
   const getIcon = (type: NotificationCardProps['type']) => {
     switch (type) {
       case 'Security':
-        return icons.squareCheckbox2;
+        return icons.security;
       case 'Card':
         return icons.ticket;
       case 'Payment':
@@ -77,7 +82,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: isNew ? COLORS.white : COLORS.transparentPrimary }]}>
-      <TouchableOpacity onPress={onPress} style={styles.headerContainer}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate(
+          screen,
+          attributes && attributes.trim() !== "" ? JSON.parse(attributes) : {}
+        )}
+        style={styles.headerContainer}
+      >
+        
         <View style={styles.headerLeftContainer}>
           <View
             style={[
@@ -107,7 +119,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                   color: COLORS.grayscale700,
                 },
               ]}>
-              {moment(date).format('DD/MM/YYYY')} | {new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {moment(date).format('DD/MM/YYYY')} | {moment(date).format('h:mma')}
             </Text>
           </View>
         </View>
@@ -124,7 +136,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             color: COLORS.grayscale700,
           },
         ]}>
-        {description}
+        {body}
       </Text>
     </View>
   );

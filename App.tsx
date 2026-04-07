@@ -24,10 +24,10 @@ const App: FC = () => {
   ],
     config: {
       screens: {
-        detail: {
-          path: 'game/:gameId',
+        game: {
+          path: 'game/:game_id',
           parse: {
-            gameId: (gameId: string) => gameId,
+            gameId: (game_id: string) => game_id,
           },
         },
       },
@@ -35,19 +35,20 @@ const App: FC = () => {
   };
 
   useEffect(() => {
-  // Handle when app is opened from background by tapping a notification
+  console.log('Handle when app is opened from background by tapping a notification');
   const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
-    if (remoteMessage?.data?.screen === 'detail' && remoteMessage.data.attributes) {
+    if (remoteMessage?.data?.screen === 'matchups' && remoteMessage.data.attributes) {
       const attrs = JSON.parse(remoteMessage.data?.attributes as string ?? '30');
+      console.log("unsubscribe", remoteMessage.data?.screen);
       navigationRef.current?.navigate(remoteMessage.data?.screen, attrs);
     }
   });
 
   // Handle when app is opened from quit state by tapping a notification
   messaging().getInitialNotification().then(remoteMessage => {
-    if (remoteMessage?.data?.screen === 'detail' && remoteMessage.data.attributes) {
+    if (remoteMessage?.data?.screen === 'matchups' && remoteMessage.data.attributes) {
       const attrs = JSON.parse(remoteMessage.data?.attributes as string ?? '30');
-      console.log("ddjjdj", remoteMessage.data?.screen, attrs);
+      console.log("messaging", remoteMessage.data?.screen, attrs);
       navigationRef.current?.navigate(remoteMessage.data?.screen, attrs);
     }
   });

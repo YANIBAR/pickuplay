@@ -63,7 +63,6 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const { t } = useTranslation();
   const gameId = route.params.game_id || {};
   const { navigate } = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [sportType, setSportType] = useState();
   const [participants, setParticipants] = useState([]);
@@ -221,7 +220,7 @@ const handleGetDirections = () => {
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
         <Header title={t('game.details.title')} target="welcome">
           <TouchableOpacity
-              //onPress={() => setShareModalVisible(true)}
+              onPress={() => setShareModalVisible(true)}
               style={styles.iconBtn}
               activeOpacity={0.75}
               hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}

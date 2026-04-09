@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './styles';
 import { API_BACKEND_URL } from '@env';
 import axios from 'axios';
+import { publicApi } from '@services/api';
 
 interface forgotFormData {
   email: string;
@@ -40,7 +41,7 @@ const ForgotPasswordEmail = () => {
     const email = data.email;
     try {
       // Send the request to the backend
-      const response = axios.post(`${API_BACKEND_URL}/auth/forgot-password/`, { email });
+      const response = publicApi.post(`otp/send`, { email });
       
       // If successful, navigate to the OTP verification screen
       navigate(screens.otpverification, { email, action: 'resetPassword' });

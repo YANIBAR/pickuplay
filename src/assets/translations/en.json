@@ -99,7 +99,7 @@
     "otpVerificationFailed": "Failed to verify the otp. {{message}}",
     "genericError": "Please try again.",
     "timeExpiredMessage": "Time has expired. Please request a new otp.",
-    "otpResentMessage": "OTP code has been resent to {{phone}}.",
+    "otpResentMessage": "OTP code has been resent to {{email}}.",
     "resendErrorLog": "Error resending OTP:",
     "serverError": "Server error: {{message}}",
     "noResponseError": "No response from server. Please check your internet connection.",

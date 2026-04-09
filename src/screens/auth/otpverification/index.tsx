@@ -7,6 +7,7 @@ import { COLORS, screens } from '@constants';
 import styles from './styles';
 import { API_BACKEND_URL, JAVA_API } from '@env';
 import axios from 'axios';
+import { publicApi } from '@services/api';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -27,8 +28,9 @@ const OTPVerification = () => {
   const handleCheckOtp = async () => {
     if (time !== 0) {
         if (next_navigation === "register") {
-          const response = await axios.post(`${JAVA_API}auth/verify-account`, {
-            phone: phone,
+
+          const response = await publicApi.post(`auth/verify-account`, {
+            email: email,
             otp: otp
           });
   
@@ -41,7 +43,7 @@ const OTPVerification = () => {
             next_navigation === "resetPassword"
               ? screens.createnewpassword
               : screens.login,
-            { phone, otp }
+            { email, otp }
           );
     } else {
       showAlert(
@@ -54,14 +56,14 @@ const OTPVerification = () => {
   const handleResend = async () => {
     try {
       // Send a request to refresh the OTP code for the given email
-      const response = await axios.post(`${JAVA_API}otp/send`,
-        {["phone"]: phone},
+      const response = await publicApi.post(`otp/send`,
+        {"email": email},
       );
   
       // Check if the request was successful
       showAlert(
         t('otpVerification.successTitle'),
-        t('otpVerification.otpResentMessage', { phone })
+        t('otpVerification.otpResentMessage', { email })
       );
   
       // Reset timer
@@ -143,7 +145,7 @@ const OTPVerification = () => {
             size="h3"
             align="center"
             style={{ justifyContent: 'center', marginVertical: 30 }}>
-            {t('otpVerification.codeSent')} { phone.slice(0, 3) + '*'.repeat(phone.length - 5) + phone.slice(-2)}
+            {t('otpVerification.codeSent')} { email}
           </Text>
           <OtpInput
             digits={4}

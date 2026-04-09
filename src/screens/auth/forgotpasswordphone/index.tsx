@@ -15,8 +15,7 @@ import { COLORS, SIZES, icons, images, screens } from '@constants';
 import styles from './styles';
 import { useTranslation } from 'react-i18next';
 import { Controller, useForm } from 'react-hook-form';
-import { JAVA_API } from '@env';
-import axios from 'axios';
+import { publicApi } from '@services/api';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -44,7 +43,7 @@ const ForgotPasswordPhoneNumber = () => {
     const fullPhoneNumber = `${callingCode}${phoneValue}`;
 
     // Call NestJS backend endpoint to send OTP
-     const response = await axios.post(`${JAVA_API}otp/send`,
+     const response = await publicApi.post(`otp/send`,
         {["phone"]: fullPhoneNumber},
       );
 

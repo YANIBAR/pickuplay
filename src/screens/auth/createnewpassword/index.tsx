@@ -14,6 +14,7 @@ import { API_BACKEND_URL, JAVA_API } from '@env';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { publicApi } from '@services/api';
 
 type Nav = {
   navigate: (value: string) => void;
@@ -24,18 +25,20 @@ const CreateNewPassword = () => {
   const { navigate } = useNavigation<Nav>();
   const [isChecked, setChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const { phone, otp} = useRoute().params;
+  const { email, otp} = useRoute().params;
   const [password, setPassword] = useState('');
   const handleResetPassword = async () => {
-  if (!phone || !otp || !password) {
+  if (!email || !otp || !password) {
+
+    console.log('Resetting password with:', { email, otp, password });
     Alert.alert('Error', 'Please fill in all fields');
     return;
   }
 
 
   try {
-    const response = await axios.post(`${JAVA_API}auth/reset-password`, {
-      phone,
+    const response = await publicApi.post(`auth/reset-password`, {
+      email,
       otp,
       newPassword: password
     });

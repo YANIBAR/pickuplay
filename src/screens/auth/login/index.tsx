@@ -283,7 +283,7 @@ const Login = () => {
           ]}
         />
         
-        <TouchableOpacity onPress={() => navigation.navigate('forgotpasswordmethods')}>
+        <TouchableOpacity onPress={() => navigation.navigate('forgotpasswordemail')}>
           <Text style={styles.forgotPasswordBtnText}>
             {t('signIn.forgotPassword')}
           </Text>

@@ -18,46 +18,97 @@ const App: FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string>('login'); // Default route
   const linking = {
-  prefixes: [
-    'pickuplay://',
-    'https://mgopass.com',
-  ],
-    config: {
-      screens: {
-        game: {
-          path: 'game/:game_id',
-          parse: {
-            gameId: (game_id: string) => game_id,
-          },
-        },
+  prefixes: ['pickuplay://', 'https://mgopass.com'],
+  config: {
+    screens: {
+      game: {
+        path: 'game/:game_id',
+      },
+      matchups: {
+        path: 'matchups',
       },
     },
-  };
+  },
+  // 👇 This overrides how NavigationContainer gets the initial URL
+  async getInitialURL() {
+    // 1. Check if app was opened from a deep link
+    const url = await Linking.getInitialURL();
+    if (url) return url;
 
-  useEffect(() => {
-  console.log('Handle when app is opened from background by tapping a notification');
-  const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
-    if (remoteMessage?.data?.screen === 'matchups' && remoteMessage.data.attributes) {
-      const attrs = JSON.parse(remoteMessage.data?.attributes as string ?? '30');
-      console.log("unsubscribe", remoteMessage.data?.screen);
-      navigationRef.current?.navigate(remoteMessage.data?.screen, attrs);
+    // 2. Check if app was opened from a quit-state notification
+    const remoteMessage = await messaging().getInitialNotification();
+
+      console.log('Foreground notification :', remoteMessage);
+    if (remoteMessage?.data?.screen) {
+      const screen = remoteMessage.data.screen;
+      const attributes = parseAttributes(remoteMessage.data.attributes);
+
+      // Build a deep link URL that matches your config
+      if (screen === 'game' && attributes?.game_id) {
+        return `pickuplay://game/${attributes.game_id}`;
+      }
+      if (screen === 'matchups') {
+        return `pickuplay://matchups`;
+      }
     }
-  });
 
-  // Handle when app is opened from quit state by tapping a notification
-  messaging().getInitialNotification().then(remoteMessage => {
-    if (remoteMessage?.data?.screen === 'matchups' && remoteMessage.data.attributes) {
-      const attrs = JSON.parse(remoteMessage.data?.attributes as string ?? '30');
-      console.log("messaging", remoteMessage.data?.screen, attrs);
-      navigationRef.current?.navigate(remoteMessage.data?.screen, attrs);
+    return null;
+  },
+  // 👇 This handles foreground/background notification taps
+  subscribe(listener: (url: string) => void) {
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+      const screen = remoteMessage?.data?.screen;
+      const attributes = parseAttributes(remoteMessage?.data?.attributes);
+
+      console.log('Foreground notification :', attributes);
+      if (screen === 'game' && attributes?.game_id) {
+        listener(`pickuplay://game/${attributes.game_id}`);
+      }
+      if (screen === 'matchups') {
+        listener(`pickuplay://matchups`);
+      }
+    });
+
+    // Background notification tap
+    const unsubscribeBackground = messaging().onNotificationOpenedApp(remoteMessage => {
+      const screen = remoteMessage?.data?.screen;
+      const attributes = parseAttributes(remoteMessage?.data?.attributes);
+
+
+      if (screen === 'game' && attributes?.game_id) {
+        listener(`pickuplay://game/${attributes.game_id}`);
+      }
+      if (screen === 'matchups') {
+        listener(`pickuplay://matchups`);
+      }
+    });
+
+    return () => {
+      unsubscribeForeground();
+      unsubscribeBackground();
+    };
+  },
+};
+
+// Helper to safely parse attributes
+function parseAttributes(attributes: unknown): Record<string, any> | undefined {
+  if (typeof attributes === 'string' && attributes.trim().length > 0) {
+    try {
+      return JSON.parse(attributes);
+    } catch (e) {
+      console.warn('Failed to parse notification attributes:', e);
     }
-  });
+  }
+  return undefined;
+}
 
-  // ...existing code...
-  // ...initializeApp and Linking...
+const allowedScreens = ['game', 'matchups'] as const;
+type AllowedScreen = typeof allowedScreens[number];
 
-  return () => unsubscribe();
-}, []);
+function isAllowedScreen(screen: any): screen is AllowedScreen {
+  return allowedScreens.includes(screen);
+}
+
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -72,7 +123,7 @@ const App: FC = () => {
           await i18n.changeLanguage(storedLanguage);
         }
         const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-          if(hasLaunched === 'false') {
+          if(hasLaunched === 'false' || hasLaunched === null) {
            setInitialRoute('onboarding');
           } else {
             setInitialRoute('welcome');

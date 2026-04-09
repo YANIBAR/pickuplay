@@ -12,23 +12,23 @@ export default StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 30,
   },
-  questionContainer: {
+  slideContainer: {
     flex: 1,
     justifyContent: 'flex-start',
   },
-  questionNumber: {
+  slideNumber: {
     fontSize: 14,
     color: COLORS.grayscale600 || '#666666',
     textAlign: 'center',
     marginBottom: 20,
     fontWeight: '500',
   },
-  questionTitleContainer: {
+  slideTitleContainer: {
     marginBottom: 30,
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  questionTitleFr: {
+  slideTitleFr: {
     fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.grayscale900 || '#333333',
@@ -36,7 +36,7 @@ export default StyleSheet.create({
     marginBottom: 8,
     lineHeight: 28,
   },
-  questionTitleAr: {
+  slideTitleAr: {
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.grayscale700 || '#555555',

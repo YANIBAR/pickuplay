@@ -15,6 +15,7 @@ import NoData from './NoData';
 import DatePickerModal from './DatePickerModal';
 import Header from './Header';
 import Column from './Column';
+import Carousel from './Carousel';
 import ConfirmModal from './ConfirmModal';
 import Country from './Country';
 import Divider from './Divider';

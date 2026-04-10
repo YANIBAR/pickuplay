@@ -128,7 +128,8 @@
     },
     "previousButton": "Previous",
     "nextButton": "Next",
-    "finishButton": "Finish"
+    "finishButton": "Finish",
+    "skipButton": "Skip"
   },
   "errors": {
     "required": "This field is required",

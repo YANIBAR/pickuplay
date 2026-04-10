@@ -47,6 +47,7 @@
     "react-native-image-picker": "^8.2.1",
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-modern-datepicker": "^1.0.0-beta.91",
+    "react-native-onboarding-swiper": "^1.4.0",
     "react-native-otp-inputs": "^7.4.0",
     "react-native-pager-view": "^6.9.1",
     "react-native-permissions": "^5.4.4",

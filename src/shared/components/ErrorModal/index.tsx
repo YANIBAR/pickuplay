@@ -9,8 +9,7 @@ import {
 } from 'react-native';
 import { Button, Text } from '@components';
 import styles from './styles';
-import { COLORS, illustrations  } from '@constants';
-import { Image } from 'react-native';
+import { COLORS  } from '@constants';
 
 interface Props extends ModalProps {
   visible: boolean;
@@ -70,22 +69,6 @@ const Component: React.FC<Props> = ({
                 ]}>
                 { message }
               </Text>
-              <Image
-            source={illustrations.passwordFailed}
-            resizeMode="contain"
-            style={styles.illustration}
-          />
-        <View style={styles.cardContent}>
-          <Text
-            size="lg"
-            align="center"
-            style={styles.title}
-          >{title || t('c.messages.oops')}</Text>
-          <Text
-            size="sm"
-            align="center"
-          >{message } moeoepro</Text>
-        </View>
               <Button
                 title="Close"
                 filled

@@ -4,15 +4,12 @@ import { Text, Header, TextInput, Button, Row, Column, Phone } from '@components
 import { Controller, useForm } from 'react-hook-form';
 import {  useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { authSelector, userRegister } from '../../../app/slices/auth';
+import { authSelector } from '../../../app/slices/auth';
 import { COLORS, icons, images, screens  } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@utils/validators';
 import styles from './styles';
-import axios from 'axios';
-import { JAVA_API } from '@env';
-import { getMessaging, getToken } from '@react-native-firebase/messaging';
 import { publicApi } from '@services/api';
 type Nav = {
   navigate: (value: string) => void;
@@ -30,22 +27,46 @@ const SignUp = () => {
     reset,
     control,
     handleSubmit,
-    formState: { errors, isSubmitSuccessful },
+    setError,
+    formState: { errors, isSubmitSuccessful, isValid  },
   }  = useForm({
     resolver: yupResolver(registerSchema),
+    mode: 'onChange',
   });
- 
-  const onSubmit = async (formData: any) => {
-    const dataWithRole = { 
-      ...formData, 
-      phone: `${callingCode}${formData.phone}`,
-      firstname: `youssef`,
-      lastname: `anibar`,
+ const [apiError, setApiError] = useState<string | null>(null);
+
+  const onSubmit = async (formData: FormData) => {
+    setApiError(null); // Reset error
+    const payload = {
+      ...formData,
+      phone: `${callingCode}${formData.phone}`
     };
-    const response = await publicApi.post(`auth/register`, dataWithRole);
-    let email = dataWithRole.email;
-    let phone = dataWithRole.phone;
-    navigate(screens.otpverification, { email, action: 'register', phone});
+
+    try {
+      await publicApi.post("auth/register", payload);
+      navigate(screens.otpverification, {
+        email: payload.email,
+        phone: payload.phone,
+        action: "register",
+      });
+    } catch (error: any) {
+      // Axios error: error.response?.data?.message or similar
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Registration failed. Please try again.";
+
+      // Option 1: Show as a general error
+      setApiError(message);
+
+      // Option 2: Set field-specific error (if backend returns which field is duplicated)
+      if (message.toLowerCase().includes("email")) {
+        setError("email", { type: "manual", message });
+      }
+      if (message.toLowerCase().includes("phone")) {
+        setError("phone", { type: "manual", message });
+      }
+    }
   };
 
   useEffect(() => {
@@ -196,8 +217,8 @@ const SignUp = () => {
               value={value}
               onBlur={onBlur}
               icon={icons.telephone}
-              onChangeText={onChange} // just the digits
-              onSelectCode={(code) => setCallingCode(code)} // 👈 update when user changes country
+              onChangeText={onChange} 
+              onSelectCode={(code) => setCallingCode(code)} 
               placeholder={t('c.phoneNumber')}
               errorText={errors?.phone?.message}
             />
@@ -242,12 +263,13 @@ const SignUp = () => {
         />
 
         <Button
-          filled
-          loading={isLoading}
-          title={t('signUp.createMyAccount')}
-          onPress={handleSubmit(onSubmit)}
-          style={styles.button}
-        />      
+  filled
+  loading={isLoading}
+  disabled={!isValid || isLoading}
+  title={t('signUp.createMyAccount')}
+  onPress={handleSubmit(onSubmit)}
+  style={styles.button}
+/>    
       </View>
     </SafeAreaView>
     

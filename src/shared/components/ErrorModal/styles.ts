@@ -1,49 +1,32 @@
+import { COLORS, SIZES } from '@constants';
 import { StyleSheet } from 'react-native';
-import { elevation } from '@utils/elevation';
-import { Dimensions } from 'react-native';
-
-const width = Dimensions.get('screen').width / 1.5;
-const height = Dimensions.get('screen').height / 3;
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default StyleSheet.create({
-  card: {
-    width: width,
-    minHeight: height,
-    borderRadius: 12,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    backgroundColor: 'white',
+  container: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    ...elevation(10),
-  },
-  iconWrapper: {
-    width: 70,
-    height: 70,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ff3333',
-    position: 'absolute',
-    top: -30,
-    ...elevation(20),
-  },
-  cardContent: {
-    padding: 10,
-    marginVertical: 20,
-    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   title: {
-    marginVertical: 20,
+    fontSize: 24,
+    color: COLORS.red,
+    textAlign: 'center',
+    marginVertical: 12,
   },
-  cancel: {
-    
-    width: '100%',
-    marginTop: 12,
+  subtitle: {
+    fontSize: 16,
+    color: COLORS.grayscale600,
+    textAlign: 'center',
+    marginVertical: 12,
   },
-  illustration: {
-    height: 180,
-    width: 180,
-    marginVertical: 22,
+  modalSubContainer: {
+    width: SIZES.width * 0.9,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
   },
 });

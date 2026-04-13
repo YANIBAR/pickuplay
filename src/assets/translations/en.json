@@ -103,7 +103,10 @@
     "resendErrorLog": "Error resending OTP:",
     "serverError": "Server error: {{message}}",
     "noResponseError": "No response from server. Please check your internet connection.",
-    "unexpectedResendError": "An error occurred while resending the OTP. Please try again."
+    "unexpectedResendError": "An error occurred while resending the OTP. Please try again.",
+    "invalidOtpMessage": "The code you entered is incorrect. Please try again.",
+    "otpExpiredMessage": "This code has expired. Please request a new one.",
+    "genericErrorMessage": "Something went wrong. Please try again."
   },
   "forgotPwd": {
     "title": "Forgot password",

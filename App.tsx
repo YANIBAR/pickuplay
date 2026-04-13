@@ -11,6 +11,7 @@ import { createNavigationContainerRef } from '@react-navigation/native';
 import { NotificationProvider } from '@contexts/NotificationContext';
 import { notifications as initialNotifications } from '@data';
 import messaging from '@react-native-firebase/messaging';
+import { JAVA_API } from '@env';
 
 const navigationRef = createNavigationContainerRef();
 
@@ -102,13 +103,6 @@ function parseAttributes(attributes: unknown): Record<string, any> | undefined {
   return undefined;
 }
 
-const allowedScreens = ['game', 'matchups'] as const;
-type AllowedScreen = typeof allowedScreens[number];
-
-function isAllowedScreen(screen: any): screen is AllowedScreen {
-  return allowedScreens.includes(screen);
-}
-
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -122,12 +116,13 @@ function isAllowedScreen(screen: any): screen is AllowedScreen {
         if (storedLanguage && i18n.isInitialized) {
           await i18n.changeLanguage(storedLanguage);
         }
-        const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+        setInitialRoute('welcome');
+        /*const hasLaunched = 'true';await AsyncStorage.getItem('hasLaunched');
           if(hasLaunched === 'false' || hasLaunched === null) {
            setInitialRoute('onboarding');
           } else {
             setInitialRoute('welcome');
-          }
+          }*/
       } catch (error) {
         console.error('Initialization error:', error);
         setInitialRoute('onboarding'); // Fallback
@@ -136,7 +131,6 @@ function isAllowedScreen(screen: any): screen is AllowedScreen {
       }
     };
     initializeApp();
-
     const sub = Linking.addEventListener('url', ({ url }) => {
       console.log('Deep link received:', url);
     });

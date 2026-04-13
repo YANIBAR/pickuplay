@@ -11,7 +11,9 @@ export default yup.object().shape({
   phone: yup
     .string()
     .required(i18n.t('errors.phoneNumberRequired'))
-    .matches(/^\d+$/, i18n.t('errors.phoneNumberDigits')),
+    .matches(/^\d+$/, i18n.t('errors.phoneNumberDigits'))
+    .min(6, i18n.t('errors.phoneNumberTooShort'))
+    .max(15, i18n.t('errors.phoneNumberTooLong')),
   password: yup
     .string()
     .required(i18n.t('errors.passwordRequired'))

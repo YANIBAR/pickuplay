@@ -1,30 +1,76 @@
-import React from 'react';
-import { Button, Icon, ModalBase, Text, View } from '@components';
-import { useTranslation } from 'react-i18next';
+import React, { ReactNode } from 'react';
+import {
+  View,
+  Modal,
+  ModalProps,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
+import { Button, Text } from '@components';
 import styles from './styles';
-import { illustrations } from '@constants';
+import { COLORS, illustrations  } from '@constants';
 import { Image } from 'react-native';
 
-interface Props {
-  title?: string;
+interface Props extends ModalProps {
   visible: boolean;
-  message?: string;
+  title: string;
+  message: string;
   onClose?: () => void;
+  closeOnClickOutside?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 const Component: React.FC<Props> = ({
-  title,
   visible,
   onClose,
+  title,
   message,
-  ...props
+  containerStyle,
+  closeOnClickOutside,
 }: Props) => {
-  const { t } = useTranslation();
-
   return (
-    <ModalBase visible={visible} onClose={onClose} title={title} message={message} {...props}>
-      <View style={styles.card}>
-      <Image
+    <Modal transparent visible={visible} animationType="fade">
+      {closeOnClickOutside ? (
+        <TouchableOpacity
+          onPress={onClose}
+          activeOpacity={1}
+          style={[styles.container, containerStyle]}>
+          <TouchableOpacity activeOpacity={1}>
+          <View style={[styles.modalSubContainer]}>
+              <Text style={styles.title}>{ title }!</Text>
+              <Text
+                style={[
+                  styles.subtitle,
+                  {
+                    color: COLORS.grayscale600,
+                  },
+                ]}>
+                { message }
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      ) : (
+        <View style={[styles.container]}>
+        <View
+          style={[
+            styles.modalSubContainer,
+            {
+              backgroundColor: COLORS.secondaryWhite,
+            },
+          ]}>
+              <Text style={styles.title}>{ title }!</Text>
+              <Text
+                style={[
+                  styles.subtitle,
+                  {
+                    color: COLORS.grayscale600,
+                  },
+                ]}>
+                { message }
+              </Text>
+              <Image
             source={illustrations.passwordFailed}
             resizeMode="contain"
             style={styles.illustration}
@@ -40,13 +86,19 @@ const Component: React.FC<Props> = ({
             align="center"
           >{message } moeoepro</Text>
         </View>
-        <Button
-          onPress={onClose}
-          style={styles.cancel}
-          title={t('c.labels.cancel')}
-        />
-      </View>
-    </ModalBase>
+              <Button
+                title="Close"
+                filled
+                style={{
+                  width: '100%',
+                  marginTop: 12,
+                }}
+                onPress={onClose}
+              />
+          </View>
+        </View>
+      )}
+    </Modal>
   );
 };
 

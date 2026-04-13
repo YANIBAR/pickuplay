@@ -2,11 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Header, OtpInput, Button, View, Text, ModalBase } from '@components';
+import { Header, OtpInput, Button, View, Text, ErrorModal } from '@components';
 import { COLORS, screens } from '@constants';
 import styles from './styles';
-import { API_BACKEND_URL, JAVA_API } from '@env';
-import axios from 'axios';
 import { publicApi } from '@services/api';
 
 type Nav = {
@@ -26,32 +24,55 @@ const OTPVerification = () => {
   const [title, setTitle] = useState('');
   const next_navigation = action;
   const handleCheckOtp = async () => {
-    if (time !== 0) {
-        if (next_navigation === "register") {
+  if (time === 0) {
+    showAlert(
+      t('otpVerification.errorTitle'),
+      t('otpVerification.timeExpiredMessage')
+    );
+    return;
+  }
 
-          const response = await publicApi.post(`auth/verify-account`, {
-            email: email,
-            otp: otp
-          });
-  
-          showAlert(
-            t('otpVerification.successTitle'),
-            t('otpVerification.otpVerifiedMessage')
-          );
-        }
-          navigate(
-            next_navigation === "resetPassword"
-              ? screens.createnewpassword
-              : screens.login,
-            { email, otp }
-          );
+  try {
+    if (next_navigation === "register") {
+      await publicApi.post(`auth/verify-account`, {
+        email,
+        otp,
+      });
+    } else if (next_navigation === "resetPassword") {
+      await publicApi.post(`auth/verify-reset-otp`, {
+        email,
+        otp,
+      });
+    }
+
+    navigate(
+      next_navigation === "resetPassword"
+        ? screens.createnewpassword
+        : screens.login,
+      { email, otp }
+    );
+
+  } catch (error: any) {
+    const status = error?.response?.status;
+
+    if (status === 400 || status === 401) {
+      showAlert(
+        t('otpVerification.errorTitle'),
+        t('otpVerification.invalidOtpMessage')
+      );
+    } else if (status === 410) {
+      showAlert(
+        t('otpVerification.errorTitle'),
+        t('otpVerification.otpExpiredMessage')
+      );
     } else {
       showAlert(
         t('otpVerification.errorTitle'),
-        t('otpVerification.timeExpiredMessage')
+        t('otpVerification.genericErrorMessage')
       );
     }
-  };
+  }
+};
   
   const handleResend = async () => {
     try {
@@ -187,13 +208,13 @@ const OTPVerification = () => {
           title={t('otpVerification.verify')}
           onPress={handleCheckOtp}
         />
-        <ModalBase
+        <ErrorModal
           visible={modalVisible}
-          title={title}
+          title={"title"}
           message={message}
           onClose={() => setModalVisible(false)}
         >
-        </ModalBase>
+        </ErrorModal>
       </View>
     </SafeAreaView>
   );

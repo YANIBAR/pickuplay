@@ -117,6 +117,8 @@ export default StyleSheet.create({
   },
   nextButton: {
     backgroundColor: COLORS.white,
+    width: '60%',
+    maxHeight: 40,
   },
   hiddenButton: {
     opacity: 0.5,

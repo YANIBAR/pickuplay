@@ -148,6 +148,7 @@ const CreateNewPassword = () => {
         onPress={handleResetPassword}
       />
       <ErrorModal
+        title={"ERROR"}
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
       >

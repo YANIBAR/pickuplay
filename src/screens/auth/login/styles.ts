@@ -8,13 +8,16 @@ export default StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   logo: {
-    width: 300,
+    width: 240,
     height: 75,
+  },
+  icon: {
+    height: 140,
   },
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: Dimensions.get('screen').height / 10,
+    marginTop: Dimensions.get('screen').height / 10,
   },
   title: {
     fontSize: 22,
@@ -44,5 +47,20 @@ export default StyleSheet.create({
   text: {
     fontSize: 16,
     marginBottom: 10,
-  }
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.gray, // adjust to your color constant
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: COLORS.gray,
+    fontSize: 14,
+},
 });

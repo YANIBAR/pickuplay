@@ -7,6 +7,7 @@ import ForgotPasswordEmailScreen from './forgotpasswordemail';
 import ForgotPasswordPhoneScreen from './forgotpasswordphone';
 import OTPVerificationScreen from './otpverification';
 import CreateNewPasswordScreen from './createnewpassword';
+import ChangePasswordScreen from './changepassword';
 import VerifyIdentityScreen from './verifyIdentity';
 
 export {
@@ -20,4 +21,5 @@ export {
   OTPVerificationScreen,
   CreateNewPasswordScreen,
   VerifyIdentityScreen,
+  ChangePasswordScreen
 };

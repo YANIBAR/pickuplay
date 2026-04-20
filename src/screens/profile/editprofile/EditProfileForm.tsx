@@ -55,9 +55,13 @@ useEffect(() => {
   const handleUpdateUser = async () => {
     try {     
       // Format birthday properly if needed
-       const response = await authenticatedApi.patch(`profile`, user);
+      const response = await authenticatedApi.patch(`profile`, user);
       await AsyncStorage.setItem("firstName", user.firstName);
       await AsyncStorage.setItem("lastName", user.lastName);
+      await AsyncStorage.setItem("email", user.email);
+      await AsyncStorage.setItem("phone", user.phone);
+      await AsyncStorage.setItem("city", user.city);
+      navigate("profile");
       if (response.status === 200 || response.status === 201) {
         Alert.alert('Success', 'Profile updated successfully');
       } else {

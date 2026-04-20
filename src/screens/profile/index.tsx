@@ -187,7 +187,7 @@ const handleImagePicker = () => {
       <View style={styles.avatarContainer}>
         <Image
           source={{ uri: `${JAVA_API}profile/${userData?.id}/image` }}
-          resizeMode="contain"
+          resizeMode="center"
           style={styles.avatar}
         />
         <TouchableOpacity style={styles.pickImage} onPress={handleImagePicker}>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Header,
   View,
@@ -7,9 +7,6 @@ import {
 import { COLORS } from '@constants';
 import { useTranslation } from 'react-i18next';
 import styles from './styles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BACKEND_URL } from '@env';
-import axios from 'axios';        
 import EditProfileForm from './EditProfileForm';
 
 

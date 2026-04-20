@@ -11,7 +11,6 @@ import { createNavigationContainerRef } from '@react-navigation/native';
 import { NotificationProvider } from '@contexts/NotificationContext';
 import { notifications as initialNotifications } from '@data';
 import messaging from '@react-native-firebase/messaging';
-import { JAVA_API } from '@env';
 
 const navigationRef = createNavigationContainerRef();
 
@@ -19,7 +18,7 @@ const App: FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string>('login'); // Default route
   const linking = {
-  prefixes: ['pickuplay://', 'https://mgopass.com'],
+  prefixes: ['https://play.google.com/store/apps/details?id=com.pickuplay.app://', 'https://mgopass.com'],
   config: {
     screens: {
       game: {

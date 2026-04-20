@@ -32,7 +32,7 @@ export default function NoLeaguePage() {
             {t("matchups.description")}
           </Text>
 
-          {/* Action Buttons */}
+          {/* Action Buttons 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.primaryButton}>
               <Text style={styles.primaryButtonText}>
@@ -45,7 +45,7 @@ export default function NoLeaguePage() {
                 {t("matchups.findTeams")}
               </Text>
             </TouchableOpacity>
-          </View>
+          </View>*/}
         </View>
       </ScrollView>
     </SafeAreaView>

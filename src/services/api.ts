@@ -4,6 +4,8 @@ import axios, { AxiosResponse } from "axios";
 import { Alert } from "react-native";
 
 const createApi = (requiresAuth: boolean) => {
+  let isRefreshing = false;
+  let failedQueue: any[] = [];
   const instance = axios.create({
     baseURL: JAVA_API,
     timeout: 5000,
@@ -12,6 +14,78 @@ const createApi = (requiresAuth: boolean) => {
       'Content-Type': 'application/json',
     },
   });
+
+  const processQueue = (error: any, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+      if (error) prom.reject(error);
+      else prom.resolve(token);
+    });
+    failedQueue = [];
+  };
+
+  instance.interceptors.response.use(
+    (response: AxiosResponse) => ({
+      ...response,
+      result: response.data,
+    }),
+
+    async (error) => {
+      const originalRequest = error.config;
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return instance(originalRequest);
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          const refreshToken = await AsyncStorage.getItem('refresh_token');
+
+          if (!refreshToken) {
+            throw new Error('No refresh token');
+          }
+
+          const response = await axios.post(
+            `${JAVA_API}/auth/refresh`,
+            { refresh_token: refreshToken }
+          );
+
+          const newAccessToken = response.data.access_token;
+
+          await AsyncStorage.setItem('access_token', newAccessToken);
+
+          processQueue(null, newAccessToken);
+
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return instance(originalRequest);
+
+        } catch (err) {
+          processQueue(err, null);
+
+          // 🔴 Important: logout user
+          await AsyncStorage.removeItem('access_token');
+          await AsyncStorage.removeItem('refresh_token');
+
+          Alert.alert('Session expired', 'Please login again');
+
+          return Promise.reject(err);
+
+        } finally {
+          isRefreshing = false;
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
 
   if (requiresAuth) {
     instance.interceptors.request.use(

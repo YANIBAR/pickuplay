@@ -54,11 +54,11 @@
         "CAMERA"
       ],
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.pickuplay"
+      "bundleIdentifier": "com.pickuplay.app"
     },
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.pickuplay",
+      "bundleIdentifier": "com.pickuplay.app",
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to scan QR codes."
       }

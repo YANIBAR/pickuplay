@@ -55,7 +55,8 @@ const getGameIcon = (type: string) => {
       5: 'tennis',
       4: 'hockey-sticks',
       6: 'table-tennis',
-      7: 'football'
+      7: 'table-tennis',
+      8: 'football'
     };
     return iconMap[type] || 'sports';
   };
@@ -77,7 +78,13 @@ export default function GameDetailsScreen({ route }: { route: any }) {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
-
+  // Determine if join button should be hidden
+  const isFull = game?.availableSpots == 0;
+  const isCanceled = game?.status === 'CANCELED';
+  const alreadyJoined = game?.participants?.some(
+    (p) => String(p.userId) === String(userData?.id)
+  );
+  const shouldHideJoinButton = alreadyJoined || isFull || isCanceled;
 
   useEffect(() => {
     const checkToken = async () => {
@@ -89,8 +96,8 @@ export default function GameDetailsScreen({ route }: { route: any }) {
     if (gameId) {
       fetchGame();
     }
+    
   }, [gameId]);
-
   const fetchGame = async () => {
     try {
       const response = await publicApi.get(`games/${gameId}`);
@@ -104,8 +111,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
 
   // Generate deep link for sharing
   const generateDeepLink = () => {
-    return`pickuplay://game/${game.id}`;
-
+    return`https://mgopass.com/pickuplay/index.html?game_id=${game.id}`;
   };
 
   // Handle share button press
@@ -157,22 +163,17 @@ const handleGetDirections = () => {
 
     const [joinModalVisible, setJoinModalVisible] = useState(false);
 
-        const [numPlayers, setNumPlayers] = useState('');
+        const [numPlayers, setNumPlayers] = useState(0);
         const [promoCode, setPromoCode] = useState('');
 
         const [discountPrice, setDiscountPrice] = useState('');
 
     const handleCloseModal = () => {
       setJoinModalVisible(false);
-      setNumPlayers('');
+      setNumPlayers(0);
       setPromoCode('');
     };
         const handleConfirmJoin = async () => {
-            if (!numPlayers.trim()) {
-              Alert.alert(t('games.pleaseEnterPlayers'));
-              return;
-            }
-        
             try {
               
               const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
@@ -180,7 +181,7 @@ const handleGetDirections = () => {
               if (response.status === 200) {
                 // Success - clear form and close modal
                 setJoinModalVisible(false);
-                setNumPlayers('');
+                setNumPlayers(0);
                 setPromoCode('');
                 
                 // Optional: show success message or navigate
@@ -216,6 +217,7 @@ const handleGetDirections = () => {
               setJoinModalVisible(true);
             };
   return (
+    <>
     <SafeAreaView style={styles.area}>
       <ScrollView style={[styles.container, { backgroundColor: COLORS.white }]}>
         <Header title={t('game.details.title')} target="welcome">
@@ -288,7 +290,7 @@ const handleGetDirections = () => {
             <View style={styles.section}>
               <Icon type="materialCommunityIcons" name="account-multiple" size={24} color={COLORS.secondary}/>
               <View style={styles.textContainer}>
-                <Text style={styles.label}>{t('game.players')} {participants.length}/{game.nbrSpots}</Text>
+                <Text style={styles.label}>{t('game.players')} {game?.nbrSpots-game?.availableSpots} /{game.nbrSpots}</Text>
                 <TouchableOpacity 
                   onPress={() => setExpandedDay(expandedDay ? null : 'all')}
                   style={styles.expandAllButton}
@@ -307,6 +309,10 @@ const handleGetDirections = () => {
                       <Text style={styles.playerName} numberOfLines={2}>
                         {toTitleCase(player.userName)}
                       </Text>
+                      
+                      <Text style={styles.playerName} numberOfLines={2}>
+                        + {player.number_guest} guests
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -314,13 +320,16 @@ const handleGetDirections = () => {
 
         </View>
       </ScrollView>
-      <View style={styles.joinButton}>
-        <Button
-          title={t('games.joinGameTitle')}
-          filled
-          onPress={handleJoinGame}
-        />
-      </View>
+      
+      {!shouldHideJoinButton && (
+        <View style={styles.joinButton}>
+          <Button
+            title={t('games.joinGameTitle')}
+            filled
+            onPress={handleJoinGame}
+          />
+        </View>
+      )}
 
       {/* Share Game Modal */}
       <Modal
@@ -378,6 +387,8 @@ const handleGetDirections = () => {
           </View>
         </View>
       </Modal>
+    </SafeAreaView>
+
 
       {/* Join Game Modal */}
         <Modal
@@ -404,7 +415,7 @@ const handleGetDirections = () => {
                 <View style={styles.divider} />
 
                 <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('games.numberOfPlayers')}</Text>
+                  <Text style={styles.fieldLabel}>{t('games.guests')}</Text>
                   <View style={styles.playerCountContainer}>
                     <TouchableOpacity 
                       style={styles.counterButton}
@@ -450,7 +461,7 @@ const handleGetDirections = () => {
                   </View>
                 </View>
 
-                <View style={styles.fieldContainer}>
+                {/* <View style={styles.fieldContainer}>
                   <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
                   <View style={styles.inputWrapper}>
                     <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
@@ -465,19 +476,19 @@ const handleGetDirections = () => {
                       <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
+                </View> */}
 
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
                     <Text style={styles.priceLabel}>Price per guest:</Text>
-                    <Text style={styles.originalPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
+                    <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
                   </View>
                   <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                     <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
                       Total ({numPlayers || 0} guests):
                     </Text>
                     <Text style={styles.discountedPriceText}>
-                      ${discountPrice || (game.price * (parseInt(numPlayers) || 0)).toFixed(2)}
+                      ${discountPrice || (game.price * (parseInt(numPlayers) + 1 || 0)).toFixed(2)}
                     </Text>
                   </View>
                 </View>
@@ -522,7 +533,7 @@ const handleGetDirections = () => {
             )}
           </View>
         </Modal>
-    </SafeAreaView>
+    </>
   );
 }
 
@@ -609,6 +620,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     width: '85%',
+    
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -829,6 +841,7 @@ const styles = StyleSheet.create({
     },
     gameInfoSection: {
       marginBottom: 16,
+      width: '85%',
     },
     gameNameModal: {
       fontSize: 18,
@@ -850,6 +863,7 @@ const styles = StyleSheet.create({
     },
     fieldContainer: {
       marginBottom: 16,
+      width: '85%',
     },
     fieldLabel: {
       fontSize: 14,
@@ -878,6 +892,7 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       padding: 12,
       marginBottom: 16,
+      width: '85%',
     },
     priceRow: {
       flexDirection: 'row',

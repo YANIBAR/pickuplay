@@ -1,4 +1,3 @@
-import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import {
   LoginScreen,
@@ -9,7 +8,8 @@ import {
   ForgotPasswordMethodsScreen,
   ForgotPasswordPhoneScreen,
   ForgotPasswordEmailScreen,
-  CreateNewPasswordScreen
+  CreateNewPasswordScreen,
+  ChangePasswordScreen
 } from '@screens';
 
 const Stack = createStackNavigator();
@@ -40,6 +40,10 @@ const AuthStack = () => (
     <Stack.Screen
       name="createnewpassword"
       component={CreateNewPasswordScreen}
+    />
+    <Stack.Screen
+      name="changepassword"
+      component={ChangePasswordScreen}
     />
   </Stack.Navigator>
 );

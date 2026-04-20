@@ -5,73 +5,46 @@ import {
   MatchupsScreen,
   ScheduleScreen,
   GamesScreen,
-  ProfileScreen
+  ProfileScreen,
+  AddGameScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
+import { decodeToken } from '@services/auth/auth.utils';
 import { COLORS } from '@constants';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
-  const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
   
-  const getUserData = async () => {
+
+
+  
+    const [role, setRole] = useState<string | null>(null);
+  useEffect(() => {
+  const fetchRole = async () => {
     try {
-      const keys = ['id', 'firstName', 'lastName', 'email', 'phone', 'role', 'profileImage'];
-      const result = await AsyncStorage.multiGet(keys);
-            
-      // Convert the array of key-value pairs into an object
-      const userData = {};
-      result.forEach(([key, value]) => {
-        if (value !== null) {
-          userData[key] = value;
-        }
-      });
-      
-      return userData;
+      const token = await AsyncStorage.getItem('access_token');
+
+      if (!token) {
+        setRole(null); // handle "not connected" state in UI
+        return;
+      }
+
+      const userInfo = decodeToken(token);
+      setRole(userInfo?.role ?? null);
     } catch (error) {
-      console.error('Error retrieving user data:', error);
-      return null;
+      console.error('Failed to fetch role:', error);
+      setRole(null);
     }
   };
 
-  // Use useFocusEffect to reload data when screen comes into focus
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchData = async () => {
-        setIsLoading(true);
-        const user = await getUserData();
-        
-        // If no user data, retry once after a short delay
-        if (!user || Object.keys(user).length === 0) {
-          console.log("No user data found, retrying...");
-          await new Promise(resolve => setTimeout(resolve, 200));
-          const retryUser = await getUserData();
-          setUserData(retryUser);
-        } else {
-          setUserData(user);
-        }
-        
-        setIsLoading(false);
-      };
-      
-      fetchData();
-    }, [])
-  );
-
-  // Show a loading state while fetching user data
-  if (isLoading || !userData) {
-    return null; // Or a loading spinner component
-  }
-
-  const isPartner = userData?.role === 'Partner';
-  
-
+  fetchRole();
+}, []);
   return (
     <Tab.Navigator
       initialRouteName={"Games"}
@@ -98,7 +71,20 @@ const TabNavigator = () => {
             ),
           }}
         />
-      
+
+        {role === 'ORGANIZER' && (
+            <Tab.Screen
+              name="addGame"
+              component={AddGameScreen}
+              options={{
+                tabBarLabel: t('menu.addGame'),
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="add-circle" type="ionicons" color={COLORS.secondary} size={size * 2.5} />
+                ),
+              }}
+            />
+        )}
+     
         <Tab.Screen
           name="Matchups"
           component={MatchupsScreen}
@@ -109,8 +95,8 @@ const TabNavigator = () => {
             ),
           }}
         /> 
-
-        {/* <Tab.Screen
+       
+          {/*<Tab.Screen
           name="Chat"
           component={ChatScreen}
           options={{

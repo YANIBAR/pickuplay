@@ -203,6 +203,18 @@ export default StyleSheet.create({
     flex: 1,
     minHeight:"100%"
   },
+  emptyState: {
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingHorizontal: 32,
+},
+emptyStateText: {
+  fontSize: 16,
+  color: COLORS.gray,
+  textAlign: 'center',
+  lineHeight: 24,
+},
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

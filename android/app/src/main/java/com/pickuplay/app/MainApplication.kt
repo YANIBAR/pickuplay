@@ -1,4 +1,4 @@
-package com.pickuplay
+package com.pickuplay.app
 
 import android.app.Application
 import com.facebook.react.PackageList

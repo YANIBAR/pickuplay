@@ -25,8 +25,10 @@ import {
   LoginScreen,
   MyGamesScreen,
   EditGameScreen,
+  AddGameScreen,
   SettingScreen,
-  Notificationcreen
+  Notificationcreen,
+  ChangePasswordScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -54,6 +56,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="Games" component={GamesScreen} />
       <Stack.Screen name="myGames" component={MyGamesScreen} />
       <Stack.Screen name="editGame" component={EditGameScreen} />
+      <Stack.Screen name="addGame" component={AddGameScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
       <Stack.Screen name="game" component={GameScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
@@ -62,6 +65,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="forgotpasswordphone"component={ForgotPasswordPhoneScreen}/>
       <Stack.Screen name="otpverification" component={OTPVerificationScreen} />
       <Stack.Screen name="createnewpassword" component={CreateNewPasswordScreen} />
+      <Stack.Screen name="changepassword" component={ChangePasswordScreen} />
       <Stack.Screen name="notifications" component={Notificationcreen} />
     </Stack.Navigator>
   );

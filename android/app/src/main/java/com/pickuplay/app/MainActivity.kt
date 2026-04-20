@@ -1,4 +1,4 @@
-package com.pickuplay
+package com.pickuplay.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

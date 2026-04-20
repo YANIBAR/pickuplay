@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
 	<key>CFBundleDisplayName</key>
 	<string>pickuplay</string>
 	<key>CFBundleExecutable</key>

@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { useUserData } from '@services/useUserData';
 import { isStoredTokenExpired } from '@utils/api/auth';
+import { publicApi } from '@services/api';
 
 type Nav = {
   navigate: (value: string) => void
@@ -60,6 +61,22 @@ const Profile = () => {
   const handleClose = () => {
     setModalVisible(false);
   };
+  const handleChangePassword = () =>  {
+      const email = userData?.email;
+      try {
+        // Send the request to the backend
+        const response = publicApi.post(`otp/send`, { email });
+        
+        // If successful, navigate to the OTP verification screen
+        navigate(screens.otpverification, { email, action: 'resetPassword' });
+      } catch (error) {
+        // Handle any errors that occur during the request
+        console.error('Error during forgot password request:', error);
+        
+        // Optionally, you can show an alert or other feedback to the user
+        Alert.alert('Forgot Password Failed', 'There was an issue with your request. Please try again.');
+      }
+    };
 
   const handleLogout = async () => {
     try {
@@ -92,24 +109,31 @@ const Profile = () => {
 
   const handleInvite = async () => {
     try {
-      const userName = userData?.firstName ? `${userData.firstName}` : 'Your friend';
-      
-      const referralMessage = `🎉 ${userName} invited you to MGO Pass!\n\n${inviteMessage}\n\n🎟️ Get admission to a variety of attractions in Casanlanca!\n\n💰 🌐 Learn more: https://pickuplay.com/#how-it-works?id=${userData?.id}\n📱 Download the app and start exploring!`;
-      
+      const userName = userData?.firstName || 'Your friend';
+
+      // 👇 unique referral link
+      const referralLink = `https://mgopass.com/pickuplay/index.html?ref=${userData?.id}`;
+
+      const message = `⚽ ${userName} invited you to join Pickuplay!
+
+  Find and join games near you instantly.
+
+  🎁 Use my invite and join your first game!
+  👉 ${referralLink}
+
+  📲 Download the app and start playing!`;
+
       const result = await Share.share({
-        message: referralMessage,
-        url: 'https://pickuplay.com/',
-        title: 'MGO Pass - Make $5 Refer a Friend',
+        message,
+        title: 'Join me on Pickuplay',
       });
 
       if (result.action === Share.sharedAction) {
-        console.log('Success', 'Referral link shared successfully!');
-      } else if (result.action === Share.dismissedAction) {
-        console.log('Share dialog dismissed');
+        console.log('Referral shared successfully');
       }
     } catch (error) {
       console.error('Error sharing referral:', error);
-      Alert.alert('Error', 'An error occurred while sharing the referral link.');
+      Alert.alert('Error', 'An error occurred while sharing the invite.');
     }
   };
   useEffect(() => {
@@ -138,6 +162,13 @@ const Profile = () => {
               onPress={() => navigate('editProfile')}
               hasArrowRight={false}
             />
+            
+            {/*<SettingsItem
+              icon={icons.user}
+              name={t('settings.changePassword')}
+              onPress={handleChangePassword}
+              hasArrowRight={false}
+            />*/}
 
             {/* Language & Region */}
             <TouchableOpacity
@@ -161,13 +192,13 @@ const Profile = () => {
               </View>
             </TouchableOpacity>
 
-            {/* Payment Methods */}
+            {/* Payment Methods 
             <SettingsItem
               icon={icons.installment}
               name={t('settings.paymentMethods')}
               onPress={() => navigate('Payment')}
               hasArrowRight={false}
-            />
+            />*/}
 
           </>
         )}

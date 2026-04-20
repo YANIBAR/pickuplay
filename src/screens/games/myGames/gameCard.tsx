@@ -85,7 +85,8 @@ export default function GameCard({ game, onPress }: GameCardProps) {
       5: 'tennis',
       4: 'hockey-sticks',
       6: 'table-tennis',
-      7: 'football'
+      7: 'table-tennis',
+      8: 'football'
     };
     return iconMap[type] || 'sports';
   };

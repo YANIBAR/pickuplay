@@ -9,6 +9,7 @@ export {
   ForgotPasswordPhoneScreen,
   OTPVerificationScreen,
   CreateNewPasswordScreen,
+  ChangePasswordScreen,
   VerifyIdentityScreen,
 } from './auth';
 export { default as ProfileScreen } from './profile';
@@ -25,6 +26,7 @@ export { default as EventDetailsScreen  } from './chat/detail';
 export { default as MatchupsScreen  } from './matchups';
 export { default as GamesScreen } from './games';
 export { default as MyGamesScreen } from './games/myGames';
+export { default as AddGameScreen } from './games/add';
 export { default as EditGameScreen } from './games/edit';
 export { default as ScheduleScreen  } from './games/schedule';
 export { default as GameScreen  } from './games/game';

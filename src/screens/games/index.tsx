@@ -32,6 +32,13 @@ type SportOption = {
   label: string;
   value: string;
 };
+const toLocalDateString = (date: Date): string => {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+};
  const getWeekDays = () => {
   const days = [];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -44,7 +51,7 @@ type SportOption = {
     date.setDate(today.getDate() + i);
     days.push({
       label: i === 0 ? 'Today' : dayNames[date.getDay()],
-      date: date.toISOString().split('T')[0], // ← YYYY-MM-DD
+      date: toLocalDateString(date),
       dayObj: date,
     });
   }
@@ -73,19 +80,12 @@ export default function HomeScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchRequests();
+    fetchGames();
   };
-  const fetchRequests = async () => {
-    try {
+  const fetchGames = async () => {
       const response = await publicApi.get(`games`, { params: { date: new Date().toISOString().split('T')[0] } });
+      console.log('Games fetched:', response.result.data.games);
       setGames(response.result.data.games);
-    } catch (error) {
-      const errorMessage = error.response?.data?.message;
-      Alert.alert('Error', errorMessage);
-      setGames(mockGames);
-    } finally {
-      setRefreshing(false);
-    }
   };
 
   const getSports = async (): Promise<void> => {
@@ -149,7 +149,7 @@ export default function HomeScreen() {
     // Use selected cities, or default to user's city if no city filter is active
     const citiesToFilter = selectedCities.length > 0 
       ? selectedCities 
-      : currentCity ? [extractCity(currentCity)] : [];
+      : cities;
     if (citiesToFilter.length > 0) {
       filtered = filtered.filter(game => 
         citiesToFilter.includes(extractCity(game.city))
@@ -159,7 +159,7 @@ export default function HomeScreen() {
     // Filter by selected weekdays
     if (selectedDays.length > 0) {
       filtered = filtered.filter(game => {
-        const gameDate = new Date(game.startTime).toISOString().split('T')[0]; // ← YYYY-MM-DD
+        const gameDate = toLocalDateString(new Date(game.startTime));
         return selectedDays.includes(gameDate);
       });
     }
@@ -193,7 +193,8 @@ export default function HomeScreen() {
 
   useEffect(() => { 
     if (currentCity) {
-      fetchRequests();
+      fetchGames();
+
       getCities();
       getSports();
     }
@@ -295,22 +296,22 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
           </ScrollView>
-            {/* Bell icon fixed to the right, outside the ScrollView */}
-            {isLogged && (
-          
-              <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
-                <View>
-                  <Image source={icons.bellOutline} style={styles.headerIcon} />
-                  {unreadCount > 0 && (
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
+          {/* Bell icon fixed to the right, outside the ScrollView */}
+          {isLogged && (
+        
+            <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
+              <View>
+                <Image source={icons.bellOutline} style={styles.headerIcon} />
+                {unreadCount > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
       </View>
       <View style={styles.daysFiltersRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysFiltersBar}>
@@ -332,7 +333,19 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
         
-        <GameGrid games={filteredGames} refreshing={refreshing} onRefresh={onRefresh}/>
+        {filteredGames.length === 0 && !refreshing ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>
+              {selectedCities.length > 0
+                ? `No games found in ${selectedCities.join(', ')}`
+                : currentCity
+                ? `No games found near ${extractCity(currentCity)}`
+                : 'No games available'}
+            </Text>
+          </View>
+        ) : (
+          <GameGrid games={filteredGames} refreshing={refreshing} onRefresh={onRefresh} />
+        )}
       </View>
 
       {toast && (

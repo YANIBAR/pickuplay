@@ -78,12 +78,12 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.pickuplay"
+    namespace "com.pickuplay.app"
     defaultConfig {
-        applicationId "com.pickuplay"
+        applicationId "com.pickuplay.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
+        versionCode 6
         versionName "1.0.1"
         missingDimensionStrategy 'react-native-camera', 'general'
         externalNativeBuild {

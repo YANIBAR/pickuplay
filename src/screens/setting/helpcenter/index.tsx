@@ -186,7 +186,7 @@ const contactUsRoute = () => {
       <HelpCenterItem
         icon={icons.instagram}
         title="Instagram"
-        onPress={() => Linking.openURL("https://www.instagram.com/pickuplay25/")}
+        onPress={() => Linking.openURL("https://www.instagram.com/pickuplay/")}
       />
     </View>
   )

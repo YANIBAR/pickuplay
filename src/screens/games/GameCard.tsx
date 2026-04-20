@@ -8,6 +8,7 @@ import { authenticatedApi } from '@services/api';
 import { useTranslation } from 'react-i18next';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import PriceTag from '@components/PriceTag';
+import { useUserData } from '@services/useUserData';
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
@@ -17,7 +18,8 @@ import PriceTag from '@components/PriceTag';
       5: 'tennis',
       4: 'hockey-sticks',
       6: 'table-tennis',
-      7: 'football'
+      7: 'table-tennis',
+      8: 'football'
     };
     return iconMap[type] || 'sports';
   };
@@ -37,8 +39,9 @@ import PriceTag from '@components/PriceTag';
     const [promoCode, setPromoCode] = useState('');
     const [isLogged, setIsLogged] = useState(false);
     const [discountPrice, setDiscountPrice] = useState('');
+    const [isJoining, setIsJoining] = useState(false);
     const { navigate } = useNavigation<Nav>();
-
+    const { userData, error, refreshUserData } = useUserData(); 
     const ApplyDiscount = (code: string) => {
       const promoCodes: Record<string, number> = {
         "PUP10%": 0.1,
@@ -67,13 +70,9 @@ import PriceTag from '@components/PriceTag';
     };
 
     const handleConfirmJoin = async () => {
-    if (!numPlayers.trim()) {
-      Alert.alert(t('games.pleaseEnterPlayers'));
-      return;
-    }
 
+    setIsJoining(true);
     try {
-      
       const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
 
       if (response.status === 200) {
@@ -91,9 +90,17 @@ import PriceTag from '@components/PriceTag';
     } catch (error) {
       const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
       Alert.alert(errorMessage);
-    } 
+    } finally {
+      setIsJoining(false);
+    }
   };
-
+// Determine if join button should be hidden
+  const isFull = game?.availableSpots == 0;
+  const isCanceled = game?.status === 'CANCELED';
+  const alreadyJoined = game?.participants?.some(
+    (p) => String(p.userId) === String(userData?.id)
+  );
+  const shouldHideJoinButton = alreadyJoined || isFull || isCanceled;
     const handleRedirectModal = (authType: 'login' | 'register') => {
       setJoinModalVisible(false);
       setNumPlayers('');
@@ -127,7 +134,7 @@ import PriceTag from '@components/PriceTag';
               style={styles.image}
               />
             <View style={[styles.participantsBadgeBase, game.nbrSpots >= game.participants.length ? styles.participantsBadge : styles.participantsBadgeFull]}>
-              <Text style={styles.usedText}>{game.participants.length} / {game.nbrSpots}</Text>
+              <Text style={styles.usedText}>{game.nbrSpots-game.availableSpots} / {game.nbrSpots}</Text>
             </View>
 
           </View>
@@ -157,16 +164,25 @@ import PriceTag from '@components/PriceTag';
                   + ', ' + (game.startTime ? new Date(game.startTime).toLocaleDateString('en-US', { weekday: 'short' }) : 'Saturday')}
               </Text>
             </View>
-
             <View style={styles.footer}>
               <PriceTag game={game} />
 
-              <TouchableOpacity
-                style={styles.joinButton}
-                onPress={handleJoinGame}
-              >
-                <Text style={styles.joinButtonText}>{t('games.joinButton')}</Text>
-              </TouchableOpacity>
+              {shouldHideJoinButton ? (
+                <Text style={styles.cannotJoinText}>
+                  {alreadyJoined
+                    ? t('game.alreadyJoined')   
+                    : isCanceled
+                    ? t('game.gameCanceled')    
+                    : t('game.gameFull')}       
+                </Text>
+              ) : (
+                <TouchableOpacity
+                  style={styles.joinButton}
+                  onPress={handleJoinGame}
+                >
+                  <Text style={styles.joinButtonText}>{t('games.joinButton')}</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </TouchableOpacity>
@@ -196,7 +212,7 @@ import PriceTag from '@components/PriceTag';
                 <View style={styles.divider} />
 
                 <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('games.numberOfPlayers')}</Text>
+                  <Text style={styles.fieldLabel}>{t('games.guests')}</Text>
                   <View style={styles.playerCountContainer}>
                     <TouchableOpacity 
                       style={styles.counterButton}
@@ -242,7 +258,7 @@ import PriceTag from '@components/PriceTag';
                   </View>
                 </View>
 
-                <View style={styles.fieldContainer}>
+                {/* <View style={styles.fieldContainer}>
                   <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
                   <View style={styles.inputWrapper}>
                     <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
@@ -257,19 +273,19 @@ import PriceTag from '@components/PriceTag';
                       <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
+                </View> */}
 
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
                     <Text style={styles.priceLabel}>Price per guest:</Text>
-                    <Text style={styles.originalPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
+                    <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
                   </View>
                   <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                     <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
                       Total ({numPlayers || 0} guests):
                     </Text>
                     <Text style={styles.discountedPriceText}>
-                      ${discountPrice || (game.price * (parseInt(numPlayers) || 0)).toFixed(2)}
+                      ${discountPrice || (game.price * (parseInt(numPlayers) + 1 || 0)).toFixed(2)}
                     </Text>
                   </View>
                 </View>
@@ -291,6 +307,7 @@ import PriceTag from '@components/PriceTag';
                     filled
                     style={styles.confirmButton}
                     onPress={handleConfirmJoin}
+                    disabled={isJoining}
                   />
                 </View>
               </View>
@@ -447,6 +464,7 @@ import PriceTag from '@components/PriceTag';
     },
     gameInfoSection: {
       marginBottom: 16,
+      width: '85%',
     },
     gameNameModal: {
       fontSize: 18,
@@ -570,5 +588,13 @@ import PriceTag from '@components/PriceTag';
       fontSize: 24,
       fontWeight: 'bold',
       color: COLORS.grayTie,
+    },
+    cannotJoinText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: COLORS.red,
+      textAlign: 'right',
+      flexShrink: 1,
+      maxWidth: '55%',
     },
   });

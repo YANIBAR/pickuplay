@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,10 @@ import {
 } from 'react-native';
 import styles from '../styles';
 import { useTranslation } from 'react-i18next';
+import { formatTime } from '@utils/dateUtils';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decodeToken } from '@services/auth/auth.utils';
 
 interface Game {
   id: number;
@@ -24,7 +28,7 @@ interface DayCardProps {
   cancelledGames: number[]; // Array of cancelled game IDs
   isPastDay: boolean; // New prop to check if day is in the past
   onPress: () => void;
-  onCancelGame: (gameId: number) => void;
+  onCancelGame: (id: number) => void;
 }
 
 export default function DayCard({
@@ -37,7 +41,9 @@ export default function DayCard({
 }: DayCardProps) {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
@@ -47,6 +53,7 @@ export default function DayCard({
   };
 
   const handleGamePress = (game: Game) => {
+    navigation.navigate('game', { game_id: game.id});
     setSelectedGame(game);
     setCancelModalVisible(true);
   };
@@ -64,14 +71,23 @@ export default function DayCard({
     setSelectedGame(null);
   };
 
-  const isCancelled = (gameId: number) => cancelledGames.includes(gameId) || gameId==1;
+  const isCancelled = (id: number) => cancelledGames.includes(id) || id==1;
 
   const handleAddGamePress = () => {
     if (!isPastDay) {
       onPress();
     }
   };
-
+  
+  useEffect(() => {
+    const fetchRole = async () => {
+      const token =  await AsyncStorage.getItem('access_token');
+      const userInfo = decodeToken(token);
+      setRole(userInfo.role);
+      return userInfo;
+    };
+    fetchRole();
+  }, []);
   return (
     <View style={styles.dayCard}>
       <Text style={styles.dayCardTitle}>{formatDate(date)}</Text>
@@ -104,7 +120,19 @@ export default function DayCard({
                 },
               ]}
             >
-              {game.address}
+              {game.title}
+            </Text>
+
+            <Text
+              style={[
+                styles.gameAddress,
+                isCancelled(game.id) && {
+                  textDecorationLine: 'line-through',
+                  color: '#991b1b',
+                },
+              ]}
+            >
+              {game.address}, {game.city}
             </Text>
 
             <Text
@@ -116,22 +144,7 @@ export default function DayCard({
                 },
               ]}
             >
-              {game.startTime} - {game.endTime}
-            </Text>
-
-            <Text
-              style={[
-                styles.gamePlayers,
-                isCancelled(game.id) && {
-                  textDecorationLine: 'line-through',
-                  color: '#991b1b',
-                },
-              ]}
-            >
-              {t('schedule.players')}: {/*game.participants.length*/}{' 2'}{" "}
-              {game.isFree
-                ? `(${t('schedule.free')})`
-                : `($${game.price}/${t('schedule.player')})`}
+              {formatTime(game.startTime)} - {formatTime(game.endTime)}
             </Text>
 
             {isCancelled(game.id) && (
@@ -143,7 +156,7 @@ export default function DayCard({
         ))
       )}
 
-      {!isPastDay && (
+      {role === 'ORGANIZER' && (
         <TouchableOpacity onPress={handleAddGamePress}>
           <Text style={styles.addGameText}>
             + {t('schedule.addGame')}

@@ -2,6 +2,7 @@
 
   "common": {
     "edit": "Edit",
+    "success": "Success",
     "view": "View",
     "cancel": "Cancel",
     "activate": "Activate",
@@ -12,7 +13,8 @@
     "next": "Next",
     "back": "Back",
     "showMore": "Show More",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "divider": "OR"
   },
   "AvailableLanguages": "Available Languages",
   "CustomerService": "Customer Survice",
@@ -233,7 +235,8 @@
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms and Conditions",
     "helpCenter": "Help Center",
-    "logout": "Logout"
+    "logout": "Logout",
+    "changePassword": "Change Password"
   },
   "writeReview": {
     "deliveryCompleted": "Delivery Completed!",
@@ -245,80 +248,100 @@
     "accessibilityInput": "Write your review here"
   },
   "terms": {
-    "headerTitle": "Terms a d conditions",
-    "introduction": "By using this website and/or purchasing from this app, you ('you' 'your' or 'purchaser') are agreeing to the following binding agreement: 'Us' or 'We' shall refer to pickuplay Inc., its board of directors, employees, officers, agents, parent company, shareholders, managers, members and affiliates.",
+    "headerTitle": "Terms and Conditions",
+    "introduction": "By using this app, you ('you', 'your' or 'user') agree to the following binding agreement. 'We', 'us', or 'our' refers to Pickuplay Inc., including its employees, officers, partners, affiliates, and service providers.",
+
     "sections": {
       "description": {
-        "title": "Description of pickuplay Service",
-        "content": "Mgo Pass is Morocco's first membership program giving users access to multiple entertainment venues for one flat price. Members pay once for a yearly pass and get into dozens of attractions for free or with huge discounts."
+        "title": "Description of Pickuplay Service",
+        "content": "Pickuplay is a platform that connects players to join, organize, and participate in pickup sports games. Users can discover games based on location, sport type, and schedule, join existing games, or create their own events."
       },
-      "purchase": {
-        "title": "Purchase Requirements",
-        "content": "Users must be 18 or older to register. Parents may create accounts for minor children but assume full responsibility for their compliance with these terms."
+
+      "eligibility": {
+        "title": "Eligibility",
+        "content": "Users must be at least 18 years old to create an account. Minors may use the platform under the supervision and responsibility of a parent or legal guardian."
       },
-      "membership": {
-        "title": "Membership Terms",
-        "content": "Accounts remain active unless terminated. pickuplay reserves the right to suspend accounts violating these terms."      },
-      "venues": {
-        "title": "Service Providers",
-        "content": "Participating venues and service providers may change without notice. Current members gain access to new providers automatically."
+
+      "account": {
+        "title": "User Accounts",
+        "content": "You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account. Pickuplay reserves the right to suspend or terminate accounts that violate these terms."
       },
-      "transferability": {
-        "title": "Account Transfer",
-        "content": "Accounts are non-transferable except for parent-managed minor accounts. Each account has unique identification."
+
+      "games": {
+        "title": "Game Participation",
+        "content": "Pickuplay acts only as a platform to connect users. We do not organize or supervise games. Users are responsible for their own participation, conduct, and safety during games."
       },
-      "disclaimers": {
-        "title": "Service Disclaimers",
-        "content": "pickuplay makes no warranties regarding service accuracy or suitability. Users assume all risks when using connected services."
+
+      "organizers": {
+        "title": "Game Organizers",
+        "content": "Users who create games are responsible for providing accurate details, managing participants, and communicating any updates such as time, location, or cancellations."
       },
+
+      "payments": {
+        "title": "Payments and Fees",
+        "content": "Some games may require payment to join. Pickuplay facilitates payments but is not responsible for disputes between users and organizers regarding fees or refunds."
+      },
+
+      "conduct": {
+        "title": "User Conduct",
+        "content": "Users agree to behave respectfully and fairly. Harassment, discrimination, cheating, or unsafe behavior may result in account suspension or removal from the platform."
+      },
+
       "liability": {
         "title": "Liability Limitations",
-        "content": "Users release pickuplay from liability for injuries, damages or losses occurring during service use. This includes family members and heirs."
+        "content": "Participation in sports activities involves inherent risks. By using Pickuplay, you agree that Pickuplay is not liable for any injuries, damages, or losses incurred during games or events."
       },
-      "indemnification": {
-        "title": "User Responsibilities",
-        "content": "You agree to indemnify pickuplay against claims arising from your service use, including venue incidents and website reliance."
+
+      "disclaimers": {
+        "title": "Service Disclaimers",
+        "content": "Pickuplay provides its services 'as is' without warranties of any kind. We do not guarantee the availability, quality, or safety of any games or participants."
       },
+
       "privacy": {
-        "title": "Data Practices",
-        "content": "While transaction data is secured, general website use carries no privacy expectation. See our Privacy Policy for details."
+        "title": "Data and Privacy",
+        "content": "We take reasonable measures to protect your data. By using the app, you agree to our data practices as described in our Privacy Policy."
       },
+
       "content": {
-        "title": "Website Content",
-        "content": "Third-party links don't imply endorsement. pickuplay isn't responsible for external content accuracy or availability."
+        "title": "User Content",
+        "content": "Users may post content such as game details, messages, and profile information. You are responsible for the content you share and must not post illegal or harmful material."
       },
+
       "property": {
         "title": "Intellectual Property",
-        "content": "All website content is pickuplay property. Unauthorized reproduction or distribution is prohibited."
+        "content": "All content, branding, and technology within Pickuplay are owned by Pickuplay Inc. Unauthorized use or reproduction is prohibited."
       },
+
       "communications": {
-        "title": "Contact Consent",
-        "content": "You consent to service-related communications via email/text. Opt-out options are available for promotional messages."
+        "title": "Communications",
+        "content": "By using Pickuplay, you agree to receive notifications related to your games, updates, and account activity. You may opt out of promotional messages."
       },
+
+      "termination": {
+        "title": "Termination",
+        "content": "Pickuplay reserves the right to suspend or terminate access to the app at any time for violations of these terms or misuse of the service."
+      },
+
       "governance": {
-        "title": "Legal Governance",
-        "content": "Utah law governs these terms. Claims must be filed within one year in Salt Lake County courts."
+        "title": "Governing Law",
+        "content": "These terms are governed by the laws of the jurisdiction in which Pickuplay operates. Any disputes shall be resolved in the appropriate courts of that jurisdiction."
       }
     },
-    "prohibitedItems": {
-      "title": "Prohibited Items",
+
+    "safety": {
+      "title": "Safety Guidelines",
       "items": [
-        "Weapons and sharp objects",
-        "Flammable materials",
-        "Illegal substances",
-        "Counterfeit goods",
-        "Perishable items",
-        "Live animals",
-        "Hazardous materials"
+        "Play responsibly and respect other players",
+        "Follow local laws and venue rules",
+        "Ensure proper equipment and physical readiness",
+        "Report unsafe behavior or incidents through the app",
+        "Do not participate if you are injured or unfit to play"
       ]
     },
-    "customs": {
-      "title": "Customs Compliance",
-      "content": "Users must comply with all customs regulations. pickuplay provides no guidance on duties/taxes and assumes no liability for violations."
-    },
+
     "modifications": {
-      "title": "Policy Changes",
-      "content": "pickuplay may modify these terms with updated effective dates. Continued use constitutes acceptance of changes."
+      "title": "Changes to Terms",
+      "content": "Pickuplay may update these Terms and Conditions at any time. Continued use of the app after changes means you accept the updated terms."
     }
   },
   "PrivacyPolicy": {
@@ -350,12 +373,13 @@
     "games": "Games",
     "user": "Profile",
     "menu": "Menu",
-    "matchups": "Matchups"
+    "matchups": "Matchups",
+    "notifications": "Notifications"
   },
   "games": {
     "joinButton": "Join",
     "joinGameTitle": "Join Game",
-    "numberOfPlayers": "Number of players",
+    "guests": "Add Guests",
     "pleaseEnterPlayers": "Please enter number of players",
     "successJoined": "Successfully joined the game",
     "failedToJoin": "Failed to join the game",
@@ -438,7 +462,7 @@
     "answer5": "Open the game you joined and tap Leave Game. Your spot will become available for other players.",
 
     "question6": "How do I update my profile information?",
-    "answer6": "Go to your Profile screen and tap Edit Profile. You can update your photo, city, bio, and other personal information.",
+    "answer6": "Go to your Profile screen, click on the gear icon, and tap Edit Profile. You can update your photo, city, bio, and other personal information.",
 
     "question7": "How do notifications work?",
     "answer7": "Pickuplay sends notifications for important updates such as new players joining your game, game reminders, or changes made by the organizer.",
@@ -506,7 +530,10 @@
     "details": {
       "title": "Game Details"
     },
-    "Orginazer": "Organizer",
+    "alreadyJoined": "You already joined",
+    "gameCanceled": "Game canceled",
+    "gameFull": "Game is full",
+    "Organizer": "Organizer",
     "location": "Location",
     "isprivate": "Privacy",
     "time": "Time",
@@ -544,6 +571,8 @@
     "enter_description": "Enter description",
     "save": "Save",
     "cancel": "Cancel",
+    "price": "Price",
+    "date": "Date",
     "game_updated": "Game updated successfully!",
     "validation_error": "Error"
   },

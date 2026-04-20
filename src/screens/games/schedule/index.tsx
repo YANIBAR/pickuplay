@@ -34,6 +34,8 @@ interface Game {
   participants: Participant[];
   createdAt: string;
   updatedAt: string;
+  status?: string;
+  price?: string;
 }
 
 interface FormData {
@@ -72,7 +74,7 @@ export default function HomeScreen({ route }) {
 
   const fetchMyGames = async () => {
     try {
-      const response = await authenticatedApi.get(`profile/games/joined?type=upcoming`);
+      const response = await authenticatedApi.get(`profile/games/joined`);
       // Check if response is ok
       if (response.status != 200) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -90,11 +92,14 @@ export default function HomeScreen({ route }) {
   useEffect(() => {
     const checkToken = async () => {
       const expired = await isStoredTokenExpired();
-      setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+      setIsLogged(!expired);
+
+      if (!expired) {
+        fetchMyGames(); // call directly here, don't rely on isLogged state
+      }
     };
     
     checkToken();
-    isLogged ?? fetchMyGames();
   }, []);
   
   const getWeekStart = (date: Date) => {
@@ -190,7 +195,7 @@ export default function HomeScreen({ route }) {
     return games.filter((game) => {
       const gameDate = new Date(game.startTime);
       return gameDate.toDateString() === date.toDateString();
-    });
+    }); 
   };
 
   return (

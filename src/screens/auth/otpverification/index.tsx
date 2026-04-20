@@ -24,6 +24,8 @@ const OTPVerification = () => {
   const [title, setTitle] = useState('');
   const next_navigation = action;
   const handleCheckOtp = async () => {
+
+      console.log('Verifying OTP for password reset with:', { email, otp });
   if (time === 0) {
     showAlert(
       t('otpVerification.errorTitle'),
@@ -137,7 +139,7 @@ const OTPVerification = () => {
 
   useEffect(() => {
     startTimer();
-
+    console.log('Email for OTP verification:', email);
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -210,7 +212,7 @@ const OTPVerification = () => {
         />
         <ErrorModal
           visible={modalVisible}
-          title={"title"}
+          title={title}
           message={message}
           onClose={() => setModalVisible(false)}
         >

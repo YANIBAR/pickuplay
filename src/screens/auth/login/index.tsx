@@ -19,7 +19,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@utils/validators';
 import messaging from '@react-native-firebase/messaging';
 import DeviceInfo from 'react-native-device-info';
-import { authenticatedApi } from '@services/api';
+import { authenticatedApi, publicApi } from '@services/api';
+import { decodeToken } from '@services/auth/auth.utils';
 
 const defaultValues = {
   identifier: '', // Changed from 'username' to 'email'
@@ -72,13 +73,13 @@ const Login = () => {
         return;
       }
 
-      const response = await axios.post(JAVA_API + 'auth/login', {
+      const response = await publicApi.post('auth/login', {
         username: formData.identifier,
         password: formData.password
       });
       const userData = response.data.data.user;
       const accessToken = response.data.data.token;
-      
+      const refresh_token = response.data.data.refreshToken;
       if (!userData) {
         throw new Error("No user data received from the server");
       }
@@ -86,7 +87,8 @@ const Login = () => {
       if (!accessToken) {
         throw new Error('No access token received');
       }
-      await storeToken(accessToken);
+      await storeToken(accessToken, refresh_token);
+      
       await storeUser(userData);
       
       // Register device for notifications
@@ -159,11 +161,14 @@ const Login = () => {
       setModalVisible(true);
     }
   };
+  
+// { id: "123", email: "user@example.com", role: "admin", exp: 1234567890, ... }
 
   // On successful login
-  const storeToken = async (token: string) => {
+  const storeToken = async (token: string, refreshToken: string) => {
     try {
       await AsyncStorage.setItem('access_token', token);
+      await AsyncStorage.setItem('refresh_token', refreshToken);
     } catch (error) {
       console.error(t('login.tokenStorageError'), error);
     }
@@ -203,9 +208,14 @@ const Login = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}>
-          <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate("welcome", {
-        screen: "Games"  // Specify which tab to show
-      })}>
+        <TouchableOpacity style={styles.logoContainer} onPress={() => navigation.navigate("welcome", {
+          screen: "Games"  // Specify which tab to show
+        })}>
+            <Image
+              source={images.homeLogo}
+              resizeMode="contain"
+              style={styles.icon}
+            />
             <Image
               source={images.logo}
               resizeMode="contain"
@@ -276,12 +286,27 @@ const Login = () => {
         <Button
           filled
           title={ t('c.login')}
-          onPress={handleSubmit(handleLogin)} // Use handleSubmit for validation
+          onPress={handleSubmit(handleLogin)}
           style={[
             styles.button,
             { opacity: isLoading ? 0.7 : 1 }
           ]}
         />
+
+        {/* OR Divider */}
+        <View style={styles.dividerContainer}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>{t('common.divider')}</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Register Button */}
+        <Button
+          title={t('c.signUp')}
+          onPress={() => navigation.navigate('register')}
+          style={styles.button}
+        />
+        
         
         <TouchableOpacity onPress={() => navigation.navigate('forgotpasswordemail')}>
           <Text style={styles.forgotPasswordBtnText}>
@@ -289,15 +314,6 @@ const Login = () => {
           </Text>
         </TouchableOpacity>
         
-        <View style={styles.bottomContainer}>
-          <Text size="h4">{t('signIn.dontHaveAccount')}</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('register')}>
-            <Text size="h4" color={COLORS.primary}>
-              {'  '}
-              {t('c.signUp')}
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
       
       <ErrorModal

@@ -27,12 +27,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
     paddingBottom: 4,
   },
-  logo: {
-    width: 128,
-    height: 128,
-    marginBottom: 22,
-    marginTop: -22,
-  },
   title: {
     fontSize: 28,
     //fontFamily: 'bold',
@@ -109,24 +103,134 @@ export default StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
   },
-  filtersBar: {
-    flex: 1,
+  // Header row
+  headerRow: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  daysFiltersBar:{
+  headerFilterIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 160,
+    height: 30,
+    alignSelf: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.black,
+  },
+  headerRight: {
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerIcon: {
+    height: 22,
+    width: 22,
+    tintColor: COLORS.black,
+  },
 
+  // Location row
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: COLORS.white,
+    gap: 8,
+  },
+  locationPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+  },
+  locationText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.black,
+    marginHorizontal: 2,
+  },
+
+  // Sport icon cards row
+  sportsIconBar: {
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    height: 120,
+  },
+  sportsIconBarContent: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  sportIconCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  sportIconCardActive: {
+    // no bg change on card, only circle changes
+  },
+sportsIconBarCompact: {
+  backgroundColor: COLORS.white,
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
+  maxHeight: 100,  // reduced from 120
+},
+  sportIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#f2f2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  sportIconCircleActive: {
+    backgroundColor: COLORS.primary,
+  },
+  sportIconLabel: {
+    fontSize: 12,
+    color: COLORS.grayscale500,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  sportIconLabelActive: {
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+
+  // Day filter pills
+  daysFiltersBar: {
     flex: 1,
     flexDirection: 'row',
     paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     marginHorizontal: 4,
     borderRadius: 20,
     borderWidth: 1,
@@ -135,18 +239,17 @@ export default StyleSheet.create({
   filterButtonActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
-    color: COLORS.white
   },
   filterButtonText: {
     fontSize: 13,
     color: COLORS.grayscale500,
-    marginRight: 4,
   },
   filterButtonTextActive: {
     color: COLORS.white,
+    fontWeight: '600',
   },
   filterBadge: {
-    backgroundColor: COLORS.white, // or your green/active color
+    backgroundColor: COLORS.white,
     borderRadius: 99,
     minWidth: 15,
     height: 15,
@@ -164,12 +267,24 @@ export default StyleSheet.create({
   clearButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginHorizontal: 4,
-    borderRadius: 20,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     backgroundColor: '#ff6b6b',
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white',
+  },
+  daysFiltersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 50,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   filtersRow: {
     flexDirection: 'row',
@@ -179,25 +294,11 @@ export default StyleSheet.create({
     borderBottomColor: '#eee',
     maxHeight: 60,
   },
-  daysFiltersRow: {
+  filtersBar: {
+    flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 50,
-  },
-  headerRight: {
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerIcon: {
-    height: 20,
-    width: 20,
-    tintColor: COLORS.secondary,
-  },
-  clearButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
   },
   content: {
     flex: 1,
@@ -215,32 +316,94 @@ emptyStateText: {
   textAlign: 'center',
   lineHeight: 24,
 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: '80%',
-    paddingBottom: 20,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  // Styles additions/changes
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.45)',
+  justifyContent: 'flex-end', // bottom sheet feel
+},
+modalContent: {
+  backgroundColor: '#fff',
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  paddingBottom: 32, // safe area buffer
+},
+dragHandle: {
+  width: 36,
+  height: 4,
+  borderRadius: 2,
+  backgroundColor: '#DDD',
+  alignSelf: 'center',
+  marginBottom: 12,
+},
+modalHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 20,
+  paddingTop: 16,
+  paddingBottom: 8,
+},
+modalTitle: {
+  fontSize: 17,
+  fontWeight: '600',
+  color: '#111',
+},
+divider: {
+  height: StyleSheet.hairlineWidth,
+  backgroundColor: '#E5E5E5',
+  marginBottom: 4,
+},
+filterSection: {
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+},
+filterSectionLabel: {
+  fontSize: 12,
+  fontWeight: '600',
+  color: '#888',
+  textTransform: 'uppercase',
+  letterSpacing: 0.6,
+  marginBottom: 10,
+},
+pillsContainer: {
+  gap: 8,
+  paddingRight: 20,
+},
+pill: {
+  paddingHorizontal: 14,
+  paddingVertical: 7,
+  borderRadius: 100,
+  borderWidth: 1.5,
+  borderColor: '#E0E0E0',
+  backgroundColor: '#FAFAFA',
+},
+pillActive: {
+  borderColor: '#1A73E8',
+  backgroundColor: '#EBF2FF',
+},
+pillText: {
+  fontSize: 13.5,
+  fontWeight: '500',
+  color: '#555',
+},
+pillTextActive: {
+  color: '#1A73E8',
+  fontWeight: '600',
+},
+applyButton: {
+  marginHorizontal: 20,
+  marginTop: 8,
+  backgroundColor: '#1A1A1A',
+  borderRadius: 12,
+  paddingVertical: 14,
+  alignItems: 'center',
+},
+applyButtonText: {
+  color: '#fff',
+  fontSize: 15,
+  fontWeight: '600',
+},
   filterOption: {
     flexDirection: 'row',
     alignItems: 'center',

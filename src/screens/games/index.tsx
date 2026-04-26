@@ -1,11 +1,11 @@
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, Alert, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, Alert, Image, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Game, extractCity } from './GameCard';
 import GameGrid from './GamesGrid';
 import { useEffect, useState } from 'react';
 import { Checkbox, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
-import { COLORS, icons } from '@constants';
+import { COLORS, icons, images } from '@constants';
 import { publicApi } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
@@ -14,6 +14,7 @@ import { useNotifications } from '@contexts/NotificationContext';
 import { getMessaging, onMessage } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { isStoredTokenExpired } from '@utils/api/auth';
+import { JAVA_API } from '@env';
 type Nav = {
   navigate: (value: string) => void
 }
@@ -39,6 +40,18 @@ const toLocalDateString = (date: Date): string => {
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
 };
+const PLAYER_OPTIONS = [
+    { label: '2v2', value: '4' },
+    { label: '3v3', value: '6' },
+    { label: '4v4', value: '8' },
+    { label: '5v5', value: '10' },
+    { label: '6v6', value: '12' },
+    { label: '7v7', value: '14' },
+    { label: '8v8', value: '16' },
+    { label: '9v9', value: '18' },
+    { label: '10v10', value: '20' },
+    { label: '11v11', value: '22' },
+  ];
  const getWeekDays = () => {
   const days = [];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -71,7 +84,8 @@ export default function HomeScreen() {
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+
   // Modal states
   const [sportModalVisible, setSportModalVisible] = useState(false);
   const [cityModalVisible, setCityModalVisible] = useState(false);
@@ -84,7 +98,6 @@ export default function HomeScreen() {
   };
   const fetchGames = async () => {
       const response = await publicApi.get(`games`, { params: { date: new Date().toISOString().split('T')[0] } });
-      console.log('Games fetched:', response.result.data.games);
       setGames(response.result.data.games);
   };
 
@@ -163,7 +176,16 @@ export default function HomeScreen() {
         return selectedDays.includes(gameDate);
       });
     }
+    console.log('Filtered games:', filtered);
 
+    // Filter by selected players
+    if (selectedPlayers.length > 0) {
+      filtered = filtered.filter(game =>{
+        return selectedPlayers.includes(String(game.nbrSpots));
+      }
+        
+      );
+    }
     setFilteredGames(filtered);
   };
 
@@ -177,7 +199,7 @@ export default function HomeScreen() {
         checkToken();
     applyFilters();
     setRefreshing(false);
-  }, [selectedSports, selectedCities, selectedDays, games]);
+  }, [selectedSports, selectedCities, selectedDays, selectedPlayers, games]);
 
   useEffect(() => {
     const fetchCity = async () => {
@@ -222,10 +244,17 @@ export default function HomeScreen() {
     );
   };
 
+  const handlePlayersToggle = (value: string) => {
+    setSelectedPlayers(prev =>
+      prev.includes(value) ? prev.filter(d => d !== value) : [...prev, value]
+    );
+  };
+
   const clearAllFilters = () => {
     setSelectedSports([]);
     setSelectedCities([]);
-    setSelectedDays([]);
+    setSelectedDays([]); 
+    setSelectedPlayers([]);
   };
 
   const hasActiveFilters = selectedSports.length > 0 || selectedCities.length > 0;
@@ -251,54 +280,76 @@ export default function HomeScreen() {
 
     return () => unsubscribe();
   }, []);
+  // Sport icon map — maps lowercase sport names to materialCommunityIcons icon names
+  const sportIconMap: Record<string, string> = {
+      1: 'soccer',
+      2: 'basketball',
+      3: 'volleyball',
+      5: 'tennis',
+      4: 'hockey-sticks',
+      6: 'cricket',
+      7: 'table-tennis',
+      8: 'football'
+  };
+
+  const getSportIcon = (id: string): string => {
+    const key = id;
+    return sportIconMap[key] ?? 'trophy-outline';
+  };
+
+  const allSportsSelected = selectedSports.length === 0;
+const FilterPillRow = ({
+  label,
+  items,
+  selectedValues,
+  onToggle,
+}: {
+  label: string;
+  items: { value: string; label: string }[];
+  selectedValues: string[];
+  onToggle: (value: string) => void;
+}) => (
+  <View style={styles.filterSection}>
+    <Text style={styles.filterSectionLabel}>{label}</Text>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.pillsContainer}
+    >
+      {items.map(({ value, label }) => {
+        const isSelected = selectedValues.includes(value);
+        return (
+          <TouchableOpacity
+            key={value}
+            style={[styles.pill, isSelected && styles.pillActive]}
+            onPress={() => onToggle(value)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: isSelected }}
+            accessibilityLabel={label}
+          >
+            <Text style={[styles.pillText, isSelected && styles.pillTextActive]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  </View>
+);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.filtersRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersBar}>
-            <TouchableOpacity 
-              style={[styles.filterButton, selectedSports.length > 0 && styles.filterButtonActive]}
-              onPress={() => setSportModalVisible(true)}
-            >
-              <Text style={[styles.filterButtonText, selectedSports.length > 0 && styles.filterButtonTextActive]}>
-                Sport
-              </Text>
-              {selectedSports.length > 0 && (
-                <View style={styles.filterBadge}>
-                  <Text style={styles.filterBadgeText}>{selectedSports.length}</Text>
-                </View>
-              )}
-              <Icon type="fontAwesome" name="caret-down" size={16} color={selectedSports.length > 0 ? COLORS.white : COLORS.gray}/>
+        {/* Header row: filter icon + title + bell */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity  onPress={() => setSportModalVisible(true)}>
 
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.filterButton, selectedCities.length > 0 && styles.filterButtonActive]}
-              onPress={() => setCityModalVisible(true)}
-            >
-              <Text style={[styles.filterButtonText, selectedCities.length > 0 && styles.filterButtonTextActive]}>
-                City
-              </Text>
-              {selectedCities.length > 0 && (
-                <View style={styles.filterBadge}>
-                  <Text style={styles.filterBadgeText}>{selectedCities.length}</Text>
-                </View>
-              )}
-              <Icon type="fontAwesome" name="caret-down" size={16} color={selectedCities.length > 0 ? COLORS.white : COLORS.gray}/>
-            </TouchableOpacity>
-            {hasActiveFilters && (
-              <TouchableOpacity 
-                style={styles.clearButton}
-                onPress={clearAllFilters}
-              >
-                <Icon type="materialCommunityIcons" name="close-circle" size={16} color="white" />
-                <Text style={styles.clearButtonText}>Clear</Text>
-              </TouchableOpacity>
-            )}
-          </ScrollView>
-          {/* Bell icon fixed to the right, outside the ScrollView */}
-          {isLogged && (
-        
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}><Image
+              source={images.logo}
+              resizeMode="contain"
+              style={styles.logo}
+            /></Text>
+          {isLogged ? (
             <TouchableOpacity onPress={() => navigate("notifications")} style={styles.headerRight}>
               <View>
                 <Image source={icons.bellOutline} style={styles.headerIcon} />
@@ -311,27 +362,61 @@ export default function HomeScreen() {
                 )}
               </View>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.headerRight} />
           )}
-      </View>
-      <View style={styles.daysFiltersRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysFiltersBar}>
-          {/* Weekday filter buttons */}
-          {weekDays.map((day) => {
-            const isSelected = selectedDays.includes(day.date);
+        </View>
+
+        {/* Location + advanced filter row */}
+        <View style={styles.locationRow}>
+          <TouchableOpacity style={styles.locationPill} onPress={() => setCityModalVisible(true)}>
+            <Icon type="materialCommunityIcons" name="map-marker-outline" size={16} color={COLORS.primary} />
+            <Text style={styles.locationText} numberOfLines={1}>
+              {selectedCities.length > 0 ? selectedCities.join(', ') : (currentCity ? extractCity(currentCity) : 'Select City')}
+            </Text>
+            <Icon type="fontAwesome" name="caret-down" size={14} color={COLORS.gray} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.headerFilterIcon} onPress={() => setSportModalVisible(true)}>
+            <Icon type="materialCommunityIcons" name="tune-variant" size={22} color={COLORS.black} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Sport icon filter row */}
+        <ScrollView
+          style={filteredGames.length === 0 && !refreshing ? styles.sportsIconBarCompact : styles.sportsIconBar}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          {/* All Sports */}
+          <TouchableOpacity
+            style={[styles.sportIconCard, allSportsSelected && styles.sportIconCardActive]}
+            onPress={() => setSelectedSports([])}
+          >
+            <View style={[styles.sportIconCircle, allSportsSelected && styles.sportIconCircleActive]}>
+              <Icon type="materialCommunityIcons" name="trophy-outline" size={26} color={allSportsSelected ? COLORS.white : COLORS.gray} />
+            </View>
+            <Text style={[styles.sportIconLabel, allSportsSelected && styles.sportIconLabelActive]}>All Sports</Text>
+          </TouchableOpacity>
+
+          {Sports.map(sport => {
+            const isActive = selectedSports.includes(sport.value);
             return (
               <TouchableOpacity
-                key={day.date}
-                style={[styles.filterButton, isSelected && styles.filterButtonActive]}
-                  onPress={() => handleDayToggle(day.date)}
-                >
-                  <Text style={[styles.filterButtonText, isSelected && styles.filterButtonTextActive]}>
-                    {day.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
+                key={sport.value}
+                style={[styles.sportIconCard, isActive && styles.sportIconCardActive]}
+                onPress={() => handleSportToggle(sport.value)}
+              >
+                <View style={[styles.sportIconCircle, isActive && styles.sportIconCircleActive]}>
+                  <Icon type="materialCommunityIcons" name={getSportIcon(sport.value)} size={26} color={isActive ? COLORS.white : COLORS.black} />
+                </View>
+                <Text style={[styles.sportIconLabel, isActive && styles.sportIconLabelActive]}>{sport.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        
         
         {filteredGames.length === 0 && !refreshing ? (
           <View style={styles.emptyState}>
@@ -357,35 +442,56 @@ export default function HomeScreen() {
 
       {/* Sport Filter Modal */}
       <Modal
-        animationType="fade"
-        transparent={true}
+        animationType="slide"
+        transparent
         visible={sportModalVisible}
         onRequestClose={() => setSportModalVisible(false)}
+        statusBarTranslucent
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <Pressable style={styles.modalOverlay} onPress={() => setSportModalVisible(false)}>
+          <Pressable style={styles.modalContent} onPress={e => e.stopPropagation()}>
+
+            {/* Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Sports</Text>
-              <TouchableOpacity onPress={() => setSportModalVisible(false)}>
-                <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+              <View style={styles.dragHandle} />
+              <Text style={styles.modalTitle}>Advanced Filter</Text>
+              <TouchableOpacity
+                onPress={() => setSportModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessibilityLabel="Close modal"
+                accessibilityRole="button"
+              >
+                <Icon type="materialCommunityIcons" name="close" size={22} color="#666" />
               </TouchableOpacity>
             </View>
 
-            {Sports.map(sport => (
-              <View style={styles.filterOption} key={sport.value}>
-                <TouchableOpacity onPress={() => handleSportToggle(sport.value)}>
-                  <Checkbox
-                    checked={selectedSports.includes(sport.value)}
-                    onValueChange={() => handleSportToggle(sport.value)}
-                  />
-                </TouchableOpacity>
-                <Text onPress={() => handleSportToggle(sport.value)} style={styles.filterOptionText}>
-                  {sport.label}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
+            <View style={styles.divider} />
+
+            {/* Filters */}
+            <FilterPillRow
+              label="Day"
+              items={weekDays.map(d => ({ value: d.date, label: d.label }))}
+              selectedValues={selectedDays}
+              onToggle={handleDayToggle}
+            />
+            <FilterPillRow
+              label="Players"
+              items={PLAYER_OPTIONS}
+              selectedValues={selectedPlayers}
+              onToggle={handlePlayersToggle}
+            />
+
+            {/* Footer CTA */}
+            <TouchableOpacity
+              style={styles.applyButton}
+              onPress={() => setSportModalVisible(false)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.applyButtonText}>Apply Filters</Text>
+            </TouchableOpacity>
+
+          </Pressable>
+        </Pressable>
       </Modal>
 
       {/* City Filter Modal */}

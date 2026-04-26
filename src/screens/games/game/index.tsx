@@ -16,6 +16,8 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 import { toTitleCase } from '@utils/helpers';
 import { Linking, Platform } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
+import { decodeToken } from '@services/auth/auth.utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Game {
   id: number;
@@ -67,6 +69,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [sportType, setSportType] = useState();
   const [participants, setParticipants] = useState([]);
+  const [role, setRole] = useState<string | null>(null);
   const [game, setGame] = useState([]);
   const [isLogged, setIsLogged] = useState(false);
   const { userData, error, refreshUserData } = useUserData(); 
@@ -87,6 +90,14 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const shouldHideJoinButton = alreadyJoined || isFull || isCanceled;
 
   useEffect(() => {
+    const fetchRole = async () => {
+      const token =  await AsyncStorage.getItem('access_token');
+      const userInfo = decodeToken(token);
+      console.log('Decoded token info:', userInfo);
+      setRole(userInfo.role);
+      return userInfo;
+    };
+    fetchRole();
     const checkToken = async () => {
       const expired = await isStoredTokenExpired();
       setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
@@ -229,10 +240,10 @@ const handleGetDirections = () => {
             >
               <Icon type="materialCommunityIcons" name="share-variant" />
           </TouchableOpacity>
-          
-          {(userData?.id == game?.creatorId && isLogged) && (
+
+          {((userData?.id == game?.creatorId || role === 'admin') && isLogged)  && (
             <TouchableOpacity
-              onPress={() => navigate("editGame", { game })}
+              onPress={() => navigate("editGame", { game })} 
               style={styles.iconBtn}
               activeOpacity={0.75}
               hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
@@ -259,7 +270,7 @@ const handleGetDirections = () => {
           <View style={styles.infoContainer}>
             <InfoRow 
               icon="account" 
-              label={t('game.Orginazer')} 
+              label={t('game.Organizer')} 
               value={game.creatorName} 
             />
             <InfoRow

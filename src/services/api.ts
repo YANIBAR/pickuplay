@@ -8,7 +8,6 @@ const createApi = (requiresAuth: boolean) => {
   let failedQueue: any[] = [];
   const instance = axios.create({
     baseURL: JAVA_API,
-    timeout: 5000,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',

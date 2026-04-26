@@ -60,7 +60,7 @@ const Login = () => {
   }, []);
 
   const handleLogin = async (formData: loginFormData) => {
-    
+    console.log('Login attempt with:', JAVA_API);
     try {
       setIsLoading(true);
       
@@ -73,7 +73,7 @@ const Login = () => {
         return;
       }
 
-      const response = await publicApi.post('auth/login', {
+      const response = await axios.post(`${JAVA_API}auth/login`, {
         username: formData.identifier,
         password: formData.password
       });

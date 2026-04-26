@@ -427,7 +427,7 @@ import { useTranslation } from 'react-i18next';
     };
     return (
       <Modal
-        title={isLogged==false ? " "  : (`${t('addGame.createGame')} ${selectedDate ? formatDate(selectedDate) : ''}`)}
+        title={isLogged==false ? " "  : (`${t('schedule.createGame')} ${selectedDate ? formatDate(selectedDate) : ''}`)}
         visible={visible}
         animationType="slide"
         onClose={onClose}
@@ -480,7 +480,7 @@ import { useTranslation } from 'react-i18next';
                     {isSubmitting ? (
                       <ActivityIndicator color="#fff" />
                     ) : (
-                      <Text style={styles.createButtonText}>{t('addGame.createGame')}</Text>
+                      <Text style={styles.createButtonText}>{t('schedule.createGame')}</Text>
                     )}
                   </TouchableOpacity>
                 )}
@@ -491,13 +491,13 @@ import { useTranslation } from 'react-i18next';
                 <View>
                   {/* Title */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>{t('addGame.title')}</Text>
+                    <Text style={styles.formLabel}>{t('schedule.title')}</Text>
                     <Controller
                       key="title"
                       name="title"
                       control={control}
                       rules={{
-                        required: t('addGame.enterTitle'),
+                        required: t('schedule.enterTitle'),
                         minLength: { value: 3, message: t('Title must be at least 3 characters') },
                       }}
                       render={({ field: { onChange, onBlur, value } }) => (
@@ -511,7 +511,7 @@ import { useTranslation } from 'react-i18next';
                             onChangeText={(text) => {
                               onChange(text);
                             }}
-                            placeholder={t('addGame.enterTitle')}
+                            placeholder={t('schedule.enterTitle')}
                             placeholderTextColor={COLORS.black}
                             keyboardType="default"
                             style={[
@@ -551,8 +551,8 @@ import { useTranslation } from 'react-i18next';
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
-                            placeholder={!sportTypeFocus ? t('addGame.selectSport') : '...'}
-                            searchPlaceholder={t('addGame.search')}
+                            placeholder={!sportTypeFocus ? t('schedule.selectSport') : '...'}
+                            searchPlaceholder={t('schedule.search')}
                             value={value}
                             onFocus={() => setSportTypeFocus(true)}
                             onBlur={async () => {
@@ -575,7 +575,7 @@ import { useTranslation } from 'react-i18next';
                   
                   {/* Image Selection */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>{t('addGame.selectImage')} *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.selectImage')} *</Text>
                     <Controller
                       name="image"
                       control={control}
@@ -592,7 +592,7 @@ import { useTranslation } from 'react-i18next';
                             onPress={handleImagePicker}
                           >
                             <Text style={styles.imageButtonText}>
-                              {value ? t('addGame.changeImage') : t('addGame.selectImage')}
+                              {value ? t('schedule.changeImage') : t('schedule.selectImage')}
                             </Text>
                           </TouchableOpacity>
                           {value && (
@@ -605,7 +605,7 @@ import { useTranslation } from 'react-i18next';
                                 style={styles.removeImageButton}
                                 onPress={handleRemoveImage}
                               >
-                                <Text style={styles.removeImageButtonText}>{t('addGame.removeImage')}</Text>
+                                <Text style={styles.removeImageButtonText}>{t('schedule.removeImage')}</Text>
                               </TouchableOpacity>
                             </View>
                           )}
@@ -621,12 +621,12 @@ import { useTranslation } from 'react-i18next';
 
                   {/* Description */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>{t('addGame.description')} *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.description')} *</Text>
                     <Controller
                       name="description"
                       control={control}
                       rules={{
-                        required: t('addGame.enterDescription'),
+                        required: t('schedule.enterDescription'),
                         minLength: {
                           value: 10,
                           message: 'Description must be at least 10 characters',
@@ -643,7 +643,7 @@ import { useTranslation } from 'react-i18next';
                             onChangeText={(text) => {
                               onChange(text);
                             }}
-                            placeholder={t('addGame.enterDescription')}
+                            placeholder={t('schedule.enterDescription')}
                             placeholderTextColor={COLORS.black}
                             multiline
                             numberOfLines={10}
@@ -674,7 +674,7 @@ import { useTranslation } from 'react-i18next';
 
                   {/* Address */}
                   <View style={styles.formGroup}>
-                    <Text style={styles.formLabel}>{t('addGame.address')} *</Text>
+                    <Text style={styles.formLabel}>{t('schedule.address')} *</Text>
                     <Controller
                       key="address"
                       name="address"
@@ -691,7 +691,7 @@ import { useTranslation } from 'react-i18next';
                             onChangeText={(text) => {
                               onChange(text);
                             }}
-                            placeholder={t('addGame.enterAddress') }
+                            placeholder={t('schedule.enterAddress') }
                             placeholderTextColor={COLORS.black}
                             keyboardType="default"
                             style={[
@@ -711,7 +711,7 @@ import { useTranslation } from 'react-i18next';
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                       {/* Start Time */}
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.formLabel}>{t('addGame.startTime')} *</Text>
+                        <Text style={styles.formLabel}>{t('schedule.startTime')} *</Text>
                         <Controller
                           name="startTime"
                           control={control}
@@ -745,7 +745,7 @@ import { useTranslation } from 'react-i18next';
                       </View>
                       {/* End Time */}
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.formLabel}>{t('addGame.endTime')}  *</Text>
+                        <Text style={styles.formLabel}>{t('schedule.endTime')}  *</Text>
                         <Controller
                           name="endTime"
                           control={control}
@@ -786,7 +786,7 @@ import { useTranslation } from 'react-i18next';
                       {/* Number of Players */}
                       <View style={{ flex: 1 }}>
                         <View style={styles.formGroup}>
-                          <Text style={styles.formLabel}>{t('addGame.numberOfPlayers')}  *</Text>
+                          <Text style={styles.formLabel}>{t('schedule.numberOfPlayers')}  *</Text>
                           <Controller
                             name="numPlayers"
                             control={control}
@@ -804,7 +804,7 @@ import { useTranslation } from 'react-i18next';
                                 >
                                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Text style={{ color: value ? COLORS.black : COLORS.gray }}>
-                                      {PLAYER_OPTIONS.find(opt => opt.value === value)?.label || t('addGame.selectPlayers')}
+                                      {PLAYER_OPTIONS.find(opt => opt.value === value)?.label || t('schedule.selectPlayers')}
                                     </Text>
                                     <Icon
                                       size={20}
@@ -866,7 +866,7 @@ import { useTranslation } from 'react-i18next';
                       {/* Price Per Player */}
                       <View style={{ flex: 1 }}>
                         <View style={styles.formGroup}>
-                          <Text style={styles.formLabel}>{t('addGame.pricePerPlayer')} *</Text>
+                          <Text style={styles.formLabel}>{t('schedule.pricePerPlayer')} *</Text>
                           <Controller
                             name="pricePerPlayer"
                             control={control}
@@ -916,8 +916,8 @@ import { useTranslation } from 'react-i18next';
               <>
               
                 <NotSignedInView
-                  heading={t('addGame.signInToCreate')}
-                  description={t('addGame.signInDescription')}
+                  heading={t('schedule.signInToCreate')}
+                  description={t('schedule.signInDescription')}
                   containerStyle={{ flex: 1 }}
                 />
               </>

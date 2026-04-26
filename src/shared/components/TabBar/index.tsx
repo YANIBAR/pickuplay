@@ -3,6 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Text } from '@components';
 import { COLORS } from '@constants';
+import Icon from '@components/Icon';
 import styles from './styles';
 
 const TabBar: FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
@@ -18,6 +19,7 @@ const TabBar: FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
             : route.name;
 
         const isFocused = state.index === index;
+        const isCenter = route.name === 'addGame';
 
         const onPress = () => {
           const event = navigation.emit({
@@ -38,10 +40,29 @@ const TabBar: FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
           });
         };
 
+        // Center "Add" button — raised circular style
+        if (isCenter) {
+          return (
+            <TouchableOpacity
+              key={route.name}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.centerItem}>
+              <View style={styles.centerButton}>
+                <Icon name="add" type="ionicons" color={COLORS.white} size={30} />
+              </View>
+            </TouchableOpacity>
+          );
+        }
+
         const icon =
           options.tabBarIcon &&
           options.tabBarIcon({
-            color: isFocused ? COLORS.primary : COLORS.secondary,
+            color: isFocused ? COLORS.secondary : '#9CA3AF',
             size: 24,
           });
 
@@ -56,12 +77,14 @@ const TabBar: FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
             onLongPress={onLongPress}
             style={styles.item}>
             {icon}
-            <Text
-              size="h6"
-              color={isFocused ? COLORS.primary : '#222'}
-              style={{ textTransform: 'capitalize', marginTop: 3 }}>
-              {label}
-            </Text>
+            {label !== '' && (
+              <Text
+                size="h6"
+                color={isFocused ? COLORS.secondary : '#9CA3AF'}
+                style={styles.label}>
+                {label as string}
+              </Text>
+            )}
           </TouchableOpacity>
         );
       })}

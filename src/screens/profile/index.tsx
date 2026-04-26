@@ -13,9 +13,8 @@ import { useUserData } from '@services/useUserData';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { JAVA_API } from '@env';
 import { authenticatedApi } from '@services/api';
-import GameCard, { Game } from './gameCard'; // ← adjust path to your gameCard location
-import { getCurrentCity, toTitleCase } from '@utils/helpers';
-import Geolocation from '@react-native-community/geolocation';
+import GameCard, { Game } from './gameCard'; 
+
 import { isStoredTokenExpired } from '@utils/api/auth';
 
 type Nav = {

@@ -323,8 +323,6 @@ const AddGameScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
       <Header title={`${t('schedule.createGame')} — ${formatDate(selectedDate)}`} />
-
-      {/* Step Indicator */}
       
       {/* Step Indicator */}
       <View style={styles.stepHeader}>
@@ -376,7 +374,7 @@ const AddGameScreen = () => {
               </View>
                   {/* City */}
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>{t('add_game.sportType')} eee*</Text>
+                <Text style={styles.formLabel}>{t('schedule.sportType')}*</Text>
                 <Controller
                   name="sportType"
                   control={control}
@@ -801,7 +799,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.grayscale300,
   },
   stepHeader: {
-    margin: 20,
+    marginBottom: 20,
   },
 
   stepText: {

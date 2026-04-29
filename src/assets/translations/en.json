@@ -378,6 +378,7 @@
   },
   "games": {
     "joinButton": "Join",
+    "unjoinButton": "Unjoin",
     "joinGameTitle": "Join Game",
     "guests": "Add Guests",
     "pleaseEnterPlayers": "Please enter number of players",

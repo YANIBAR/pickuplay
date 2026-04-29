@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
-import { Button, Icon, NotSignedInView } from '@components';
+import { Button, ConfirmModal, Icon, NotSignedInView } from '@components';
 import { JAVA_API } from '@env';
 import { COLORS, FONTS, icons,SIZES } from '@constants';
 import { useNavigation } from '@react-navigation/native';
@@ -35,6 +35,7 @@ import { useUserData } from '@services/useUserData';
     const navigation = useNavigation();
     const { t } = useTranslation();
     const [joinModalVisible, setJoinModalVisible] = useState(false);
+    const [unjoinModalVisible, setUnjoinModalVisible] = useState(false);
     const [numPlayers, setNumPlayers] = useState('');
     const [promoCode, setPromoCode] = useState('');
     const [isLogged, setIsLogged] = useState(false);
@@ -68,6 +69,25 @@ import { useUserData } from '@services/useUserData';
       e.stopPropagation();
       setJoinModalVisible(true);
     };
+
+    const handleUnjoinGame = (e: any) => {
+      e.stopPropagation();
+      setUnjoinModalVisible(true);
+    };
+    const handleConfirmUnjoin = async () => {
+      setIsJoining(true);
+      try {
+        const response = await authenticatedApi.post(`games/${game.id}/unjoin`);
+
+        if (response.status === 200) {
+          console.log('Unjoining game with ID:', game.id);
+        }
+      } catch (error) {
+        console.error('Error unjoining game:', error);
+      } finally {
+        setIsJoining(false);
+      }
+    }
 
     const handleConfirmJoin = async () => {
 
@@ -170,11 +190,20 @@ import { useUserData } from '@services/useUserData';
               {shouldHideJoinButton ? (
                 <Text style={styles.cannotJoinText}>
                   {alreadyJoined
-                    ? t('game.alreadyJoined')   
+                    ? (
+                      
+                      <TouchableOpacity
+                        style={styles.unjoinButton}
+                        onPress={handleUnjoinGame}
+                      >
+                        <Text style={styles.joinButtonText}>{t('games.unjoinButton')}</Text>
+                      </TouchableOpacity>
+                    )
                     : isCanceled
                     ? t('game.gameCanceled')    
                     : t('game.gameFull')}       
                 </Text>
+                
               ) : (
                 <TouchableOpacity
                   style={styles.joinButton}
@@ -331,9 +360,18 @@ import { useUserData } from '@services/useUserData';
             )}
           </View>
         </Modal>
+
+        <ConfirmModal
+          visible={unjoinModalVisible}
+          onConfirm={handleConfirmUnjoin}
+          onCancel={() => setUnjoinModalVisible(false)}
+          title="Unjoin Game"
+          message="Are you sure you want to unjoin this game?"
+        />
       </>
     );
   }
+  
 
   const styles = StyleSheet.create({
     card: {
@@ -431,6 +469,14 @@ import { useUserData } from '@services/useUserData';
       color: 'white',
       fontSize: 14,
       fontWeight: '600',
+    },
+    unjoinButton: {
+      backgroundColor: COLORS.error,
+      paddingVertical: 10,
+      paddingHorizontal: 30,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     modalOverlay: {
       flex: 1,

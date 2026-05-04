@@ -18,7 +18,7 @@ const App: FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string>('login'); // Default route
   const linking = {
-  prefixes: ['https://play.google.com/store/apps/details?id=com.pickuplay.app://', 'https://mgopass.com'],
+  prefixes: ['https://play.google.com/store/apps/details?id=com.pickuplay.app://', 'http://162.222.205.74:3000/index.html://', 'pickuplay://'],
   config: {
     screens: {
       game: {
@@ -60,7 +60,6 @@ const App: FC = () => {
       const screen = remoteMessage?.data?.screen;
       const attributes = parseAttributes(remoteMessage?.data?.attributes);
 
-      console.log('Foreground notification :', attributes);
       if (screen === 'game' && attributes?.game_id) {
         listener(`pickuplay://game/${attributes.game_id}`);
       }

@@ -85,7 +85,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       <TouchableOpacity
         onPress={() => navigation.navigate(
           screen,
-          attributes && attributes.trim() !== "" ? JSON.parse(attributes) : {}
+          attributes
         )}
         style={styles.headerContainer}
       >
@@ -110,7 +110,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                   color: COLORS.grayscale900,
                 },
               ]}>
-              {title} 
+              {title}
             </Text>
             <Text
               style={[

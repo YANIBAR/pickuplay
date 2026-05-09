@@ -50,10 +50,15 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.pickuplay.refresh</string>
+		<string>com.pickuplay.cleanup</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to scan QR code</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Pickuplay uses your location to help you discover nearby pickup games and sports activities in your city.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app does not use your photo library directly. Some features may require limited image access.</string>
 	<key>NSUserNotificationUsageDescription</key>

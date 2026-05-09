@@ -9,14 +9,14 @@ interface GameGridProps {
 }
 
 export default function GameGrid({ games, refreshing = false, onRefresh }: GameGridProps) {
-
   return (
     <FlatList
       data={games}
-      keyExtractor={(item, index) => `${item.id}-${index}`} // Combine ID with index
+      keyExtractor={(item, index) => `${item.id}-${index}`}
       renderItem={({ item }) => (
         <GameCard 
           game={item}
+          onRefresh={onRefresh}  // 👈 pass it down
         />
       )}
       numColumns={1}
@@ -25,15 +25,13 @@ export default function GameGrid({ games, refreshing = false, onRefresh }: GameG
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={[COLORS.primary]}       // Android
-          tintColor={COLORS.primary}      // iOS
+          colors={[COLORS.primary]}
+          tintColor={COLORS.primary}
         />
       }
     />
-    
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     padding: 8,

@@ -31,12 +31,12 @@ import { useUserData } from '@services/useUserData';
     return parts[parts.length - 1] || location;
   }
 
-  export default function GameCard({ game }: GameCardProps) {
+  export default function GameCard({ game , onRefresh }: GameCardProps) {
     const navigation = useNavigation();
     const { t } = useTranslation();
     const [joinModalVisible, setJoinModalVisible] = useState(false);
     const [unjoinModalVisible, setUnjoinModalVisible] = useState(false);
-    const [numPlayers, setNumPlayers] = useState('');
+    const [numPlayers, setNumPlayers] = useState(0);
     const [promoCode, setPromoCode] = useState('');
     const [isLogged, setIsLogged] = useState(false);
     const [discountPrice, setDiscountPrice] = useState('');
@@ -81,6 +81,7 @@ import { useUserData } from '@services/useUserData';
 
         if (response.status === 200) {
           console.log('Unjoining game with ID:', game.id);
+          onRefresh?.();
         }
       } catch (error) {
         console.error('Error unjoining game:', error);
@@ -89,23 +90,16 @@ import { useUserData } from '@services/useUserData';
       }
     }
 
-    const handleConfirmJoin = async () => {
-
+   const handleConfirmJoin = async () => {
     setIsJoining(true);
     try {
       const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
-
       if (response.status === 200) {
-        // Success - clear form and close modal
         setJoinModalVisible(false);
-        setNumPlayers('');
+        setNumPlayers(0);
         setPromoCode('');
-        
-        // Optional: show success message or navigate
         Alert.alert(t('games.successJoined'));
-        
-        // Optional: refresh game state or navigate
-        // await fetchGameDetails(game.id);
+        onRefresh?.();  // trigger refresh
       }
     } catch (error) {
       const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
@@ -123,14 +117,14 @@ import { useUserData } from '@services/useUserData';
   const shouldHideJoinButton = alreadyJoined || isFull || isCanceled;
     const handleRedirectModal = (authType: 'login' | 'register') => {
       setJoinModalVisible(false);
-      setNumPlayers('');
+      setNumPlayers(0);
       setPromoCode('');
       navigate(authType)
     };
 
     const handleCloseModal = () => {
       setJoinModalVisible(false);
-      setNumPlayers('');
+      setNumPlayers(0);
       setPromoCode('');
     };
     useEffect(() => {
@@ -248,7 +242,7 @@ import { useUserData } from '@services/useUserData';
                       onPress={() => {
                         const current = parseInt(numPlayers) || 0;
                         if (current > 0) {
-                          setNumPlayers((current - 1).toString());
+                          setNumPlayers((current - 1));
                         }
                       }}
                     >
@@ -267,14 +261,14 @@ import { useUserData } from '@services/useUserData';
                         color={COLORS.primary}
                       />
                       <Text style={styles.playerCountText}>
-                        {numPlayers || '0'}
+                        {numPlayers || 0}
                       </Text>
                     </View>
                     <TouchableOpacity 
                       style={styles.counterButton}
                       onPress={() => {
                         const current = parseInt(numPlayers) || 0;
-                        setNumPlayers((current + 1).toString());
+                        setNumPlayers((current + 1));
                       }}
                     >
                       <Icon 
@@ -306,15 +300,15 @@ import { useUserData } from '@services/useUserData';
 
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>Price per guest:</Text>
+                    <Text style={styles.priceLabel}>Price per player:</Text>
                     <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
                   </View>
                   <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                     <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
-                      Total ({numPlayers || 0} guests):
+                      Total ({numPlayers || 0} players):
                     </Text>
                     <Text style={styles.discountedPriceText}>
-                      ${discountPrice || (game.price * (parseInt(numPlayers) + 1 || 0)).toFixed(2)}
+                      ${discountPrice || (game.price * (numPlayers + 1 || 0)).toFixed(2)}
                     </Text>
                   </View>
                 </View>

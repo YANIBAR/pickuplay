@@ -306,7 +306,7 @@ const Profile = () => {
           />
         </View>
       </RBSheet>
-    </SafeAreaView>
+    </SafeAreaView> 
   );
 };
 

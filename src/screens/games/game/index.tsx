@@ -122,7 +122,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
 
   // Generate deep link for sharing
   const generateDeepLink = () => {
-    return`https://mgopass.com/pickuplay/index.html?game_id=${game.id}`;
+    return`http://pickuplay.com/?game_id=${game.id}`;
   };
 
   // Handle share button press
@@ -491,12 +491,12 @@ const handleGetDirections = () => {
 
                 <View style={styles.priceInfo}>
                   <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>Price per guest:</Text>
+                    <Text style={styles.priceLabel}>Price per player:</Text>
                     <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
                   </View>
                   <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                     <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
-                      Total ({numPlayers || 0} guests):
+                      Total ({numPlayers || 0} players):
                     </Text>
                     <Text style={styles.discountedPriceText}>
                       ${discountPrice || (game.price * (parseInt(numPlayers) + 1 || 0)).toFixed(2)}

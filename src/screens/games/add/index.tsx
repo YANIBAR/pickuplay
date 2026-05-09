@@ -392,7 +392,7 @@ const AddGameScreen = () => {
                         maxHeight={300}
                         labelField="label"
                         valueField="value"
-                        placeholder={t('add_game.select_sport')}
+                        placeholder={t('schedule.select_sport')}
                         searchPlaceholder={t('schedule.search')}
                         value={value}
                         onBlur={async () => await trigger('sportType')}
@@ -536,8 +536,9 @@ const AddGameScreen = () => {
                         onChangeText={onChange}
                         placeholder={t('schedule.enterDescription')}
                         placeholderTextColor={COLORS.black}
-                        multiline
+                        multiline={true}          // 👈 this is what makes it a textarea
                         numberOfLines={10}
+                        maxLength={40}
                         textAlignVertical="top"
                         style={[
                           styles.textInput,
@@ -734,7 +735,7 @@ const AddGameScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   form: { padding: 16 },
-  formGroup: { marginBottom: 20 },
+  formGroup: { marginBottom: 20},
   formLabel: { fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' },
   textInput: {
     backgroundColor: 'white',
@@ -800,6 +801,7 @@ const styles = StyleSheet.create({
   },
   stepHeader: {
     marginBottom: 20,
+    marginHorizontal: 16 
   },
 
   stepText: {

@@ -2,7 +2,8 @@ import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, Alert, Ima
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Game, extractCity } from './GameCard';
 import GameGrid from './GamesGrid';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Checkbox, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS, icons, images } from '@constants';
@@ -130,18 +131,15 @@ export default function HomeScreen() {
       if (currentCity) {
         const userCity = extractCity(currentCity);
 
-        // Add city if not in DB
         if (!dbCities.includes(userCity)) {
           updatedCities.unshift(userCity);
         } else {
-          // Move it to first position
           updatedCities = [
             userCity,
             ...dbCities.filter((c) => c !== userCity),
           ];
         }
 
-        // Select it by default
         setSelectedCities([userCity]);
       }
 
@@ -189,18 +187,25 @@ export default function HomeScreen() {
     setFilteredGames(filtered);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      if (currentCity) {
+        fetchGames();
+      }
+    }, [currentCity])
+  ); 
+
   // Apply filters whenever filter state changes
   useEffect(() => {
     const checkToken = async () => {
-          const expired = await isStoredTokenExpired();
-          setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
-        };
-    
-        checkToken();
+        const expired = await isStoredTokenExpired();
+        setIsLogged(!expired); // ← also note the `!` — logged = NOT expired
+      };
+  
+      checkToken();
     applyFilters();
     setRefreshing(false);
   }, [selectedSports, selectedCities, selectedDays, selectedPlayers, games]);
-
   useEffect(() => {
     const fetchCity = async () => {
       try {
@@ -213,13 +218,10 @@ export default function HomeScreen() {
     fetchCity();
   }, []);
 
-  useEffect(() => { 
-    if (currentCity) {
-      fetchGames();
-
-      getCities();
-      getSports();
-    }
+  useEffect(() => {
+    fetchGames();
+    getCities();
+    getSports();
   }, [currentCity]);
 
   const handleSportToggle = (sport: string) => {

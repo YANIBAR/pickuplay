@@ -10,7 +10,7 @@ export default yup.object().shape({
     .email(i18n.t('errors.invalidEmail')),
   phone: yup
     .string()
-    .required(i18n.t('errors.phoneNumberRequired'))
+    .notRequired()
     .matches(/^\d+$/, i18n.t('errors.phoneNumberDigits'))
     .min(6, i18n.t('errors.phoneNumberTooShort'))
     .max(15, i18n.t('errors.phoneNumberTooLong')),

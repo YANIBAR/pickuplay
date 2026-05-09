@@ -220,7 +220,8 @@
     "updateButton": "Update",
     "saveChanges": "Save Changes",
     "deleteMyAccount": "Delete My Account",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "deleting": "Deleting..."
 
   },
   "settings": {
@@ -374,6 +375,7 @@
     "user": "Profile",
     "menu": "Menu",
     "matchups": "Matchups",
+    "fields": "Fields",
     "notifications": "Notifications"
   },
   "games": {
@@ -395,7 +397,7 @@
     "createGame": "Create Game",
     "title": "Title",
     "enterTitle": "Enter game title",
-
+    "select_sport": "Select sport type...",
     "sportType": "Sport type",
     "selectSport": "Select sport",
     "search": "Search...",

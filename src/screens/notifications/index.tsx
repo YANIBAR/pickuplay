@@ -41,7 +41,6 @@ const Notifications = () => {
 
     // Mark all as read when screen is opened
     markAllAsRead();
-
     return () => unsubscribe();
   }, []);
 

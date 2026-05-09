@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Button, Icon, Text } from '@components';
 import { COLORS, screens, SIZES } from '@constants';
@@ -8,9 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { authenticatedApi } from '@services/api';
 import { useUserData } from '@services/useUserData';
 import { Dropdown } from 'react-native-element-dropdown';
+import RBSheet from 'react-native-raw-bottom-sheet';
 
 const EditProfileForm = ({ onShowgame }) => {
   const { userData, error, refreshUserData } = useUserData();
+
+  const refRBSheet = useRef<any>(null);
+  const refDeleteSheet = useRef<any>(null);
   const [user, setUser] = useState({
     userId: '',
     firstName: '',
@@ -39,6 +43,29 @@ const EditProfileForm = ({ onShowgame }) => {
     { label: 'Blue Springs', value: 'blue_springs' },
     { label: 'Liberty', value: 'liberty' },  
   ];
+  const handleDeleteAccount = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+
+      // Call your delete-account endpoint
+      await authenticatedApi.delete(`profile/delete`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Clear all local storage just like logout
+      const keysToRemove = [
+        'access_token', 'id', 'firstName', 'lastName', 'email',
+        'phone', 'role', 'preferredLanguage', 'profileImage', 'gameId',
+      ];
+      await AsyncStorage.multiRemove(keysToRemove);
+      await refreshUserData();
+
+      navigate("welcome");
+    } catch (e) {
+      console.error('Failed to delete account', e);
+      Alert.alert('Error', 'Failed to delete account. Please try again.');
+    }
+  };
 useEffect(() => {
   if (userData) {
     setUser({
@@ -147,18 +174,52 @@ useEffect(() => {
           </Text>
         </TouchableOpacity>
 
-        {/*<TouchableOpacity 
+
+
+        <TouchableOpacity 
           style={[styles.desactivateBotton, loading && styles.disabledButton]}
+          onPress={() => refDeleteSheet.current?.open()} 
           disabled={loading}
         >
           <Text style={styles.buttonText}>
             {loading ? t('editProfile.updating') : t('editProfile.deleteMyAccount')}
           </Text>
-        </TouchableOpacity>*/}
+        </TouchableOpacity>
 
       </View>
+      <RBSheet
+        ref={refDeleteSheet}
+        closeOnPressMask={true}
+        height={260}
+        customStyles={{
+          wrapper: { backgroundColor: 'rgba(0,0,0,0.5)' },
+          draggableIcon: { backgroundColor: COLORS.grayscale200, height: 4 },
+          container: { borderTopRightRadius: 32, borderTopLeftRadius: 32, height: 260, backgroundColor: COLORS.white },
+        }}
+      >
+        <Text style={styles.bottomTitle}>Delete Account</Text>
+        <View style={[styles.separateLine, { backgroundColor: COLORS.grayscale200 }]} />
+        <Text style={[styles.bottomSubtitle, { color: COLORS.black }]}>
+          {t('settings.deleteAccountConfirmation', 'This will permanently delete your account and all associated data. This action cannot be undone.')}
+        </Text>
+        <View style={styles.bottomContainer}>
+          <Button
+            title={t('settings.deleteAccount', 'Delete Account')}
+            filled
+            style={[styles.confirmDelete, { backgroundColor: COLORS.red, borderColor: COLORS.error }]}
+            onPress={handleDeleteAccount}
+          />
+          <Button
+            title={t('c.cancel')}
+            style={{ width: (SIZES.width - 32) / 2 - 8, backgroundColor: COLORS.transparentPrimary, borderRadius: 32, borderColor: COLORS.transparentPrimary }}
+            textColor={COLORS.primary}
+            onPress={() => refDeleteSheet.current?.close()}
+          />
+        </View>
+      </RBSheet>
     </ScrollView>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -232,7 +293,47 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderColor: '#e0e0e0',
     opacity: 0.6,
-  }
+  },   
+  deleteButton: {
+    backgroundColor: COLORS.red,
+    borderColor: COLORS.error,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  confirmDelete: {
+    width: (SIZES.width - 32) / 2 - 8,
+    backgroundColor: COLORS.primary,
+    borderRadius: 32
+  },
+  bottomContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 12,
+    paddingHorizontal: 16
+  },
+  bottomTitle: {
+    fontSize: 24,
+    fontFamily: "semiBold",
+    color: COLORS.primary,
+    textAlign: "center",
+    marginTop: 12
+  },
+  bottomSubtitle: {
+    fontSize: 20,
+    fontFamily: "semiBold",
+    color: COLORS.grayscale900,
+    textAlign: "center",
+    marginVertical: 28
+  },
+  separateLine: {
+    width: SIZES.width,
+    height: 1,
+    backgroundColor: COLORS.grayscale200,
+    marginTop: 12
+  }  
 });
 
 export default EditProfileForm;

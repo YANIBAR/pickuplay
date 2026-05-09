@@ -8,7 +8,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { forgotSchema } from '@utils/validators';
 import { useTranslation } from 'react-i18next';
 import styles from './styles';
-import { API_BACKEND_URL } from '@env';
 import axios from 'axios';
 import { publicApi } from '@services/api';
 

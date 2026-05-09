@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { 
   ScrollView, 
   TouchableOpacity,
-  Image
+  Image,
+  Alert
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Controller, useForm } from 'react-hook-form';
@@ -60,7 +61,6 @@ const Login = () => {
   }, []);
 
   const handleLogin = async (formData: loginFormData) => {
-    console.log('Login attempt with:', JAVA_API);
     try {
       setIsLoading(true);
       

@@ -11,20 +11,18 @@ class NotificationService {
   // Request permissions for notifications
   async requestPermissions() {
     try {
-      // Using the new API approach
-      const app = firebase.app();
-      const messagingInstance = messaging(app);
-      
-      const authStatus = await messagingInstance.requestPermission();
-      const enabled = 
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-      
-      console.log('Authorization status:', authStatus);
-      return enabled;
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+        console.log('Android POST_NOTIFICATIONS:', granted);
+      }
+      // Register for remote messages before requesting permission or getting token
+      await getMessaging(getApp()).registerDeviceForRemoteMessages();
+      const authStatus = await requestPermission(getMessaging(getApp()));
+      console.log('Firebase auth status:', authStatus);
     } catch (error) {
-      console.log('Permission request error:', error);
-      return false;
+      console.error('Permission error:', error);
     }
   }
 

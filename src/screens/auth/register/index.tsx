@@ -39,7 +39,7 @@ const SignUp = () => {
     setApiError(null); // Reset error
     const payload = {
       ...formData,
-      phone: `${callingCode}${formData.phone}`
+      ...(formData.phone ? { phone: `${callingCode}${formData.phone}` } : {})
     };
 
     try {
@@ -217,9 +217,9 @@ const SignUp = () => {
               value={value}
               onBlur={onBlur}
               icon={icons.telephone}
-              onChangeText={onChange} 
-              onSelectCode={(code) => setCallingCode(code)} 
-              placeholder={t('c.phoneNumber')}
+              onChangeText={onChange}
+              onSelectCode={(code) => setCallingCode(code)}
+              placeholder={t('c.phoneNumber') + ' (' + t('c.optional') + ')'}
               errorText={errors?.phone?.message}
             />
           )}

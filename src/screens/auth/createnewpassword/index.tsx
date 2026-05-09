@@ -10,8 +10,6 @@ import { Header, TextInput, Checkbox, Button, View, Text, ErrorModal, SuccessMod
 import { COLORS, icons, illustrations } from '@constants';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import styles from './styles';
-import { API_BACKEND_URL, JAVA_API } from '@env';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { publicApi } from '@services/api';

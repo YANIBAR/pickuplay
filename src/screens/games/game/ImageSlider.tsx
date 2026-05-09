@@ -1,4 +1,3 @@
-import { API_BACKEND_URL, JAVA_API } from '@env';
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, FlatList, Pressable } from 'react-native';
 

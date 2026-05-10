@@ -28,7 +28,8 @@ import {
   AddGameScreen,
   SettingScreen,
   Notificationcreen,
-  ChangePasswordScreen
+  ChangePasswordScreen,
+  mapFieldsScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -59,6 +60,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="addGame" component={AddGameScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
       <Stack.Screen name="game" component={GameScreen} />
+      <Stack.Screen name="map" component={mapFieldsScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="forgotpasswordmethods"component={ForgotPasswordMethodsScreen}/>
       <Stack.Screen name="forgotpasswordemail"component={ForgotPasswordEmailScreen}/>

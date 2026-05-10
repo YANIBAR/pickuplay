@@ -1,3 +1,4 @@
+
 export { default as WelcomeScreen } from './welcome';
 export {
   LoginScreen,
@@ -32,3 +33,7 @@ export { default as ScheduleScreen  } from './games/schedule';
 export { default as GameScreen  } from './games/game';
 export { default as EditProfileScreen } from './profile/editprofile';
 export { default as Notificationcreen } from './notifications';
+export { default as mapFieldsScreen } from './fields/map';
+
+
+ 

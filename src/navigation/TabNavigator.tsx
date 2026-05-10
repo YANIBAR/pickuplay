@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   MatchupsScreen,
-  ScheduleScreen,
+  mapFieldsScreen,
   GamesScreen,
   ProfileScreen,
   AddGameScreen
@@ -56,12 +56,12 @@ const TabNavigator = () => {
       />
 
       <Tab.Screen
-        name="Matchups"
-        component={MatchupsScreen}
+        name="Fields"
+        component={mapFieldsScreen}
         options={{
-          tabBarLabel: t('menu.matchups'),
+          tabBarLabel: t('menu.fields'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="sword-cross" type="materialCommunityIcons" color={color} size={size} />
+            <Icon name="navigate" type="ionicons" color={color} size={size} />
           ),
         }}
       />
@@ -81,12 +81,12 @@ const TabNavigator = () => {
       )}
 
       <Tab.Screen
-        name="Schedule"
-        component={ScheduleScreen}
+        name="Matchups"
+        component={MatchupsScreen}
         options={{
-          tabBarLabel: t('menu.schedule'),
+          tabBarLabel: t('menu.matchups'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="calendar-outline" type="ionicons" color={color} size={size} />
+            <Icon name="sword-cross" type="materialCommunityIcons" color={color} size={size} />
           ),
         }}
       />

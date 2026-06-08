@@ -63,6 +63,8 @@
 	<string>This app does not use your photo library directly. Some features may require limited image access.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>This app uses notifications to alert you about new games and updates.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PickuPlay uses your location to help you discover nearby games and activities, and to provide location-based features even when the app is running in the background.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

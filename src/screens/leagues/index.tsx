@@ -3,18 +3,41 @@ import { Header } from '@components';
 import { useTranslation } from 'react-i18next';
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decodeToken } from '@services/auth/auth.utils';
+import { useNavigation } from '@react-navigation/native';
 
 export default function NoLeaguePage() {
   const { t } = useTranslation();
+  const { navigate } = useNavigation();
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        if (!token) {
+          setRole(null);
+          return;
+        }
+        const userInfo = decodeToken(token);
+        setRole(userInfo?.role ?? null);
+      } catch (error) {
+        console.error('Failed to fetch role:', error);
+        setRole(null);
+      }
+    };
+    fetchRole();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
         
-      <Header title={t('menu.matchups')} />
+      <Header title={t('menu.leagues')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Image
-            source={images.matchups}
+            source={images.leagueCover}
             resizeMode="contain"
             style={styles.logo}
           />
@@ -22,30 +45,53 @@ export default function NoLeaguePage() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          <Text style={styles.mainTitle}>{t("matchups.startMatchup")}</Text>
+          <Text style={styles.mainTitle}>{t("leagues.startLeague")}</Text>
 
           <Text style={styles.subtitle}>
-            {t("matchups.noChallenges")}
+            {t("leagues.noLeagues")}
           </Text>
 
           <Text style={styles.description}>
-            {t("matchups.description")}
+            {t("leagues.description")}
           </Text>
 
-          {/* Action Buttons 
+          {/* Action Buttons */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>
-                {t("matchups.createMatchup")}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.secondaryButton}>
+            {(role === 'ORGANIZER' || role === 'ADMIN') && (
+              <TouchableOpacity style={styles.primaryButton}>
+                  <Text style={styles.primaryButtonText}>
+                    {t("leagues.createLeague")}
+                  </Text>
+                </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.secondaryButton} onPress={() => navigate("teams")}>
               <Text style={styles.secondaryButtonText}>
-                {t("matchups.findTeams")}
+                {t("leagues.findTeams")}
               </Text>
             </TouchableOpacity>
-          </View>*/}
+          </View>
+          {(role === 'ORGANIZER' || role === 'ADMIN') && (
+            <View style={styles.joinSection}>
+              <Text style={styles.joinTitle}>{t("leagues.joinLeague")}</Text>
+              <Text style={styles.joinDescription}>
+                {t("leagues.joinLeagueDescription")}
+              </Text>
+
+              <View style={styles.joinButtonContainer}>
+                <TouchableOpacity style={styles.joinButton}>
+                  <Text style={styles.joinButtonText}>
+                    {t("leagues.joinAsPlayer")}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.joinButton}>
+                  <Text style={styles.joinButtonText}>
+                    {t("leagues.joinAsTeam")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -156,6 +202,49 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: '#1FAC9B',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  joinSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  joinTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  joinDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  joinButtonContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  joinButton: {
+    flex: 1,
+    backgroundColor: '#1FAC9B',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#1FAC9B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: '600',
   },
   featuresContainer: {

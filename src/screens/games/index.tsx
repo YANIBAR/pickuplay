@@ -16,10 +16,10 @@ import { getMessaging, onMessage } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import { JAVA_API } from '@env';
+import axios from 'axios';
 type Nav = {
   navigate: (value: string) => void
 }
-const mockGames: Game[] = [];
 
 type Sport = {
   id: string;
@@ -155,7 +155,7 @@ export default function HomeScreen() {
   const applyFilters = () => {
     let filtered = [...games];
     if (selectedSports.length > 0) {
-      filtered = filtered.filter(game => selectedSports.includes(game.sportType.id));
+      filtered = filtered.filter(game => game.sportType.id === selectedSports[0]);
     }
     // Use selected cities, or default to user's city if no city filter is active
     const citiesToFilter = selectedCities.length > 0 
@@ -174,7 +174,6 @@ export default function HomeScreen() {
         return selectedDays.includes(gameDate);
       });
     }
-    console.log('Filtered games:', filtered);
 
     // Filter by selected players
     if (selectedPlayers.length > 0) {
@@ -206,11 +205,12 @@ export default function HomeScreen() {
     applyFilters();
     setRefreshing(false);
   }, [selectedSports, selectedCities, selectedDays, selectedPlayers, games]);
+
   useEffect(() => {
     const fetchCity = async () => {
       try {
         const city = await getCurrentCity();
-        setCurrentCity(city);
+        setCurrentCity("Kansas City");
       } catch (error) {
         console.error('Failed to get city:', error);
       }
@@ -226,9 +226,7 @@ export default function HomeScreen() {
 
   const handleSportToggle = (sport: string) => {
     setSelectedSports(prev =>
-      prev.includes(sport)
-        ? prev.filter(s => s !== sport)
-        : [...prev, sport]
+      prev.includes(sport) ? [] : [sport]
     );
   };
 
@@ -291,7 +289,8 @@ export default function HomeScreen() {
       4: 'hockey-sticks',
       6: 'cricket',
       7: 'table-tennis',
-      8: 'football'
+      8: 'football',
+      9: 'baseball',
   };
 
   const getSportIcon = (id: string): string => {

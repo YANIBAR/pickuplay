@@ -14,10 +14,9 @@ import { formatDateLong, formatTime } from '@utils/dateUtils';
 import { useUserData } from '@services/useUserData';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import { toTitleCase } from '@utils/helpers';
-import { Linking, Platform } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
 import { decodeToken } from '@services/auth/auth.utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Calendar, CalendarList, MultiSelectCalendar } from 'react-native-calendars';
 
 interface Game {
   id: number;
@@ -56,14 +55,17 @@ const getGameIcon = (type: string) => {
       3: 'volleyball',
       5: 'tennis',
       4: 'hockey-sticks',
-      6: 'table-tennis',
+      6: 'cricket',
       7: 'table-tennis',
-      8: 'football'
+      8: 'football',
+      9: "baseball",
     };
     return iconMap[type] || 'sports';
   };
 export default function GameDetailsScreen({ route }: { route: any }) {
   const { t } = useTranslation();
+  const [calendarModalVisible, setCalendarModalVisible] = useState(false);
+  const [selectedDates, setSelectedDates] = useState<{[date: string]: {selected: boolean}}>({});
   const gameId = route.params.game_id || {};
   const { navigate } = useNavigation();
   const [shareModalVisible, setShareModalVisible] = useState(false);
@@ -122,7 +124,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
 
   // Generate deep link for sharing
   const generateDeepLink = () => {
-    return`http://pickuplay.com/?game_id=${game.id}`;
+    return`http://pickuplay.com/redirect?game_id=${game.id}`;
   };
 
   // Handle share button press
@@ -156,21 +158,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
     Clipboard.setString(link);
     Alert.alert(t('common.copied'), t('game.shareModal.linkCopied'));
   };
-const handleGetDirections = () => {
-  const address = encodeURIComponent(game.address);
-  const url = Platform.OS === 'ios'
-    ? `maps://app?daddr=${address}`
-    : `google.navigation:q=${address}`;
-
-  Linking.canOpenURL(url).then((supported) => {
-    if (supported) {
-      Linking.openURL(url);
-    } else {
-      // Fallback to Google Maps in browser
-      Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${address}`);
-    }
-  });
-};
+  
 
     const [joinModalVisible, setJoinModalVisible] = useState(false);
 
@@ -178,7 +166,21 @@ const handleGetDirections = () => {
         const [promoCode, setPromoCode] = useState('');
 
         const [discountPrice, setDiscountPrice] = useState('');
-
+      const handleCloneGame = async () => {
+        try {
+          const dates = Object.keys(selectedDates);
+          if (dates.length === 0) {
+            Alert.alert(t('game.selectAtLeastOneDate'));
+            return;
+          }
+          console.log(`games/${game.id}/clone`, dates);
+          const response = await authenticatedApi.post(`games/${game.id}/clone`, { dates : dates });
+          setCalendarModalVisible(false);
+          Alert.alert(t('game.cloneSuccess'));
+        } catch (error) {
+          Alert.alert(t('game.cloneFailed'), error?.response?.data?.message || t('common.error'));
+        }
+      }
     const handleCloseModal = () => {
       setJoinModalVisible(false);
       setNumPlayers(0);
@@ -227,6 +229,15 @@ const handleGetDirections = () => {
               e.stopPropagation();
               setJoinModalVisible(true);
             };
+
+          const handleInviteGame = async (e: any) => {
+            e.stopPropagation();
+            try {
+              const response = await authenticatedApi.post(`games/inviteToGame`, { gameId: game.id });
+            } catch (error) {
+              console.error('Failed to invite to game:', error);
+            }
+          };
   return (
     <>
     <SafeAreaView style={styles.area}>
@@ -241,16 +252,27 @@ const handleGetDirections = () => {
               <Icon type="materialCommunityIcons" name="share-variant" />
           </TouchableOpacity>
 
-          {((userData?.id == game?.creatorId || role === 'admin') && isLogged)  && (
-            <TouchableOpacity
-              onPress={() => navigate("editGame", { game })} 
-              style={styles.iconBtn}
-              activeOpacity={0.75}
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-            >
-              <Icon type="feather" name="edit" />
-            </TouchableOpacity>
-        )}
+          {((userData?.id == game?.creatorId || role === 'ADMIN') && isLogged)  && (
+            <>
+              <TouchableOpacity
+                onPress={() => setCalendarModalVisible(true)}
+                style={styles.iconBtn}
+                activeOpacity={0.75}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              >
+                <Icon type="feather" name="copy" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigate("editGame", { game })} 
+                style={styles.iconBtn}
+                activeOpacity={0.75}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              >
+                <Icon type="feather" name="edit" />
+              </TouchableOpacity>
+            
+            </>
+          )}
         </Header>
       
         <ImageSlider images={[`${JAVA_API}games/${game.id}/image`]} />
@@ -320,10 +342,11 @@ const handleGetDirections = () => {
                       <Text style={styles.playerName} numberOfLines={2}>
                         {toTitleCase(player.userName)}
                       </Text>
-                      
-                      <Text style={styles.playerName} numberOfLines={2}>
-                        + {player.number_guest} guests
-                      </Text>
+                      {player.number_guest > 0 && (
+                        <Text style={styles.playerName} numberOfLines={2}>
+                          + {player.number_guest} guests
+                        </Text>
+                      )}
                     </View>
                   ))}
                 </View>
@@ -341,8 +364,15 @@ const handleGetDirections = () => {
           />
         </View>
       )}
-
-      {/* Share Game Modal */}
+      {/* {((userData?.id == game?.creatorId || role === 'ADMIN') && isLogged)  && (
+        <View style={styles.joinButton}>
+          <Button
+            title={t('game.invite')}
+            onPress={handleInviteGame}
+          />
+        </View>
+      )}
+      Share Game Modal */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -400,150 +430,189 @@ const handleGetDirections = () => {
       </Modal>
     </SafeAreaView>
 
-
-      {/* Join Game Modal */}
         <Modal
-          animationType="fade"
+          animationType="slide"
           transparent={true}
-          visible={joinModalVisible}
-          onRequestClose={handleCloseModal}
+          visible={calendarModalVisible}
+          onRequestClose={() => setCalendarModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
-            {isLogged==true ? (
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>{t('games.joinGameTitle')}</Text>
-                  <Pressable onPress={handleCloseModal} style={styles.closeButton}>
-                    <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
-                  </Pressable>
-                </View>
-
-                <View style={styles.gameInfoSection}>
-                  <Text style={styles.gameNameModal}>{game.title}</Text>
-                  <Text style={styles.gameType}>{game.sportType?.name?.toUpperCase() ?? ''}</Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('games.guests')}</Text>
-                  <View style={styles.playerCountContainer}>
-                    <TouchableOpacity 
-                      style={styles.counterButton}
-                      onPress={() => {
-                        const current = parseInt(numPlayers) || 0;
-                        if (current > 0) {
-                          setNumPlayers((current - 1).toString());
-                        }
-                      }}
-                    >
-                      <Icon 
-                        type="materialCommunityIcons" 
-                        name="minus" 
-                        size={24} 
-                        color="white"
-                      />
-                    </TouchableOpacity>
-                    <View style={styles.playerCountDisplay}>
-                      <Icon 
-                        type="materialCommunityIcons" 
-                        name="account-multiple" 
-                        size={16} 
-                        color={COLORS.primary}
-                      />
-                      <Text style={styles.playerCountText}>
-                        {numPlayers || '0'}
-                      </Text>
-                    </View>
-                    <TouchableOpacity 
-                      style={styles.counterButton}
-                      onPress={() => {
-                        const current = parseInt(numPlayers) || 0;
-                        setNumPlayers((current + 1).toString());
-                      }}
-                    >
-                      <Icon 
-                        type="materialCommunityIcons" 
-                        name="plus" 
-                        size={24} 
-                        color="white"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
-                  <View style={styles.inputWrapper}>
-                    <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter promo code"
-                      placeholderTextColor="#999"
-                      value={promoCode}
-                      onChangeText={setPromoCode}
-                    />
-                    <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}> 
-                      <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View> */}
-
-                <View style={styles.priceInfo}>
-                  <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>Price per player:</Text>
-                    <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
-                  </View>
-                  <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
-                    <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
-                      Total ({numPlayers || 0} players):
-                    </Text>
-                    <Text style={styles.discountedPriceText}>
-                      ${discountPrice || (game.price * (parseInt(numPlayers) + 1 || 0)).toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.buttonContainer}>
-                  <Button
-                    title="Cancel"
-                    style={{
-                      width: (SIZES.width) / 3,
-                      backgroundColor: COLORS.transparentPrimary,
-                      borderRadius: 32,
-                      borderColor: COLORS.transparentPrimary
-                    }}
-                    textColor={COLORS.primary}
-                    onPress={handleCloseModal}
-                  />
-                  <Button
-                    title="Confirm"
-                    filled
-                    style={styles.confirmButton}
-                    onPress={handleConfirmJoin}
-                  />
-                </View>
-              </View>
-            ) : (
-              
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}></Text>
-                  <Pressable onPress={handleCloseModal} style={styles.closeButton}>
-                    <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
-                  </Pressable>
-                </View>
-              
-                <NotSignedInView
-                  heading="Sign in to join game"
-                  description="Access your upcoming and past sessions when signed in."
-                  containerStyle={{ flex: 1 }}
-                  onNavigate={() => setJoinModalVisible(false)}  // or however you close your modal
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{t('game.selectDatesToClone')}</Text>
+              <Calendar
+                markingType={'multi-dot'}
+                markedDates={selectedDates}
+                onDayPress={day => {
+                  setSelectedDates(prev => {
+                    const newDates = { ...prev };
+                    if (newDates[day.dateString]) {
+                      delete newDates[day.dateString];
+                    } else {
+                      newDates[day.dateString] = { selected: true, selectedColor: COLORS.primary };
+                    }
+                    return newDates;
+                  });
+                }}
+              />
+              <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                <Button
+                  title={t('common.cancel')}
+                  style={{ flex: 1, marginRight: 8 }}
+                  onPress={() => setCalendarModalVisible(false)}
+                />
+                <Button
+                  title={t('game.clone')}
+                  filled
+                  style={{ flex: 1 }}
+                  onPress={handleCloneGame}
                 />
               </View>
-            )}
+            </View>
           </View>
-        </Modal>
+        </Modal>  
+      {/* Join Game Modal */}
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={joinModalVisible}
+            onRequestClose={handleCloseModal}
+          >
+            <View style={styles.modalOverlay}>
+              {isLogged==true ? (
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>{t('games.joinGameTitle')}</Text>
+                    <Pressable onPress={handleCloseModal} style={styles.closeButton}>
+                      <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                    </Pressable>
+                  </View>
+  
+                  <View style={styles.gameInfoSection}>
+                    <Text style={styles.gameNameModal}>{game.title}</Text>
+                    <Text style={styles.gameType}>{game.sportType?.name?.toUpperCase() ?? ''}</Text>
+                  </View>
+  
+                  <View style={styles.divider} />
+  
+                  <View style={styles.fieldContainer}>
+                    <Text style={styles.fieldLabel}>{t('schedule.numberOfPlayers')}</Text>
+                    <View style={styles.playerCountContainer}>
+                      <TouchableOpacity 
+                        style={styles.counterButton}
+                        onPress={() => {
+                          const current = parseInt(numPlayers) || 1;
+                          if (current > 1) {
+                            setNumPlayers((current - 1));
+                          }
+                        }}
+                      >
+                        <Icon 
+                          type="materialCommunityIcons" 
+                          name="minus" 
+                          size={24} 
+                          color="white"
+                        />
+                      </TouchableOpacity>
+                      <View style={styles.playerCountDisplay}>
+                        <Icon 
+                          type="materialCommunityIcons" 
+                          name="account-multiple" 
+                          size={16} 
+                          color={COLORS.primary}
+                        />
+                        <Text style={styles.playerCountText}>
+                          {numPlayers || 1}
+                        </Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={styles.counterButton}
+                        onPress={() => {
+                          const current = parseInt(numPlayers) || 1;
+                          setNumPlayers((current + 1));
+                        }}
+                      >
+                        <Icon 
+                          type="materialCommunityIcons" 
+                          name="plus" 
+                          size={24} 
+                          color="white"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+  
+                  {/* <View style={styles.fieldContainer}>
+                    <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
+                    <View style={styles.inputWrapper}>
+                      <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter promo code"
+                        placeholderTextColor="#999"
+                        value={promoCode}
+                        onChangeText={setPromoCode}
+                      />
+                      <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}> 
+                        <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View> */}
+  
+                  <View style={styles.priceInfo}>
+                    <View style={styles.priceRow}>
+                      <Text style={styles.priceLabel}>Price per player:</Text>
+                      <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
+                    </View>
+                    <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
+                      <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
+                        Total ({numPlayers || 0} players):
+                      </Text>
+                      <Text style={styles.discountedPriceText}>
+                        ${discountPrice || (game.price * (numPlayers || 1)).toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+  
+                  <View style={styles.buttonContainer}>
+                    <Button
+                      title="Cancel"
+                      style={{
+                        width: (SIZES.width) / 3,
+                        backgroundColor: COLORS.transparentPrimary,
+                        borderRadius: 32,
+                        borderColor: COLORS.transparentPrimary
+                      }}
+                      textColor={COLORS.primary}
+                      onPress={handleCloseModal}
+                    />
+                    <Button
+                      title="Confirm"
+                      filled
+                      style={styles.confirmButton}
+                      onPress={handleConfirmJoin}
+                    />
+                  </View>
+                </View>
+              ) : (
+                
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}></Text>
+                    <Pressable onPress={handleCloseModal} style={styles.closeButton}>
+                      <Icon type="materialCommunityIcons" name="close" size={24} color="#333" />
+                    </Pressable>
+                  </View>
+                
+                  <NotSignedInView
+                    heading="Sign in to join game"
+                    description="Access your upcoming and past sessions when signed in."
+                    containerStyle={{ flex: 1 }}
+                    onNavigate={() => setJoinModalVisible(false)}  // or however you close your modal
+                  />
+                </View>
+              )}
+            </View>
+          </Modal>
     </>
   );
 }
@@ -839,7 +908,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   joinButton: {
-      backgroundColor: COLORS.primary,
       marginHorizontal: 30,
       borderRadius: 20,
       justifyContent: 'center',

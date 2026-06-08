@@ -47,36 +47,36 @@ const requestPermission = async () => {
   return true; // iOS handled via Info.plist
 };
 export const getCurrentCity = async () => {
-    const hasPermission = await requestPermission();
-    if (!hasPermission) {
-      console.log('Permission denied');
-      return;
-    }
+  let city = 'Kansas City'; // default fallback
+  const hasPermission = await requestPermission();
+  console.log('Location permission:', hasPermission);
+  if (!hasPermission) {
+    console.log('Permission denied');
+    return city; // ← just return the string directly
+  }
 
-    return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-
-          try {
-            // Using OpenStreetMap Nominatim (free, no API key)
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-              { headers: { 'User-Agent': 'pickuplay/1.0' } } // required by Nominatim
-            );
-            const data = await response.json();
-            const city =
-              data.address.city ||
-              data.address.town ||
-              data.address.village ||
-              data.address.county;
-            resolve(city);
-          } catch (err) {
-            reject(err);
-          }
-        },
-        (error) => reject(error),
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-      );
-    });
-  };
+  return new Promise((resolve, reject) => {
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { 'User-Agent': 'pickuplay/1.0' } }
+          );
+          const data = await response.json();
+          city =
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            data.address.county;
+          resolve(city);
+        } catch (err) {
+          reject(err);
+        }
+      },
+      (error) => reject(error),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+};

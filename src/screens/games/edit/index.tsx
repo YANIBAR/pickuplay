@@ -1,6 +1,6 @@
 import { COLORS, SIZES } from '@constants';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Image as RNImage, } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Image as RNImage, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, } from 'react-native';
 import { Button,  Header } from '@components';
 import { useTranslation } from 'react-i18next';
 import { authenticatedApi, publicApi } from '@services/api';
@@ -36,7 +36,7 @@ const EditGameScreen = ({ route }) => {
     defaultValues: {
       title: '',
       description: '',
-      sportType: '',
+      sportTypeId: '',
       address: '',
       startTime: '',
       endTime: '',
@@ -50,7 +50,7 @@ const EditGameScreen = ({ route }) => {
   const [formData, setFormData] = useState({
     id: game?.id || '',
     title: game?.title || '',
-    sportType: game?.sportType.id || '',
+    sportTypeId: game?.sportType.id || '',
     city: game?.city || '',
     availableSpots: game?.availableSpots || '',
     nbrSpots: game?.nbrSpots || '',
@@ -63,16 +63,20 @@ const EditGameScreen = ({ route }) => {
     price: game?.price || ''
   });
   const PLAYER_OPTIONS = [
-    { label: '2v2', value: '4' },
-    { label: '3v3', value: '6' },
-    { label: '4v4', value: '8' },
-    { label: '5v5', value: '10' },
-    { label: '6v6', value: '12' },
-    { label: '7v7', value: '14' },
-    { label: '8v8', value: '16' },
-    { label: '9v9', value: '18' },
-    { label: '10v10', value: '20' },
-    { label: '11v11', value: '22' },
+    { label: '4', value: '4' },
+    { label: '6', value: '6' },
+    { label: '8', value: '8' },
+    { label: '10', value: '10' },
+    { label: '12', value: '12' },
+    { label: '14', value: '14' },
+    { label: '16', value: '16' },
+    { label: '18', value: '18' },
+    { label: '20', value: '20' },
+    { label: '22', value: '22' },
+    { label: '36', value: '36' },
+    { label: '48', value: '48' },
+    { label: '64', value: '64' },
+    { label: 'illimited', value: '100' },
   ];
 
   const getCities = async (): Promise<void> => {
@@ -273,8 +277,15 @@ const EditGameScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-      
-      <ScrollView style={styles.container}>
+      <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView style={styles.container}
+          contentContainerStyle={{ paddingBottom: 140 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
         <Header title={t('edit_game.edit_game')}/>
         <View style={styles.form}>
           <View style={styles.inputGroup}>
@@ -376,8 +387,8 @@ const EditGameScreen = ({ route }) => {
               labelField="label"
               valueField="value"
               placeholder={t('edit_game.select_sport_type') }
-              value={formData.sportType}
-              onChange={item => handleChange('sportType', item.value)}
+              value={formData.sportTypeId}
+              onChange={item => handleChange('sportTypeId', item.value)}
               style={[styles.dropdown, fieldsDisabled && styles.disabledDropdown]}
             />
           </View>
@@ -459,6 +470,9 @@ const EditGameScreen = ({ route }) => {
               placeholder={t('edit_game.enter_description')}
               multiline
               numberOfLines={4}
+              textAlignVertical="top"
+              blurOnSubmit={false}
+              returnKeyType="done"
             />
           </View>
   
@@ -471,7 +485,7 @@ const EditGameScreen = ({ route }) => {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+      </ScrollView></TouchableWithoutFeedback></KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -482,6 +496,7 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 16,
+    marginBottom: 80,
   },
   inputGroup: {
     marginBottom: 20,

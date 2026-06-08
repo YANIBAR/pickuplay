@@ -16,9 +16,8 @@ import {
   ForgotPasswordPhoneScreen,
   ForgotPasswordEmailScreen,
   CreateNewPasswordScreen,
-  ChatScreen,
-  EventDetailsScreen,
-  MatchupsScreen,
+  TeamsScreen,
+  LeaguesScreen,
   ScheduleScreen,
   GamesScreen,
   GameScreen,
@@ -28,7 +27,10 @@ import {
   AddGameScreen,
   SettingScreen,
   Notificationcreen,
-  ChangePasswordScreen
+  ChangePasswordScreen,
+  mapFieldsScreen,
+  addFieldScreen,
+  fieldScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -49,9 +51,8 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
       <Stack.Screen name="customerservice" component={CustomerServiceScreen} />
       <Stack.Screen name="terms" component={TermsScreen} />
-      <Stack.Screen name="chat" component={ChatScreen} />
-      <Stack.Screen name="eventDetail" component={EventDetailsScreen} />
-      <Stack.Screen name="matchups" component={MatchupsScreen} />
+      <Stack.Screen name="teams" component={TeamsScreen} />
+      <Stack.Screen name="leagues" component={LeaguesScreen} />
       <Stack.Screen name="booking" component={ScheduleScreen} />
       <Stack.Screen name="Games" component={GamesScreen} />
       <Stack.Screen name="myGames" component={MyGamesScreen} />
@@ -59,6 +60,9 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="addGame" component={AddGameScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
       <Stack.Screen name="game" component={GameScreen} />
+      <Stack.Screen name="map" component={mapFieldsScreen} />
+      <Stack.Screen name="addField" component={addFieldScreen} />
+      <Stack.Screen name="field" component={fieldScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="forgotpasswordmethods"component={ForgotPasswordMethodsScreen}/>
       <Stack.Screen name="forgotpasswordemail"component={ForgotPasswordEmailScreen}/>

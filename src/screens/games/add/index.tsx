@@ -26,7 +26,7 @@ import { StyleSheet } from 'react-native';
 interface FormData {
   title: string;
   description: string;
-  sportType: string;
+  sportType: number;
   address: string;
   city: string;
   startTime: string;
@@ -45,8 +45,9 @@ const AddGameScreen = () => {
   const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
   const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [sportType, setSportType] = useState("");
+  const [isCity, setCity] = useState(""); 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [sportTypeFocus, setSportTypeFocus] = useState(false);
   const [selectedImage, setSelectedImage] = useState<any>(null);
   const [sports, setSports] = useState<{ label: string; value: string }[]>([]);
   const [cities, setCities] = useState<{ label: string; value: string }[]>([]);
@@ -63,9 +64,9 @@ const AddGameScreen = () => {
     defaultValues: {
       title: '',
       description: '',
-      sportType: undefined,
+      sportType: 0, 
       address: '',
-      city: undefined,
+      city: '', 
       startTime: '',
       endTime: '',
       numPlayers: '',
@@ -79,16 +80,20 @@ const AddGameScreen = () => {
   const isPrivate = watch('isPrivate');
 
   const PLAYER_OPTIONS = [
-    { label: '2v2', value: '4' },
-    { label: '3v3', value: '6' },
-    { label: '4v4', value: '8' },
-    { label: '5v5', value: '10' },
-    { label: '6v6', value: '12' },
-    { label: '7v7', value: '14' },
-    { label: '8v8', value: '16' },
-    { label: '9v9', value: '18' },
-    { label: '10v10', value: '20' },
-    { label: '11v11', value: '22' },
+    { label: '4', value: '4' },
+    { label: '6', value: '6' },
+    { label: '8', value: '8' },
+    { label: '10', value: '10' },
+    { label: '12', value: '12' },
+    { label: '14', value: '14' },
+    { label: '16', value: '16' },
+    { label: '18', value: '18' },
+    { label: '20', value: '20' },
+    { label: '22', value: '22' },
+    { label: '36', value: '36' },
+    { label: '48', value: '48' },
+    { label: '64', value: '64' },
+    { label: 'illimited', value: '100' },
   ];
 
   const getSports = async (): Promise<void> => {
@@ -252,6 +257,7 @@ const AddGameScreen = () => {
   };
 
   const handleNextStep = async () => {
+    console.log('Validating Step 1...', FormData);
     if (await validateStep1()) {
       setCurrentStep(2);
       setStep(2);
@@ -263,39 +269,11 @@ const AddGameScreen = () => {
   // ─── Submit ───────────────────────────────────────────────────────────────
 
   const onSubmit = async (data: FormData) => {
-    console.log('Form Data:', data);
-    data.sportType = "1";
-    const validationRules = [
-      { condition: !data.title?.trim(), message: 'Title is required' },
-      { condition: !data.city?.trim(), message: 'City is required' },
-      { condition: !data.city?.trim(), message: 'City is required' },
-      { condition: !data.address?.trim(), message: 'Address is required' },
-      { condition: !data.startTime?.trim(), message: 'Start time is required' },
-      { condition: !data.endTime?.trim(), message: 'End time is required' },
-      { condition: !data.numPlayers?.trim(), message: 'Number of players is required' },
-      { condition: !isPrivate && !data.image, message: 'Image is required for public games' },
-    ];
-
-    const validationError = validationRules.find(r => r.condition);
-    if (validationError) {
-      Alert.alert('Validation Error', validationError.message);
-      return;
-    }
-
-    if (!isGameDurationValid(data.startTime, data.endTime)) {
-      Alert.alert('', 'Game duration cannot exceed 3 hours.');
-      return;
-    }
-
-    if (!isStartTimeValid(selectedDate, data.startTime)) {
-      Alert.alert('Error', 'Game must start at least 2 hours from now.');
-      return;
-    }
-
+   
     const payload = {
       title: data.title.trim(),
       description: data.description,
-      sportType: data.sportType,
+      sportType: sportType,
       city: data.city,
       address: data.address.trim(),
       date: formatDateForAPI(selectedDate),
@@ -304,7 +282,6 @@ const AddGameScreen = () => {
       nbrSpots: parseInt(data.numPlayers, 10),
       price: parseFloat(data.pricePerPlayer) || 0,
     };
-
     try {
       const response = await authenticatedApi.post('games/create', payload);
       const game = response.result.data;
@@ -322,7 +299,7 @@ const AddGameScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-      <Header title={`${t('schedule.createGame')} — ${formatDate(selectedDate)}`} />
+      <Header title={t('schedule.createGame')} />
       
       {/* Step Indicator */}
       <View style={styles.stepHeader}>
@@ -368,37 +345,6 @@ const AddGameScreen = () => {
                         style={[styles.textInput, errors?.title && { borderColor: 'red' }]}
                       />
                       {errors?.title && <Text style={styles.errorText}>{errors.title.message}</Text>}
-                    </View>
-                  )}
-                />
-              </View>
-                  {/* City */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>{t('schedule.sportType')}*</Text>
-                <Controller
-                  name="sportType"
-                  control={control}
-                  rules={{ required: 'sportType is required' }}
-                  render={({ field: { onChange, value } }) => (
-                    <View>
-                      <Dropdown
-                        style={[styles.dropdown, errors?.sportType && { borderColor: 'red' }]}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        inputSearchStyle={styles.inputSearchStyle}
-                        iconStyle={styles.iconStyle}
-                        data={sports}
-                        search
-                        maxHeight={300}
-                        labelField="label"
-                        valueField="value"
-                        placeholder={t('schedule.select_sport')}
-                        searchPlaceholder={t('schedule.search')}
-                        value={value}
-                        onBlur={async () => await trigger('sportType')}
-                        onChange={item => onChange(item.value)}
-                      />
-                      {errors?.sportType && <Text style={styles.errorText}>{errors.sportType.message}</Text>}
                     </View>
                   )}
                 />
@@ -486,38 +432,39 @@ const AddGameScreen = () => {
                 </View>
               </View>
 
-              {/* Image */}
+
+
+                  {/* sport Type */}
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>{t('schedule.selectImage')} *</Text>
+                <Text style={styles.formLabel}>{t('schedule.sportType')}*</Text>
                 <Controller
-                  name="image"
+                  name="sportType"
                   control={control}
-                  rules={{ required: !isPrivate ? 'Image is required' : false }}
-                  render={({ field: { value } }) => (
+                  rules={{ required: 'sportType is required' }}
+                  render={({ field: { onChange, value } }) => (
                     <View>
-                      <TouchableOpacity
-                        style={[styles.imageButton, errors?.image && { borderColor: 'red' }]}
-                        onPress={handleImagePicker}
-                      >
-                        <Text style={styles.imageButtonText}>
-                          {value ? t('schedule.changeImage') : t('schedule.selectImage')}
-                        </Text>
-                      </TouchableOpacity>
-                      {value && (
-                        <View style={styles.imagePreviewContainer}>
-                          <RNImage source={{ uri: value }} style={styles.imagePreview} />
-                          <TouchableOpacity style={styles.removeImageButton} onPress={handleRemoveImage}>
-                            <Text style={styles.removeImageButtonText}>{t('schedule.removeImage')}</Text>
-                          </TouchableOpacity>
-                        </View>
-                      )}
-                      {errors?.image && <Text style={styles.errorText}>{errors.image.message}</Text>}
+                      <Dropdown
+                        style={[styles.dropdown, errors?.sportType && { borderColor: 'red' }]}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={sports}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={t('schedule.select_sport')}
+                        searchPlaceholder={t('schedule.search')}
+                        value={sportType || ''} // always controlled
+                        onBlur={async () => await trigger('sportType')}
+                        onChange={item => setSportType(item.value)}
+                      />
+                      {errors?.sportType && <Text style={styles.errorText}>{errors.sportType.message}</Text>}
                     </View>
                   )}
                 />
               </View>
-
-
               {/* Description */}
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>{t('schedule.description')} *</Text>
@@ -551,6 +498,39 @@ const AddGameScreen = () => {
                   )}
                 />
               </View>
+              {/* Image */}
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>{t('schedule.selectImage')} *</Text>
+                <Controller
+                  name="image"
+                  control={control}
+                  rules={{ required: !isPrivate ? 'Image is required' : false }}
+                  render={({ field: { value } }) => (
+                    <View>
+                      <TouchableOpacity
+                        style={[styles.imageButton, errors?.image && { borderColor: 'red' }]}
+                        onPress={handleImagePicker}
+                      >
+                        <Text style={styles.imageButtonText}>
+                          {value ? t('schedule.changeImage') : t('schedule.selectImage')}
+                        </Text>
+                      </TouchableOpacity>
+                      {value && (
+                        <View style={styles.imagePreviewContainer}>
+                          <RNImage source={{ uri: value }} style={styles.imagePreview} />
+                          <TouchableOpacity style={styles.removeImageButton} onPress={handleRemoveImage}>
+                            <Text style={styles.removeImageButtonText}>{t('schedule.removeImage')}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                      {errors?.image && <Text style={styles.errorText}>{errors.image.message}</Text>}
+                    </View>
+                  )}
+                />
+              </View>
+
+
+              
 
             </View>
           ) : (
@@ -575,7 +555,6 @@ const AddGameScreen = () => {
                   onCancel={() => setDatePickerVisibility(false)}
                 />
               </View>
-
               {/* City */}
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>{t('add_game.city')} *</Text>
@@ -598,7 +577,7 @@ const AddGameScreen = () => {
                         valueField="value"
                         placeholder={t('add_game.select_city')}
                         searchPlaceholder={t('schedule.search')}
-                        value={value}
+                        value={value || ''} // always controlled
                         onBlur={async () => await trigger('city')}
                         onChange={item => onChange(item.value)}
                       />

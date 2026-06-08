@@ -11,10 +11,7 @@ const PriceTag: React.FC<PriceTagProps> = ({ game, unit = '/ player' }) => {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={[styles.originalPrice]}>
-                {game.price ? "$" + game.price.toFixed(2) : 'Free'}
-            </Text>
-            <Text style={{ fontSize: 12, color: COLORS.secondary, marginLeft: 4 }}>
-                {unit}
+                {game.price ? "$" + game.price.toFixed(2) + unit : 'Free'}
             </Text>
             {game.discount && (
             <Text style={styles.originalPrice}>${(game.price - game.discount).toFixed(2)}</Text> 

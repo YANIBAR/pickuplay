@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   MatchupsScreen,
-  ScheduleScreen,
+  mapFieldsScreen,
   GamesScreen,
   ProfileScreen,
-  AddGameScreen
+  AddGameScreen,
+  LeaguesScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -56,18 +57,18 @@ const TabNavigator = () => {
       />
 
       <Tab.Screen
-        name="Matchups"
-        component={MatchupsScreen}
+        name="Fields"
+        component={mapFieldsScreen}
         options={{
-          tabBarLabel: t('menu.matchups'),
+          tabBarLabel: t('menu.fields'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="sword-cross" type="materialCommunityIcons" color={color} size={size} />
+            <Icon name="navigate" type="ionicons" color={color} size={size} />
           ),
         }}
       />
 
       {/* Center raised button — only navigable for ORGANIZER, but always visible */}
-      {role === 'ORGANIZER' && (
+      {(role === 'ORGANIZER' || role === 'ADMIN') && (
           <Tab.Screen
             name="addGame"
             component={AddGameScreen}
@@ -81,12 +82,12 @@ const TabNavigator = () => {
       )}
 
       <Tab.Screen
-        name="Schedule"
-        component={ScheduleScreen}
+        name="Leagues"
+        component={LeaguesScreen}
         options={{
-          tabBarLabel: t('menu.schedule'),
+          tabBarLabel: t('menu.leagues'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="calendar-outline" type="ionicons" color={color} size={size} />
+            <Icon name="trophy" type="materialCommunityIcons" color={color} size={size} />
           ),
         }}
       />

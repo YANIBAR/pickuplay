@@ -52,11 +52,11 @@ const createApi = (requiresAuth: boolean) => {
             throw new Error('No refresh token');
           }
 
+
           const response = await axios.post(
             `${JAVA_API}/auth/refresh`,
             { refresh_token: refreshToken }
           );
-
           const newAccessToken = response.data.access_token;
 
           await AsyncStorage.setItem('access_token', newAccessToken);
@@ -67,19 +67,19 @@ const createApi = (requiresAuth: boolean) => {
           return instance(originalRequest);
 
         } catch (err) {
-          processQueue(err, null);
+           processQueue(err, null);
 
-          // 🔴 Important: logout user
-          await AsyncStorage.removeItem('access_token');
-          await AsyncStorage.removeItem('refresh_token');
+           // 🔴 Important: logout user
+           await AsyncStorage.removeItem('access_token');
+           await AsyncStorage.removeItem('refresh_token');
 
-          Alert.alert('Session expired', 'Please login again');
+           Alert.alert('Session expired', 'Please login again');
 
-          return Promise.reject(err);
+           return Promise.reject(err);
 
-        } finally {
+         } finally {
           isRefreshing = false;
-        }
+         }
       }
 
       return Promise.reject(error);

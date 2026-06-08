@@ -14,6 +14,7 @@ const rectangleCard = require('@assets/images/rectangle-card.png');
 const orderSuccess = require('@assets/images/order_success.png');
 const icon = require('@assets/images/icon.png');
 const matchups = require('@assets/images/matchups.png');
+const leagueCover = require('@assets/images/league-cover.png');
 
 const images = {
   logo,
@@ -29,7 +30,8 @@ const images = {
   rectangleCard,
   orderSuccess,
   icon,
-  matchups
+  matchups,
+  leagueCover
 };
 
 export default images;

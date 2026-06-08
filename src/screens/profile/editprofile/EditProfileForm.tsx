@@ -45,12 +45,10 @@ const EditProfileForm = ({ onShowgame }) => {
   ];
   const handleDeleteAccount = async () => {
     try {
-      const token = await AsyncStorage.getItem('access_token');
+
 
       // Call your delete-account endpoint
-      await authenticatedApi.delete(`profile/delete`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await authenticatedApi.delete(`profile`);
 
       // Clear all local storage just like logout
       const keysToRemove = [
@@ -59,25 +57,25 @@ const EditProfileForm = ({ onShowgame }) => {
       ];
       await AsyncStorage.multiRemove(keysToRemove);
       await refreshUserData();
-
+      refDeleteSheet.current?.close();
       navigate("welcome");
     } catch (e) {
       console.error('Failed to delete account', e);
       Alert.alert('Error', 'Failed to delete account. Please try again.');
     }
   };
-useEffect(() => {
-  if (userData) {
-    setUser({
-      userId: userData.id ?? "",
-      firstName: userData.firstName ?? "",
-      lastName: userData.lastName ?? "",
-      email: userData.email ?? "",
-      phone: userData.phone ?? "",
-      city: userData.city ?? "",
-    });
-  }
-}, [userData]);
+  useEffect(() => {
+    if (userData) {
+      setUser({
+        userId: userData.id ?? "",
+        firstName: userData.firstName ?? "",
+        lastName: userData.lastName ?? "",
+        email: userData.email ?? "",
+        phone: userData.phone ?? "",
+        city: userData.city ?? "",
+      });
+    }
+  }, [userData]);
 
   const handleUpdateUser = async () => {
     try {     

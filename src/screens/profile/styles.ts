@@ -440,7 +440,7 @@ export default StyleSheet.create({
         backgroundColor: COLORS.white,
         borderColor: "rgba(0,0,0,0.06)",
         borderWidth: 1,
-        marginVertical: 12,
+        marginVertical: 8,
         shadowColor: COLORS.primary,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.12,
@@ -588,5 +588,33 @@ export default StyleSheet.create({
     width: 1,
     height: 46,
     backgroundColor: COLORS.transparentPrimary, // or '#E5E5E5' for neutral
-    }
+    },
+    scheduleCard: {
+        backgroundColor: '#fff',
+        padding: 18,
+        borderRadius: 18,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderColor: "rgba(0,0,0,0.06)",
+        borderWidth: 1,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 3,
+        marginBottom: 12,
+        flexDirection: 'row',
+    },
+
+    scheduleTitle: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: '#222',
+    },
+
+    scheduleSubtitle: {
+        fontSize: 13,
+        color: '#777',
+        marginTop: 2,
+    },
 });

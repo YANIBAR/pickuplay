@@ -5,10 +5,11 @@ import { withProviders } from '@hocs';
 import AuthProvider from './src/shared/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Linking, PermissionsAndroid, Platform, StyleSheet, Text, View } from 'react-native';
 import { NotificationProvider, useNotifications } from '@contexts/NotificationContext';
 import { notifications as initialNotifications } from '@data';
-import messaging from '@react-native-firebase/messaging';
+import messaging, { getMessaging, requestPermission } from '@react-native-firebase/messaging';
+import { getApp } from '@react-native-firebase/app';
 
 const navigationRef = createNavigationContainerRef();
 
@@ -125,6 +126,27 @@ const App: FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string>('login');
 
+  // 🔹 Request notification permission
+  function requestNotificationPermission() {
+    try {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        ).then(granted => {
+          console.log('Android POST_NOTIFICATIONS:', granted);
+        });
+      }
+      // Register for remote messages before requesting permission or getting token
+      getMessaging(getApp()).registerDeviceForRemoteMessages().then(() => {
+        requestPermission(getMessaging(getApp())).then(authStatus => {
+          console.log('Firebase auth status:', authStatus);
+        });
+      });
+    } catch (error) {
+      console.error('Permission error:', error);
+    }
+  }
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -152,6 +174,10 @@ const App: FC = () => {
     });
 
     return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    requestNotificationPermission();
   }, []);
 
   if (!isReady) return null;

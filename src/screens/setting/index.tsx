@@ -112,30 +112,30 @@ const Profile = () => {
       const userName = userData?.firstName || 'Your friend';
 
       // 👇 unique referral link
-      const referralLink = `https://mgopass.com/pickuplay/index.html?ref=${userData?.id}`;
+      const referralLink = `https://pickuplay.com/`;
 
       const message = `⚽ ${userName} invited you to join Pickuplay!
 
-  Find and join games near you instantly.
+        Find and join games near you instantly.
 
-  🎁 Use my invite and join your first game!
-  👉 ${referralLink}
+        🎁 Use my invite and join your first game!
+        👉 ${referralLink}
 
-  📲 Download the app and start playing!`;
+        📲 Download the app and start playing!`;
 
-      const result = await Share.share({
-        message,
-        title: 'Join me on Pickuplay',
-      });
+            const result = await Share.share({
+              message,
+              title: 'Join me on Pickuplay',
+            });
 
-      if (result.action === Share.sharedAction) {
-        console.log('Referral shared successfully');
-      }
-    } catch (error) {
-      console.error('Error sharing referral:', error);
-      Alert.alert('Error', 'An error occurred while sharing the invite.');
-    }
-  };
+            if (result.action === Share.sharedAction) {
+              console.log('Referral shared successfully');
+            }
+          } catch (error) {
+            console.error('Error sharing referral:', error);
+            Alert.alert('Error', 'An error occurred while sharing the invite.');
+          }
+        };
   useEffect(() => {
     const checkToken = async () => {
       const expired = await isStoredTokenExpired();

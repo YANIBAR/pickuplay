@@ -5,7 +5,8 @@ import {
   mapFieldsScreen,
   GamesScreen,
   ProfileScreen,
-  AddGameScreen
+  AddGameScreen,
+  LeaguesScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -67,7 +68,7 @@ const TabNavigator = () => {
       />
 
       {/* Center raised button — only navigable for ORGANIZER, but always visible */}
-      {role === 'ORGANIZER' && (
+      {(role === 'ORGANIZER' || role === 'ADMIN') && (
           <Tab.Screen
             name="addGame"
             component={AddGameScreen}
@@ -81,12 +82,12 @@ const TabNavigator = () => {
       )}
 
       <Tab.Screen
-        name="Matchups"
-        component={MatchupsScreen}
+        name="Leagues"
+        component={LeaguesScreen}
         options={{
-          tabBarLabel: t('menu.matchups'),
+          tabBarLabel: t('menu.leagues'),
           tabBarIcon: ({ color, size }) => (
-            <Icon name="sword-cross" type="materialCommunityIcons" color={color} size={size} />
+            <Icon name="trophy" type="materialCommunityIcons" color={color} size={size} />
           ),
         }}
       />

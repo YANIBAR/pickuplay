@@ -83,7 +83,7 @@ android {
         applicationId "com.pickuplay.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 12
+        versionCode 21
         versionName "1.0.1"
         missingDimensionStrategy 'react-native-camera', 'general'
         externalNativeBuild {
@@ -91,6 +91,9 @@ android {
                 version "3.22.1"
             }
         }
+        manifestPlaceholders = [
+            GOOGLE_MAPS_API_KEY: project.findProperty("GOOGLE_MAPS_API_KEY") ?: ""
+        ]
     }
     signingConfigs {
         debug {

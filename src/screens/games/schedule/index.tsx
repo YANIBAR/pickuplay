@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, SafeAreaView } from 'react-native';
 import styles from './styles';
-import Header from './components/Header';
+import ScheduleHeader from './components/Header';
 import DayCard from './components/DayCard';
 import GameModal from './components/GameModal';
 import { authenticatedApi } from '@services/api';
 import { isStoredTokenExpired } from '@utils/api/auth';
+import { Header } from '@components';
+import { useTranslation } from 'react-i18next';
 
 interface Participant {
   id: number;
@@ -49,6 +51,7 @@ interface FormData {
 }
 
 export default function HomeScreen({ route }) {
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -200,7 +203,8 @@ export default function HomeScreen({ route }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Header
+      <Header title={t('menu.schedule')} />
+      <ScheduleHeader
         weekStart={weekStart}
         onPreviousWeek={goToPreviousWeek}
         onNextWeek={goToNextWeek}

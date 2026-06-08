@@ -439,6 +439,25 @@
     "createMatchup": "Create Matchup",
     "findTeams": "Find Teams"
   },
+  "leagues": {
+    "comingSoon": "Coming soon",
+    "createLeagueComingSoon": "The league creation feature is coming soon. Stay tuned!",
+    "createLeague": "Create League",
+    "findTeams": "Find Teams",
+    "startLeague": "Start your own league",
+    "noLeagues": "No leagues available.",
+    "description": "Leagues are a great way to organize regular competitions and events.",
+    "joinLeague": "Join a League",
+    "joinLeagueDescription": "Join as a player or as a team to participate in exciting leagues.",
+    "joinAsPlayer": "Join as Player",
+    "joinAsTeam": "Join as Team"
+  },
+  "teams": {
+    "title": "Find Teams",
+    "noTeams": "Teams feature coming soon",
+    "description":
+      "Soon you'll be able to discover teams, join squads, and challenge other teams to matchups.",
+  },
   "faq": {
     "categories": {
       "general": "General",
@@ -511,6 +530,8 @@
     "fields": "Fields",
     "rented": "Rented",
     "organizedGames": "Organized Games",
+    "list": "List",
+    "calendar": "Calendar",
     "noActivity": "You have no activity yet.",
     "firstGame": "Check back here once you play your first game. ⚽",
     "uploadSuccessTitle": "Success",
@@ -529,10 +550,20 @@
     "eventsPerYear_plural": "{{count}} Events/year"
   },
   "games_header": "games list",
+  "add_game": {
+    "city": "City",
+    "select_city": "Select city",
+    "date": "Date",
+    "select_date": "Select date",
+    "title": "Add Game",
+    "description": "Fill in the details to create a new game.",
+    "game_created": "Game created successfully"
+  },
   "game": {
     "details": {
       "title": "Game Details"
     },
+    "invite": "Send Invitation",
     "alreadyJoined": "You already joined",
     "gameCanceled": "Game canceled",
     "gameFull": "Game is full",
@@ -551,33 +582,48 @@
       "deepLinkLabel": "Deep Link:",
       "failedToShare": "Failed to share game",
       "linkCopied": "Game link copied to clipboard."
-    }
+    },
+    "selectDatesToClone": "Select dates to clone this game",
+    "clone": "Clone",
+    "cloneSuccess": "Game cloned successfully!",
+    "cloneFailed": "Failed to clone game.",
+    "selectAtLeastOneDate": "Please select at least one date."
   },
   "myGames": {
     "full": "Full",
     "spotsAvailable": "{{count}}  Spots Available"
   },
   "edit_game" : {
-    "edit_game": "Edit game",
-    "game_title": "game Title",
-    "enter_game_title": "Enter game Title",
-    "sportType": "Type",
-    "select_sport_type": "Select a sport type...",
+    "edit_game": "Edit Game",
+    "game_title": "Game Title",
+    "enter_game_title": "Enter game title",
+    "price": "Price",
+    "enter_price": "Enter price",
+    "city": "City",
+    "select_city": "Select city",
     "address": "Address",
     "enter_address": "Enter address",
-    "city": "City",
-    "select_city": "Select a city...",
+    "sportType": "Sport Type",
+    "select_sport_type": "Select sport type",
     "availableSpots": "Available Spots",
-    "select_available_spots": "Select available spots...",
-    "allowed_visits": "Allowed Visits",
+    "select_available_spots": "Select available spots",
+    "date": "Date",
     "description": "Description",
     "enter_description": "Enter description",
     "save": "Save",
-    "cancel": "Cancel",
-    "price": "Price",
-    "date": "Date",
-    "game_updated": "Game updated successfully!",
-    "validation_error": "Error"
+    "game_updated": "Game updated successfully",
+    "validation_error": "Validation Error",
+    "invalid_data": "Invalid data",
+    "error": "Error",
+    "forbidden": "You are not allowed to edit this game",
+    "not_found": "Game not found",
+    "server_error": "An unexpected error occurred. Please try again",
+    "select_image": "Select Image",
+    "change_image": "Change Image",
+    "remove_image": "Remove",
+    "start_time": "Start Time",
+    "end_time": "End Time",
+    "image_required": "Image is required",
   },
   "image_upload": {
     "upload_image": "Upload Image",
@@ -635,5 +681,32 @@
       "error": "Error"
     },
     "divider": "OR"
+  },
+  "field": {
+    "details": {
+      "title": "Field Details"
+    },
+
+    "address": "Address",
+    "city": "City",
+    "date": "Date",
+    "sportType": "Sport Type",
+    "environment": "Environment",
+    "access": "Access",
+
+    "indoor": "Indoor",
+    "outdoor": "Outdoor",
+
+    "getDirections": "Get Directions",
+    "copyLink": "Copy Link",
+
+    "shareError": "Unable to share field. Please try again.",
+    "linkCopied": "Link copied to clipboard!",
+
+    "accessType": {
+      "free": "Free",
+      "paid": "Paid",
+      "private": "Private",
+    }
   }
 }

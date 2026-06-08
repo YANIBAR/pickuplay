@@ -210,23 +210,6 @@ const SignUp = () => {
         )}*/}
 
         <Controller
-          name="phone"
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Phone
-              value={value}
-              onBlur={onBlur}
-              icon={icons.telephone}
-              onChangeText={onChange}
-              onSelectCode={(code) => setCallingCode(code)}
-              placeholder={t('c.phoneNumber') + ' (' + t('c.optional') + ')'}
-              errorText={errors?.phone?.message}
-            />
-          )}
-        />
-        
-
-        <Controller
           name="password"
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
@@ -263,13 +246,13 @@ const SignUp = () => {
         />
 
         <Button
-  filled
-  loading={isLoading}
-  disabled={!isValid || isLoading}
-  title={t('signUp.createMyAccount')}
-  onPress={handleSubmit(onSubmit)}
-  style={styles.button}
-/>    
+          filled
+          loading={isLoading}
+          disabled={!isValid || isLoading}
+          title={t('signUp.createMyAccount')}
+          onPress={handleSubmit(onSubmit)}
+          style={styles.button}
+        />    
       </View>
     </SafeAreaView>
     

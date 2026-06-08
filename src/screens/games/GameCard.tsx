@@ -17,9 +17,10 @@ import { useUserData } from '@services/useUserData';
       3: 'volleyball',
       5: 'tennis',
       4: 'hockey-sticks',
-      6: 'table-tennis',
+      6: 'cricket',
       7: 'table-tennis',
-      8: 'football'
+      8: 'football',
+      9: 'baseball',
     };
     return iconMap[type] || 'sports';
   };
@@ -147,9 +148,12 @@ import { useUserData } from '@services/useUserData';
               source={{ uri: `${JAVA_API}games/${game.id}/image` }}
               style={styles.image}
               />
-            <View style={[styles.participantsBadgeBase, game.nbrSpots >= game.participants.length ? styles.participantsBadge : styles.participantsBadgeFull]}>
-              <Text style={styles.usedText}>{game.nbrSpots-game.availableSpots} / {game.nbrSpots}</Text>
-            </View>
+            {game.nbrSpots !== 100 && (
+              <View style={[styles.participantsBadgeBase, game.nbrSpots >= game.participants.length ? styles.participantsBadge : styles.participantsBadgeFull]}>
+              
+                <Text style={styles.usedText}>{game.nbrSpots-game.availableSpots} / {game.nbrSpots}</Text>
+              </View>
+            )}
 
           </View>
           <View style={styles.content}>
@@ -235,13 +239,13 @@ import { useUserData } from '@services/useUserData';
                 <View style={styles.divider} />
 
                 <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('games.guests')}</Text>
+                  <Text style={styles.fieldLabel}>{t('schedule.numberOfPlayers')}</Text>
                   <View style={styles.playerCountContainer}>
                     <TouchableOpacity 
                       style={styles.counterButton}
                       onPress={() => {
-                        const current = parseInt(numPlayers) || 0;
-                        if (current > 0) {
+                        const current = parseInt(numPlayers) || 1;
+                        if (current > 1) {
                           setNumPlayers((current - 1));
                         }
                       }}
@@ -261,13 +265,13 @@ import { useUserData } from '@services/useUserData';
                         color={COLORS.primary}
                       />
                       <Text style={styles.playerCountText}>
-                        {numPlayers || 0}
+                        {numPlayers || 1}
                       </Text>
                     </View>
                     <TouchableOpacity 
                       style={styles.counterButton}
                       onPress={() => {
-                        const current = parseInt(numPlayers) || 0;
+                        const current = parseInt(numPlayers) || 1;
                         setNumPlayers((current + 1));
                       }}
                     >
@@ -308,7 +312,7 @@ import { useUserData } from '@services/useUserData';
                       Total ({numPlayers || 0} players):
                     </Text>
                     <Text style={styles.discountedPriceText}>
-                      ${discountPrice || (game.price * (numPlayers + 1 || 0)).toFixed(2)}
+                      ${discountPrice || (game.price * (numPlayers || 1)).toFixed(2)}
                     </Text>
                   </View>
                 </View>

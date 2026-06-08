@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Header, OtpInput, Button, View, Text, ErrorModal } from '@components';
+import { Header, OtpInput, Button, View, Text, ErrorModal, SuccessModal } from '@components';
 import { COLORS, screens } from '@constants';
 import styles from './styles';
 import { publicApi } from '@services/api';
@@ -18,64 +18,68 @@ const OTPVerification = () => {
   const [disabled, setDisabled] = useState<boolean>(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [otp, setOtp] = useState('');
-  const { email, action, phone } = useRoute().params;
+  const route = useRoute();
+  const [email, setEmail] = useState(route.params?.email ?? '');
+  const [action, setAction] = useState(route.params?.action ?? '');
+  const [phone, setPhone] = useState(route.params?.phone ?? '');
+  const [visible, setVisible] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [title, setTitle] = useState('');
   const next_navigation = action;
   const handleCheckOtp = async () => {
-
-      console.log('Verifying OTP for password reset with:', { email, otp });
-  if (time === 0) {
-    showAlert(
-      t('otpVerification.errorTitle'),
-      t('otpVerification.timeExpiredMessage')
-    );
-    return;
-  }
-
-  try {
-    if (next_navigation === "register") {
-      await publicApi.post(`auth/verify-account`, {
-        email,
-        otp,
-      });
-    } else if (next_navigation === "resetPassword") {
-      await publicApi.post(`auth/verify-reset-otp`, {
-        email,
-        otp,
-      });
+    console.log('Checking OTP:', otp, 'for email:', email, 'and action:', action, "time remaining:", time);
+    if (time === 0) {
+      showAlert(
+        t('otpVerification.errorTitle'),
+        t('otpVerification.timeExpiredMessage')
+      );
+      return;
     }
 
-    navigate(
-      next_navigation === "resetPassword"
-        ? screens.createnewpassword
-        : screens.login,
-      { email, otp }
-    );
+    try {
 
-  } catch (error: any) {
-    const status = error?.response?.status;
+        await publicApi.post(`auth/verify-account`, {
+          email,
+          otp,
+        });
+      setVisible(true);
+      navigate(
+        next_navigation === "resetPassword"
+          ? screens.createnewpassword
+          : screens.welcome,
+        { email, otp }
+      );
 
-    if (status === 400 || status === 401) {
-      showAlert(
-        t('otpVerification.errorTitle'),
-        t('otpVerification.invalidOtpMessage')
-      );
-    } else if (status === 410) {
-      showAlert(
-        t('otpVerification.errorTitle'),
-        t('otpVerification.otpExpiredMessage')
-      );
-    } else {
-      showAlert(
-        t('otpVerification.errorTitle'),
-        t('otpVerification.genericErrorMessage')
-      );
+    } catch (error: any) {
+      const status = error?.response?.status;
+
+      if (status === 400 || status === 401) {
+        showAlert(
+          t('otpVerification.errorTitle'),
+          t('otpVerification.invalidOtpMessage')
+        );
+      } else if (status === 410) {
+        showAlert(
+          t('otpVerification.errorTitle'),
+          t('otpVerification.otpExpiredMessage')
+        );
+      } else {
+        showAlert(
+          t('otpVerification.errorTitle'),
+          t('otpVerification.genericErrorMessage')
+        );
+      }
     }
-  }
-};
+  };
   
+  
+    const onClose = (): void => {
+      setVisible(false);
+      if (next_navigation === "register") {
+        navigate(screens.login);
+      }
+    };
   const handleResend = async () => {
     try {
       // Send a request to refresh the OTP code for the given email
@@ -139,7 +143,6 @@ const OTPVerification = () => {
 
   useEffect(() => {
     startTimer();
-    console.log('Email for OTP verification:', email);
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -147,6 +150,12 @@ const OTPVerification = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (route.params?.email) setEmail(route.params.email);
+    if (route.params?.action) setAction(route.params.action);
+    if (route.params?.phone) setPhone(route.params.phone);
+  }, [route.params]);
+  
   const resend = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -218,6 +227,8 @@ const OTPVerification = () => {
         >
         </ErrorModal>
       </View>
+
+          <SuccessModal visible={visible} onClose={onClose} />
     </SafeAreaView>
   );
 };

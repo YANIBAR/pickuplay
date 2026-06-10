@@ -22,7 +22,7 @@ export { default as CustomerServiceScreen } from './setting/customerservice';
 export { default as PrivacyPolicyScreen } from './setting/privacypolicy';
 export { default as PaymentScreen } from './setting/payment';
 export { default as TermsScreen } from './setting/terms';
-//export { default as ChatScreen  } from './chat';
+export { default as ChatScreen  } from './games/game/chat';
 export { default as TeamsScreen  } from './teams';
 export { default as LeaguesScreen  } from './leagues';
 export { default as GamesScreen } from './games';

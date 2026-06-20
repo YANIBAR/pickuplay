@@ -2046,6 +2046,11 @@
   dependencies:
     firebase "12.10.0"
 
+"@react-native-firebase/database@^24.1.1":
+  version "24.1.1"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/database/-/database-24.1.1.tgz#679d1e0c96d09c36ad73093ecbe988ee2dfde566"
+  integrity sha512-6C3mVPjFnh7cU6eDsxwIHhDShuot+FHZ38xLKXQh8sBhI5z+Y9fZvAm+w5IYE8f0kKseHpftuv987FonfI7W2g==
+
 "@react-native-firebase/firestore@^24.1.1":
   version "24.1.1"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-24.1.1.tgz#677ace9fb4f2a10402cb626c2e3feafd14a862a0"

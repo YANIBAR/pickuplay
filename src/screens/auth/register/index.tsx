@@ -12,7 +12,7 @@ import { registerSchema } from '@utils/validators';
 import styles from './styles';
 import { publicApi } from '@services/api';
 type Nav = {
-  navigate: (value: string) => void;
+  navigate: (value: string, params?: any) => void;
 };
 
 const SignUp = () => {
@@ -35,7 +35,7 @@ const SignUp = () => {
   });
  const [apiError, setApiError] = useState<string | null>(null);
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: any) => {
     setApiError(null); // Reset error
     const payload = {
       ...formData,
@@ -48,6 +48,7 @@ const SignUp = () => {
         email: payload.email,
         phone: payload.phone,
         action: "register",
+        password: payload.password,
       });
     } catch (error: any) {
       // Axios error: error.response?.data?.message or similar

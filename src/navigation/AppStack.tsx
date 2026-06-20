@@ -30,7 +30,9 @@ import {
   ChangePasswordScreen,
   mapFieldsScreen,
   addFieldScreen,
-  fieldScreen
+  fieldScreen,
+  ChatScreen,
+  ProfileOnboardingScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -42,6 +44,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
     <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="welcome" component={TabNavigator} /> 
       <Stack.Screen name="onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="profileOnboarding" component={ProfileOnboardingScreen} />
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="profile" component={ProfileScreen} />
       <Stack.Screen name="setting" component={SettingScreen} />
@@ -59,8 +62,10 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="editGame" component={EditGameScreen} />
       <Stack.Screen name="addGame" component={AddGameScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
-      <Stack.Screen name="game" component={GameScreen} />
       <Stack.Screen name="map" component={mapFieldsScreen} />
+      <Stack.Screen name="game" component={GameScreen} />
+      <Stack.Screen name="chat" component={ChatScreen} />
+      
       <Stack.Screen name="addField" component={addFieldScreen} />
       <Stack.Screen name="field" component={fieldScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />

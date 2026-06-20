@@ -110,7 +110,7 @@ export default function GamesScreen() {
     }
 
     return (
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.card}>
         {games.map((game) => (
           <GameCard
             key={game.id}
@@ -140,6 +140,16 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  card: {
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   centerContainer: {
     flex: 1,

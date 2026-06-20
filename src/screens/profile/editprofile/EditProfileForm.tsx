@@ -52,7 +52,7 @@ const EditProfileForm = ({ onShowgame }) => {
 
       // Clear all local storage just like logout
       const keysToRemove = [
-        'access_token', 'id', 'firstName', 'lastName', 'email',
+        'access_token', "refresh_token", 'id', 'firstName', 'lastName', 'email',
         'phone', 'role', 'preferredLanguage', 'profileImage', 'gameId',
       ];
       await AsyncStorage.multiRemove(keysToRemove);

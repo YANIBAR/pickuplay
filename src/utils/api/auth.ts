@@ -1,6 +1,7 @@
 import api from '@services/api';
 import { loginFormData, registerFormData } from '@types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Buffer } from 'buffer';
 
 export default {
   login: async (data: loginFormData) => await api.post('users', data),
@@ -16,13 +17,14 @@ export default {
  * @param {string} token - JWT token string
  * @returns {boolean} - true if expired, false if valid
  */
-export const isTokenExpired = (token) => {
+export const isTokenExpired = (token?: string | null): boolean => {
   if (!token) return true;
 
   try {
     // Decode the payload (middle part of JWT)
     const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
+    const decodedJson = Buffer.from(payload, 'base64').toString('utf8');
+    const decoded = JSON.parse(decodedJson) as { exp?: number };
 
     if (!decoded.exp) return false; // No expiry set — treat as valid
 
@@ -40,8 +42,18 @@ export const isTokenExpired = (token) => {
  */
 export const isStoredTokenExpired = async () => {
   try {
-    const token = await AsyncStorage.getItem('access_token');
-    return isTokenExpired(token);
+    const accessToken = await AsyncStorage.getItem('access_token');
+    const accessExpired = isTokenExpired(accessToken);
+
+    if (!accessExpired) return false; // access token still valid
+
+    // Access expired -> check refresh token existence and expiry
+    const refreshToken = await AsyncStorage.getItem('refresh_token');
+    if (!refreshToken) return true; // no refresh token -> expired
+
+    const refreshExpired = isTokenExpired(refreshToken);
+    // If refresh token is still valid we consider the session alive (can refresh)
+    return refreshExpired;
   } catch (error) {
     console.error('Error reading token:', error);
     return true;
@@ -53,12 +65,13 @@ export const isStoredTokenExpired = async () => {
  * @param {string} token - JWT token string
  * @returns {number} - seconds remaining (negative if already expired)
  */
-export const getTokenTimeRemaining = (token) => {
+export const getTokenTimeRemaining = (token?: string | null): number => {
   if (!token) return -1;
 
   try {
     const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
+    const decodedJson = Buffer.from(payload, 'base64').toString('utf8');
+    const decoded = JSON.parse(decodedJson) as { exp?: number };
 
     if (!decoded.exp) return Infinity;
 

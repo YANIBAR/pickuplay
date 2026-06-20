@@ -79,36 +79,41 @@ import { useUserData } from '@services/useUserData';
       setIsJoining(true);
       try {
         const response = await authenticatedApi.post(`games/${game.id}/unjoin`);
-
         if (response.status === 200) {
-          console.log('Unjoining game with ID:', game.id);
+          setIsLogged(true); // ✅ token worked → still logged in
           onRefresh?.();
         }
       } catch (error) {
         console.error('Error unjoining game:', error);
+        setIsLogged(false); // ✅ 401 that couldn't refresh → logged out
       } finally {
         setIsJoining(false);
       }
-    }
+    };
 
-   const handleConfirmJoin = async () => {
-    setIsJoining(true);
-    try {
-      const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
-      if (response.status === 200) {
-        setJoinModalVisible(false);
-        setNumPlayers(0);
-        setPromoCode('');
-        Alert.alert(t('games.successJoined'));
-        onRefresh?.();  // trigger refresh
+    const handleConfirmJoin = async () => {
+      setIsJoining(true);
+      try {
+        const response = await authenticatedApi.post(
+          `games/${game.id}/join?guestNumber=${numPlayers}`
+        );
+        if (response.status === 200) {
+          setIsLogged(true); // ✅ token worked
+          setJoinModalVisible(false);
+          setNumPlayers(0);
+          setPromoCode('');
+          Alert.alert(t('games.successJoined'));
+          onRefresh?.();
+        }
+      } catch (error) {
+        const isAuthError = error?.response?.status === 401;
+        if (isAuthError) setIsLogged(false); // ✅ refresh failed, show login prompt
+        const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
+        Alert.alert(errorMessage);
+      } finally {
+        setIsJoining(false);
       }
-    } catch (error) {
-      const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
-      Alert.alert(errorMessage);
-    } finally {
-      setIsJoining(false);
-    }
-  };
+    };
 // Determine if join button should be hidden
   const isFull = game?.availableSpots == 0;
   const isCanceled = game?.status === 'CANCELED';

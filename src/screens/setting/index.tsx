@@ -82,6 +82,7 @@ const Profile = () => {
     try {
       const keysToRemove = [
         'access_token',
+        'refresh_token',
         'id',
         'firstName',
         'lastName',

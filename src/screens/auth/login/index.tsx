@@ -184,12 +184,12 @@ const Login = () => {
         ['email', user.email || ''],
         ['phone', user.phone || ''],
         ['city', user.city || ''],
+        ['favoriteSport', user.favoriteSport.id?.toString() || ''],
         ['preferredLanguage', user.preferredLanguage || 'en'],
         ['role', user.role || ''],
         //['profileImage', user.profileImage || ''],
         //['gameId', user.role === "Partner" ? user.gameId || '' : ''],
       ]);
-      
       // Change language
       i18n.changeLanguage(user.preferredLanguage);
     } catch (error) {

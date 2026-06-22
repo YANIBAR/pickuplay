@@ -17,6 +17,7 @@ import { getApp } from '@react-native-firebase/app';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import { JAVA_API } from '@env';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 type Nav = {
   navigate: (value: string) => void
 }
@@ -154,6 +155,7 @@ export default function HomeScreen() {
   // Filter games based on selected filters
   const applyFilters = () => {
     let filtered = [...games];
+    const favoriteSportId = AsyncStorage.getItem('favoriteSport');
     if (selectedSports.length > 0) {
       filtered = filtered.filter(game => game.sportType.id === selectedSports[0]);
     }
@@ -215,6 +217,19 @@ export default function HomeScreen() {
         console.error('Failed to get city:', error);
       }
     };
+    
+    const loadFavoriteSport = async () => {
+      try {
+        const value = await AsyncStorage.getItem('favoriteSport');
+        if (value !== null) {
+          const parsed = parseInt(value, 10);
+          setSelectedSports([isNaN(parsed) ? null : parsed]);
+        }
+      } catch (e) {
+        console.warn('Failed to load favorite sport', e);
+      }
+    };
+    loadFavoriteSport();
     fetchCity();
   }, []);
 

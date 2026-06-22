@@ -1,4 +1,3 @@
-
 export { default as WelcomeScreen } from './welcome';
 export {
   LoginScreen,
@@ -15,6 +14,7 @@ export {
 } from './auth';
 export { default as ProfileScreen } from './profile';
 export { default as OnboardingScreen } from './onboarding';
+export { default as ProfileOnboardingScreen } from './games/onboarding';
 export { default as SettingScreen } from './setting';
 export { default as LanguageItemScreen } from './setting/language';
 export { default as HelpCenterScreen } from './setting/helpcenter';
@@ -22,7 +22,7 @@ export { default as CustomerServiceScreen } from './setting/customerservice';
 export { default as PrivacyPolicyScreen } from './setting/privacypolicy';
 export { default as PaymentScreen } from './setting/payment';
 export { default as TermsScreen } from './setting/terms';
-//export { default as ChatScreen  } from './chat';
+export { default as ChatScreen  } from './games/game/chat';
 export { default as TeamsScreen  } from './teams';
 export { default as LeaguesScreen  } from './leagues';
 export { default as GamesScreen } from './games';
@@ -38,4 +38,3 @@ export { default as addFieldScreen } from './fields/add';
 export { default as fieldScreen } from './fields/field';
 
 
- 

@@ -83,99 +83,64 @@ export default StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-  // Game Card Styles
+  /* ── Game Cards ── */
   gameCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
     elevation: 3,
+    gap: 12,
   },
-  gameCardUsed: {
-    backgroundColor: '#f5f5f5',
-    opacity: 0.7,
-  },
-  gameHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  gameTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 4,
-  },
-  gameDescription: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 12,
-  },
-  gameDetails: {
-    fontSize: 13,
-    color: '#666',
-    marginVertical: 4,
-  },
-  gameFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  gameIconBg: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: COLORS.transparentPrimary,
     alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    justifyContent: 'center',
   },
-  participantsBadge: {
-    flexDirection: 'row',
+  gameIconText: {
+    fontSize: 22,
+  },
+  gameInfo: {
+    flex: 1,
+    gap: 3,
+  },
+  gameName: {
+    fontSize: 15,
+    fontFamily: 'bold',
+    color: COLORS.secondary,
+    fontWeight: "700"
+  },
+  gameSub: {
+    fontSize: 10,
+    fontFamily: 'regular',
+    color: '#888',
+  },
+  gameRight: {
     alignItems: 'center',
-    backgroundColor: '#E3F2FD',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
   },
-  participantsText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2196F3',
-    marginLeft: 6,
+  gamePlayers: {
+    fontSize: 15,
+    fontFamily: 'bold',
+    color: COLORS.secondary,
+    fontWeight: "700"
   },
-  statusBadgeAvailable: {
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  statusBadgeFull: {
-    backgroundColor: '#FFEBEE',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  statusTextAvailable: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4CAF50',
-  },
-  statusTextFull: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#F44336',
-  },
-  privateBadge: {
-    backgroundColor: '#FFB74D',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  privateBadgeText: {
+  gamePlayersLabel: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#fff',
+    fontFamily: 'regular',
+    color: '#999',
   },
+  gameCardDivider: {
+    width: 1,
+    height: 46,
+    backgroundColor: COLORS.transparentPrimary, // or '#E5E5E5' for neutral
+    }
 });

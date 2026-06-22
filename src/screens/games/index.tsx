@@ -541,7 +541,7 @@ const FilterPillRow = ({
             ))}
           </View>
         </View>
-      </Modal>
+      </Modal> 
     </SafeAreaView>
   );
 }

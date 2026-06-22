@@ -276,11 +276,6 @@ const Profile = () => {
   const [showAllGames, setShowAllGames] = useState(false);
   const GAMES_PREVIEW = 3;
 
-  // Joined games state for calendar
-  const [joinedGames, setJoinedGames] = useState<Game[]>([]);
-  const [joinedGamesLoading, setJoinedGamesLoading] = useState(false);
-  const [joinedGamesError, setJoinedGamesError] = useState<string | null>(null);
-
   const [profileInfo, setProfileInfo] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -290,9 +285,9 @@ const Profile = () => {
     day: number; month: number; year: number;
   } | null>(null);
 
-  // Games filtered by selected calendar day (for joined games)
+  // Games filtered by selected calendar day
   const gamesForSelectedDay: Game[] = selectedCalDate
-    ? joinedGames.filter((g) => {
+    ? games.filter((g) => {
         if (!g.date) return false;
         const d = new Date(g.date);
         return (
@@ -333,23 +328,6 @@ const Profile = () => {
     }
   };
 
-  // Fetch joined games for calendar
-  const fetchJoinedGames = async () => {
-    try {
-      setJoinedGamesLoading(true);
-      setJoinedGamesError(null);
-      const response = await authenticatedApi.get(`profile/games/joined`);
-      let gamesData = response.result?.data.games ;
-      if (!Array.isArray(gamesData)) gamesData = [];
-      setJoinedGames(gamesData);
-    } catch (err: any) {
-      console.error('Error fetching joined games:', err);
-      setJoinedGamesError('Failed to load joined games.');
-    } finally {
-      setJoinedGamesLoading(false);
-    }
-  };
-
   const renderHeader = () => (
     <Header title={t('menu.user')}>
       <TouchableOpacity onPress={() => navigate('setting')}>
@@ -365,15 +343,22 @@ const Profile = () => {
   useEffect(() => {
     const checkToken = async () => {
       const expired = await isStoredTokenExpired();
-      setIsLogged(!expired);
+      console.log('Token expired:', expired);
+      const logged = !expired;
+      setIsLogged(logged);
+
+      if (logged) {
+        setSelectedImage(`${JAVA_API}profile/45/image`);
+        fetchGames();
+        fetchProfileInfo();
+      } else {
+        // Clear any user-specific state when not logged in
+        setSelectedImage(null);
+        setGames([]);
+        setProfileInfo(null);
+      }
     };
     checkToken();
-    if (isLogged) {
-      setSelectedImage(`${JAVA_API}profile/45/image`);
-      fetchGames();
-      fetchProfileInfo();
-      fetchJoinedGames(); // fetch joined games for calendar
-    }
   }, [userData?.id]);
 
   const uploadImage = async (file: any) => {
@@ -489,27 +474,14 @@ const Profile = () => {
   const renderCalendarView = () => (
     <>
       <MiniCalendar
-        games={joinedGames}
+        games={games}
         onDayPress={(day, month, year) => setSelectedCalDate({ day, month, year })}
         selectedDate={selectedCalDate}
       />
 
       {selectedCalDate && (
         <View style={{ marginTop: 4 }}>
-          {joinedGamesLoading ? (
-            <View style={{ alignItems: 'center', paddingVertical: 24 }}>
-              <ActivityIndicator size="small" color={COLORS.primary} />
-            </View>
-          ) : joinedGamesError ? (
-            <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-              <Text style={{ color: COLORS.red, marginBottom: 8 }}>{joinedGamesError}</Text>
-              <TouchableOpacity onPress={fetchJoinedGames}>
-                <Text style={{ color: COLORS.primary, fontWeight: '600' }}>
-                  {t('common.tryAgain')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : gamesForSelectedDay.length === 0 ? (
+          {gamesForSelectedDay.length === 0 ? (
             <View style={noEventStyles.box}>
               <Text style={noEventStyles.text}>No games on this day.</Text>
             </View>

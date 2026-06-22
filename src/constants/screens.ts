@@ -10,4 +10,5 @@ export default {
   notifications: 'notifications',
   onboarding: 'onboarding',
   welcome: 'welcome',
+  profileOnboarding: 'profileOnboarding',
 };

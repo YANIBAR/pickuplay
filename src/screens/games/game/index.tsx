@@ -251,7 +251,6 @@ export default function GameDetailsScreen({ route }: { route: any }) {
             >
               <Icon type="materialCommunityIcons" name="share-variant" />
           </TouchableOpacity>
-
           {((userData?.id == game?.creatorId || role === 'ADMIN') && isLogged)  && (
             <>
               <TouchableOpacity

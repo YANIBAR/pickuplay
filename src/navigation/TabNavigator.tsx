@@ -6,7 +6,9 @@ import {
   GamesScreen,
   ProfileScreen,
   AddGameScreen,
-  LeaguesScreen
+  LeaguesScreen,
+  OnboardingScreen,
+  ProfileOnboardingScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -58,7 +60,7 @@ const TabNavigator = () => {
 
       <Tab.Screen
         name="Fields"
-        component={mapFieldsScreen}
+        component={ProfileOnboardingScreen} // Temporarily using profile onboarding as a placeholder for the fields screen
         options={{
           tabBarLabel: t('menu.fields'),
           tabBarIcon: ({ color, size }) => (

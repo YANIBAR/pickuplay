@@ -7,7 +7,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Checkbox, Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS, icons, images } from '@constants';
-import { publicApi } from '@services/api';
+import { publicApi, authenticatedApi } from '@services/api';
+import { useUserData } from '@services/useUserData';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
 import { getCurrentCity } from '@utils/helpers';
@@ -15,8 +16,6 @@ import { useNotifications } from '@contexts/NotificationContext';
 import { getMessaging, onMessage } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { isStoredTokenExpired } from '@utils/api/auth';
-import { JAVA_API } from '@env';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 type Nav = {
   navigate: (value: string) => void
@@ -74,6 +73,7 @@ const PLAYER_OPTIONS = [
 };
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const { userData } = useUserData();
   const [isLogged, setIsLogged] = useState(false);
   const { unreadCount, addNotification } = useNotifications();
   const [games, setGames] = useState<Game[]>([]); 
@@ -231,7 +231,42 @@ export default function HomeScreen() {
     };
     loadFavoriteSport();
     fetchCity();
-  }, []);
+  }, []); 
+
+  // Prompt user to upload profile image once if missing
+  useEffect(() => {
+    if (!userData?.id) return;
+    const promptKey = `upload_image_prompt_shown_${userData.id}`;
+
+    const checkAndPrompt = async () => {
+      try {
+        const alreadyShown = await AsyncStorage.getItem(promptKey);
+        if (alreadyShown) return;
+
+        const response: any = await authenticatedApi.get(`profile/${userData.id}`);
+        const data = response.result?.data ?? response.data ?? null;
+        const hasImage = !!(data?.image || data?.picture || data?.profileImage);
+
+        if (!hasImage) {
+          setTimeout(() => {
+            Alert.alert(
+              t('profile.uploadPromptTitle') || 'Please add a photo',
+              t('profile.uploadPromptMessage') || 'Please upload an image so others can recognize you when you show up.',
+              [
+                { text: t('common.later') || 'Later', style: 'cancel', onPress: async () => { await AsyncStorage.setItem(promptKey, 'true'); } },
+                { text: t('profile.uploadNow') || 'Upload now', onPress: async () => { await AsyncStorage.setItem(promptKey, 'true'); navigate('myProfile'); } },
+              ],
+              { cancelable: true }
+            );
+          }, 600);
+        }
+      } catch (err) {
+        console.warn('profile image check failed', err);
+      }
+    };
+
+    checkAndPrompt();
+  }, [userData?.id]);
 
   useEffect(() => {
     fetchGames();

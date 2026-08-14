@@ -18,6 +18,7 @@ import {
   CreateNewPasswordScreen,
   TeamsScreen,
   LeaguesScreen,
+  AddLeaguesScreen,
   ScheduleScreen,
   GamesScreen,
   GameScreen,
@@ -26,13 +27,19 @@ import {
   EditGameScreen,
   AddGameScreen,
   SettingScreen,
-  Notificationcreen,
+  NotificationScreen,
   ChangePasswordScreen,
   mapFieldsScreen,
   addFieldScreen,
   fieldScreen,
   ChatScreen,
-  ProfileOnboardingScreen
+  ProfileOnboardingScreen,
+  MyProfileScreen,
+  LeagueDetailScreen,
+  EditLeaguesScreen,
+  AddTeamScreen,
+  TeamDetailScreen,
+  TeamRequestsScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -47,6 +54,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="profileOnboarding" component={ProfileOnboardingScreen} />
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="profile" component={ProfileScreen} />
+      <Stack.Screen name="myProfile" component={MyProfileScreen} />
       <Stack.Screen name="setting" component={SettingScreen} />
       <Stack.Screen name="LanguageItem" component={LanguageItemScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
@@ -55,7 +63,13 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="customerservice" component={CustomerServiceScreen} />
       <Stack.Screen name="terms" component={TermsScreen} />
       <Stack.Screen name="teams" component={TeamsScreen} />
+      <Stack.Screen name="addTeam" component={AddTeamScreen} />
+      <Stack.Screen name="teamDetail" component={TeamDetailScreen} />
+      <Stack.Screen name="teamRequests" component={TeamRequestsScreen} />
       <Stack.Screen name="leagues" component={LeaguesScreen} />
+      <Stack.Screen name="addLeague" component={AddLeaguesScreen} />
+      <Stack.Screen name="editLeague" component={EditLeaguesScreen} />
+      <Stack.Screen name="leagueDetail" component={LeagueDetailScreen} />
       <Stack.Screen name="booking" component={ScheduleScreen} />
       <Stack.Screen name="Games" component={GamesScreen} />
       <Stack.Screen name="myGames" component={MyGamesScreen} />
@@ -75,7 +89,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="otpverification" component={OTPVerificationScreen} />
       <Stack.Screen name="createnewpassword" component={CreateNewPasswordScreen} />
       <Stack.Screen name="changepassword" component={ChangePasswordScreen} />
-      <Stack.Screen name="notifications" component={Notificationcreen} />
+      <Stack.Screen name="notifications" component={NotificationScreen} />
     </Stack.Navigator>
   );
 };

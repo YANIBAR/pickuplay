@@ -1,5 +1,5 @@
-import { images } from '@constants';
-import { Header } from '@components';
+import { COLORS, images } from '@constants';
+import { Button, Header } from '@components';
 import { useTranslation } from 'react-i18next';
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,6 +29,35 @@ export default function NoLeaguePage() {
     };
     fetchRole();
   }, []);
+  const teams = [
+  {
+    id: 1,
+    name: 'KC soccer league',
+    sport: 'Soccer',
+    location: 'Brooklyn, NY',
+    players: '2 / 8 Teams',
+    image:
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9mP_-oztGsSD-RKJt0Ck03lbVDpnGGuDJDQ&s',
+  },
+  {
+    id: 2,
+    name: 'SoftBall tournament',
+    sport: 'Softball',
+    location: 'Queens, NY',
+    players: '8 / 16 Teams',
+    image:
+      'https://images-platform.99static.com/Rug1Q_WUXj3wLPTHItuD3zOeLEU=/354x6:1587x1239/500x500/top/smart/99designs-contests-attachments/66/66435/attachment_66435050',
+  },
+  {
+    id: 3,
+    name: 'CO ED tournament',
+    sport: 'Tennis',
+    location: 'Manhattan, NY',
+    players: '6 / 10 Teams',
+    image:
+      'https://upload.wikimedia.org/wikipedia/en/9/95/FC_Kansas_City_logo1.png',
+  }
+];
   return (
     <SafeAreaView style={styles.container}>
         
@@ -58,7 +87,7 @@ export default function NoLeaguePage() {
           {/* Action Buttons */}
           <View style={styles.buttonContainer}>
             {(role === 'ORGANIZER' || role === 'ADMIN') && (
-              <TouchableOpacity style={styles.primaryButton}>
+              <TouchableOpacity style={styles.primaryButton}  onPress={() => navigate("addLeague")}>
                   <Text style={styles.primaryButtonText}>
                     {t("leagues.createLeague")}
                   </Text>
@@ -69,6 +98,32 @@ export default function NoLeaguePage() {
                 {t("leagues.findTeams")}
               </Text>
             </TouchableOpacity>
+          </View>
+          <View style={styles.leagueList}>
+                  
+                { teams.map((team) => (
+                  <TouchableOpacity key={team.id} style={styles.leagueCard} onPress={() => navigate("leagueDetail")}>
+                    <Image
+                      source={{ uri: team.image }}
+                      style={styles.leagueImage}
+                    />
+
+                    <View style={styles.leagueInfo}>
+                      <Text style={styles.leagueName}>{team.name}</Text>
+
+                      <Text style={styles.leagueSport}>{team.sport}</Text>
+
+                      <Text style={styles.leagueLocation}>
+                        {team.location}
+                      </Text>
+
+                      <Text style={styles.leaguePlayers}>
+                        {team.players}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+            
           </View>
           {(role === 'ORGANIZER' || role === 'ADMIN') && (
             <View style={styles.joinSection}>
@@ -283,4 +338,99 @@ const styles = StyleSheet.create({
     color: '#888',
     lineHeight: 18,
   },
+  leagueList: {
+    gap: 16,
+  },
+
+  leagueCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    overflow: 'hidden',
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+
+  leagueImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 16,
+    backgroundColor: '#ddd',
+  },
+
+  leagueInfo: {
+    flex: 1,
+    marginLeft: 14,
+    justifyContent: 'space-between',
+  },
+
+  leagueName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111',
+  },
+
+  leagueSport: {
+    fontSize: 15,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+
+  leagueLocation: {
+    fontSize: 14,
+    color: '#777',
+    marginTop: 4,
+  },
+
+  leaguePlayers: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+
+
+  matchupButton: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+
+  matchupButtonText: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  mvpBadge: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    backgroundColor: '#E8FFFA',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+
+  mvpBadgeText: {
+    color: '#19C2A0',
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.5,
+  }
 });

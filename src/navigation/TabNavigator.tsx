@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
-  MatchupsScreen,
   mapFieldsScreen,
   GamesScreen,
-  ProfileScreen,
   AddGameScreen,
   LeaguesScreen,
-  OnboardingScreen,
-  ProfileOnboardingScreen
+  ProfileOnboardingScreen,
+  MyProfileScreen
 } from '@screens';
 import Icon from '@components/Icon';
 import TabBar from '@components/TabBar';
@@ -60,7 +58,7 @@ const TabNavigator = () => {
 
       <Tab.Screen
         name="Fields"
-        component={ProfileOnboardingScreen} // Temporarily using profile onboarding as a placeholder for the fields screen
+        component={mapFieldsScreen} // Temporarily using profile onboarding as a placeholder for the fields screen
         options={{
           tabBarLabel: t('menu.fields'),
           tabBarIcon: ({ color, size }) => (
@@ -96,7 +94,7 @@ const TabNavigator = () => {
 
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={MyProfileScreen}
         options={{
           tabBarLabel: t('menu.user'),
           tabBarIcon: ({ color, size }) => (

@@ -39,6 +39,7 @@ const ProfileOnboarding = () => {
   };
 
   const pickImage = () => {
+    
     Alert.alert(
       t('profile.selectImageTitle') || 'Select image',
       '',

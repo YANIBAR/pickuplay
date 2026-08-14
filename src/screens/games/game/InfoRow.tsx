@@ -8,9 +8,10 @@ interface InfoRowProps {
   label: string;
   value: string;
   isAddress?: boolean;
+  isHost?: boolean;
 }
 
-export default function InfoRow({ icon, label, value, isAddress }: InfoRowProps) {
+export default function InfoRow({ icon, label, value, isAddress, isHost }: InfoRowProps) {
   const handleGetDirections = () => {
     const address = encodeURIComponent(value);
     const url = Platform.OS === 'ios'
@@ -25,6 +26,25 @@ export default function InfoRow({ icon, label, value, isAddress }: InfoRowProps)
       }
     });
   };
+  const handleGetWhatsapp = async () => {
+    const phoneNumber = '18162102864'; // Include country code
+    const message = encodeURIComponent(`Join the game: ${label} at ${value}`);
+
+    const appUrl = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+    const webUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+
+    try {
+      const supported = await Linking.canOpenURL(appUrl);
+
+      if (supported) {
+        await Linking.openURL(appUrl);
+      } else {
+        await Linking.openURL(webUrl);
+      }
+    } catch (error) {
+      console.error('Unable to open WhatsApp', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -33,6 +53,11 @@ export default function InfoRow({ icon, label, value, isAddress }: InfoRowProps)
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{value}</Text>
       </View>
+      {isHost && (
+        <TouchableOpacity onPress={handleGetWhatsapp}>
+            <Icon type="materialCommunityIcons" name="whatsapp" size={28} color={COLORS.primary}/>
+        </TouchableOpacity>
+      )}
       {isAddress && (
         <TouchableOpacity onPress={handleGetDirections}>
             <Icon type="materialCommunityIcons" name="directions" size={28} color={COLORS.primary}/>

@@ -16,7 +16,7 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 import { toTitleCase } from '@utils/helpers';
 import { decodeToken } from '@services/auth/auth.utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Calendar, CalendarList, MultiSelectCalendar } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 
 interface Game {
   id: number;
@@ -75,6 +75,11 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const [game, setGame] = useState([]);
   const [isLogged, setIsLogged] = useState(false);
   const { userData, error, refreshUserData } = useUserData(); 
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+const handleImageError = (id: string) => {
+  setImageErrors(prev => ({ ...prev, [id]: true }));
+};
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>('all');
 
@@ -189,7 +194,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
         const handleConfirmJoin = async () => {
             try {
               
-              const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers}`);
+              const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers-1}`);
         
               if (response.status === 200) {
                 // Success - clear form and close modal
@@ -293,6 +298,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               icon="account" 
               label={t('game.Organizer')} 
               value={game.creatorName} 
+              isHost
             />
             <InfoRow
               icon="map-marker"
@@ -333,12 +339,17 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               <View style={styles.playersContainer}>
                 <View style={styles.playersGrid}>
                   {game?.participants?.map((player, index) => (
-                    <View key={index} style={styles.playerCard}>
+                    <TouchableOpacity key={index} style={styles.playerCard} onPress={() => navigate('profile', { userId: player.userId })}>
                       <Image
-                        source={{ uri: `${JAVA_API}profile/${player?.userId}/image` }}
+                        source={
+                          imageErrors[player.userId]
+                            ? images.avatar
+                            : { uri: `${JAVA_API}profile/${player?.userId}/image` }
+                        } 
+                        onError={() => handleImageError(player.userId)}
                         style={styles.playerImage}
                       />
-                      <Text style={styles.playerName} numberOfLines={2}>
+                        <Text style={styles.playerName} numberOfLines={2}>
                         {toTitleCase(player.userName)}
                       </Text>
                       {player.number_guest > 0 && (
@@ -346,7 +357,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
                           + {player.number_guest} guests
                         </Text>
                       )}
-                    </View>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>

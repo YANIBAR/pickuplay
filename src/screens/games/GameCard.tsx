@@ -95,7 +95,7 @@ import { useUserData } from '@services/useUserData';
       setIsJoining(true);
       try {
         const response = await authenticatedApi.post(
-          `games/${game.id}/join?guestNumber=${numPlayers}`
+          `games/${game.id}/join?guestNumber=${numPlayers-1}`
         );
         if (response.status === 200) {
           setIsLogged(true); // ✅ token worked

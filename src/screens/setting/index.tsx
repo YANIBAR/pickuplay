@@ -163,6 +163,13 @@ const Profile = () => {
               onPress={() => navigate('editProfile')}
               hasArrowRight={false}
             />
+
+            <SettingsItem
+              icon={icons.user}
+              name={t('settings.requests')}
+              onPress={() => navigate('teamRequests')}
+              hasArrowRight={false}
+            />
             
             {/*<SettingsItem
               icon={icons.user}

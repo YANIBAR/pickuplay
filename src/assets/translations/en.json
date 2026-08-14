@@ -15,7 +15,9 @@
     "showMore": "Show More",
     "tryAgain": "Try Again",
     "divider": "OR",
-    "skip": "Skip"
+    "skip": "Skip",
+    "later": "Later"
+
   },
   "AvailableLanguages": "Available Languages",
   "CustomerService": "Customer Survice",
@@ -547,7 +549,10 @@
     "selectImageTitle": "Select Image",
     "selectImageDescription": "Choose how to select an image",
     "camera": "Camera",
-    "photoLibrary": "Photo Library"
+    "photoLibrary": "Photo Library",
+    "uploadPromptTitle": "Upload Profile Picture",
+    "uploadPromptMessage": "Would you like to upload a new profile picture?",
+    "uploadNow": "Upload Now"
   },
   "event": {
     "eventTitle":"Events",

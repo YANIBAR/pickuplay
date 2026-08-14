@@ -17,8 +17,6 @@ const identityDark = require('@assets/illustrations/identity_dark.png');
 const card = require('@assets/illustrations/card.png');
 const services = require('@assets/illustrations/services.png');
 const servicesDark = require('@assets/illustrations/services_dark.png');
-const friends = require('@assets/illustrations/friends.png');
-const friendsDark = require('@assets/illustrations/friends_dark.png');
 const successPaymentType = require('@assets/illustrations/success_payment_type.png');
 const successPaymentTypeDark = require('@assets/illustrations/success_payment_type_dark.png');
 const requestMoney = require('@assets/illustrations/request_money.png');
@@ -43,7 +41,6 @@ const permissionGiven = require('@assets/illustrations/permission_given.png');
 const permissionGivenDark = require('@assets/illustrations/permission_given_dark.png');
 const searchPrivacy = require('@assets/illustrations/search_privacy.png');
 const searchPrivacyDark = require('@assets/illustrations/search_privacy_dark.png');
-const background = require('@assets/illustrations/background.png');
 const notFound = require('@assets/illustrations/not_found.png');
 
 const illustrations = {
@@ -62,7 +59,6 @@ const illustrations = {
   identityDark,
   card,
   services,
-  friends,
   successPaymentType,
   requestMoney,
   bankSuccess,
@@ -86,13 +82,11 @@ const illustrations = {
   splitBillDark,
   refundSuccessDark,
   servicesDark,
-  friendsDark,
   blockedContactsDark,
   correctDataDark,
   downloadDataDark,
   permissionGivenDark,
   searchPrivacyDark,
-  background,
   notFound,
 };
 

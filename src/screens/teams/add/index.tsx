@@ -42,11 +42,31 @@ interface FormData {
   is_public: boolean;
 }
 
-type StepKey = 'basic' | 'details' | 'settings';
+type AgeRange = '15-20' | '20-29' | '30-39' | '40+';
+
+interface Player {
+  id: string;
+  name: string;
+  ageRange: AgeRange;
+  phone?: string;
+  email: string;
+}
+
+const AGE_RANGE_OPTIONS: { value: AgeRange; label: string }[] = [
+  { value: '15-20', label: '15–20' },
+  { value: '20-29', label: '20–29' },
+  { value: '30-39', label: '30–39' },
+  { value: '40+',   label: '40+' },
+];
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type StepKey = 'basic' | 'details' | 'players' | 'settings';
 
 const STEPS: { key: StepKey; label: string; icon: string }[] = [
   { key: 'basic',    label: 'Basic Info',    icon: 'info' },
   { key: 'details',  label: 'Team Details',  icon: 'sports' },
+  { key: 'players',  label: 'Add Players',   icon: 'group' },
   { key: 'settings', label: 'Settings',      icon: 'settings' },
 ];
 
@@ -65,6 +85,17 @@ const AddTeamScreen = () => {
   // Dropdown data
   const [sports, setSports] = useState<{ label: string; value: string }[]>([]);
   const [cities, setCities] = useState<{ label: string; value: string }[]>([]);
+
+  // Players
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [playerDraft, setPlayerDraft] = useState<{
+    name: string;
+    ageRange: AgeRange | '';
+    phone: string;
+    email: string;
+  }>({ name: '', ageRange: '', phone: '', email: '' });
+  const [playerFieldErrors, setPlayerFieldErrors] = useState<{ name?: string; ageRange?: string; email?: string }>({});
+  const [playersError, setPlayersError] = useState('');
 
   const {
     control,
@@ -89,6 +120,11 @@ const AddTeamScreen = () => {
     },
     mode: 'onBlur',
   });
+
+  const maxPlayersValue = watch('max_players');
+  const maxPlayersNum = parseInt(maxPlayersValue, 10) || 0;
+  const playersRemaining = Math.max(maxPlayersNum - players.length, 0);
+  const isPlayersFull = maxPlayersNum > 0 && players.length >= maxPlayersNum;
 
   // ─── Fetch data ──────────────────────────────────────────────────────────────
 
@@ -125,21 +161,90 @@ const AddTeamScreen = () => {
     getCities();
   }, []);
 
+  // Keep the players list from exceeding max_players if the user goes back and lowers it
+  useEffect(() => {
+    if (maxPlayersNum > 0 && players.length > maxPlayersNum) {
+      setPlayers(prev => prev.slice(0, maxPlayersNum));
+    }
+  }, [maxPlayersNum]);
+
   // ─── Step validation ─────────────────────────────────────────────────────────
 
   const STEP_FIELDS: Record<number, (keyof FormData)[]> = {
     0: ['name', 'sport_id', 'description'],
     1: ['team_type', 'team_format', 'skill_level', 'max_players'],
-    2: ['city', 'owner_id'],
+    2: [],
+    3: ['city', 'owner_id'],
+  };
+
+  const validatePlayersStep = () => {
+    if (players.length === 0) {
+      setPlayersError('Add at least one player to continue');
+      return false;
+    }
+    setPlayersError('');
+    return true;
   };
 
   const handleNext = async () => {
+    const stepKey = STEPS[currentStep].key;
+
+    if (stepKey === 'players') {
+      if (!validatePlayersStep()) return;
+      setCurrentStep(s => Math.min(s + 1, TOTAL_STEPS - 1));
+      return;
+    }
+
     const fields = STEP_FIELDS[currentStep];
     const valid = await trigger(fields);
     if (valid) setCurrentStep(s => Math.min(s + 1, TOTAL_STEPS - 1));
   };
 
   const handleBack = () => setCurrentStep(s => Math.max(s - 1, 0));
+
+  // ─── Player helpers ──────────────────────────────────────────────────────────
+
+  const addPlayer = () => {
+    if (maxPlayersNum > 0 && players.length >= maxPlayersNum) {
+      setPlayersError(`You've reached the max of ${maxPlayersNum} players`);
+      return;
+    }
+
+    const name = playerDraft.name.trim();
+    const email = playerDraft.email.trim();
+    const phone = playerDraft.phone.trim();
+
+    const fieldErrors: { name?: string; ageRange?: string; email?: string } = {};
+    if (!name) fieldErrors.name = 'Name is required';
+    if (!playerDraft.ageRange) fieldErrors.ageRange = 'Select an age range';
+    if (!email) fieldErrors.email = 'Email is required';
+    else if (!EMAIL_REGEX.test(email)) fieldErrors.email = 'Enter a valid email';
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setPlayerFieldErrors(fieldErrors);
+      return;
+    }
+
+    setPlayers(prev => [
+      ...prev,
+      {
+        id: `${Date.now()}-${prev.length}`,
+        name,
+        ageRange: playerDraft.ageRange as AgeRange,
+        email,
+        phone: phone || undefined,
+      },
+    ]);
+    setPlayerDraft({ name: '', ageRange: '', phone: '', email: '' });
+    setPlayerFieldErrors({});
+    setPlayersError('');
+  };
+
+  const removePlayer = (id: string) => {
+    setPlayers(prev => prev.filter(p => p.id !== id));
+    setPlayersError('');
+    setPlayerFieldErrors({});
+  };
 
   // ─── Image helpers ───────────────────────────────────────────────────────────
 
@@ -192,6 +297,11 @@ const AddTeamScreen = () => {
   // ─── Submit ──────────────────────────────────────────────────────────────────
 
   const onSubmit = async (data: FormData) => {
+    if (!validatePlayersStep()) {
+      setCurrentStep(STEPS.findIndex(s => s.key === 'players'));
+      return;
+    }
+
     const payload = {
       name: data.name.trim(),
       sportId: data.sport_id,
@@ -203,6 +313,12 @@ const AddTeamScreen = () => {
       city: data.city,
       ownerId: data.owner_id,
       isPublic: data.is_public,
+      players: players.map(p => ({
+        name: p.name,
+        ageRange: p.ageRange,
+        email: p.email,
+        phone: p.phone || null,
+      })),
     };
     try {
       const response = await authenticatedApi.post('teams/create', payload);
@@ -505,7 +621,148 @@ const AddTeamScreen = () => {
     </View>
   );
 
-  // Step 2 — Settings
+  // Step 2 — Add Players
+  const renderStepPlayers = () => (
+    <View>
+      <View style={styles.sectionHeader}>
+        <Icon name="group" type="materialIcons" size={20} color={COLORS.primary} />
+        <Text style={styles.sectionTitle}>Add Players</Text>
+      </View>
+
+      <View style={styles.playersCounterRow}>
+        <Text style={styles.playersCounterText}>
+          {players.length} / {maxPlayersNum || '—'} added
+        </Text>
+        {maxPlayersNum > 0 && (
+          <Text style={styles.playersRemainingText}>
+            {isPlayersFull ? 'Roster full' : `${playersRemaining} spot${playersRemaining === 1 ? '' : 's'} left`}
+          </Text>
+        )}
+      </View>
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${maxPlayersNum > 0 ? Math.min((players.length / maxPlayersNum) * 100, 100) : 0}%` },
+          ]}
+        />
+      </View>
+
+      <View style={styles.playerFormCard}>
+        {/* Name */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Player Name *</Text>
+          <TextInput
+            value={playerDraft.name}
+            onChangeText={v => setPlayerDraft(d => ({ ...d, name: v }))}
+            placeholder="Enter player name"
+            placeholderTextColor={COLORS.grayscale400}
+            style={[styles.textInput, playerFieldErrors.name && styles.inputError]}
+            editable={!isPlayersFull}
+          />
+          {!!playerFieldErrors.name && <Text style={styles.errorText}>{playerFieldErrors.name}</Text>}
+        </View>
+
+        {/* Age range */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Age Range *</Text>
+          <View style={styles.chipGrid}>
+            {AGE_RANGE_OPTIONS.map(opt => (
+              <TouchableOpacity
+                key={opt.value}
+                style={[styles.chip, playerDraft.ageRange === opt.value && styles.chipActive]}
+                onPress={() => !isPlayersFull && setPlayerDraft(d => ({ ...d, ageRange: opt.value }))}
+                disabled={isPlayersFull}
+              >
+                <Text style={[styles.chipText, playerDraft.ageRange === opt.value && styles.chipTextActive]}>
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {!!playerFieldErrors.ageRange && <Text style={styles.errorText}>{playerFieldErrors.ageRange}</Text>}
+        </View>
+
+        {/* Email */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Email *</Text>
+          <TextInput
+            value={playerDraft.email}
+            onChangeText={v => setPlayerDraft(d => ({ ...d, email: v }))}
+            placeholder="player@example.com"
+            placeholderTextColor={COLORS.grayscale400}
+            style={[styles.textInput, playerFieldErrors.email && styles.inputError]}
+            editable={!isPlayersFull}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          {!!playerFieldErrors.email && <Text style={styles.errorText}>{playerFieldErrors.email}</Text>}
+        </View>
+
+        {/* Phone (optional) */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Phone (optional)</Text>
+          <TextInput
+            value={playerDraft.phone}
+            onChangeText={v => setPlayerDraft(d => ({ ...d, phone: v }))}
+            placeholder="Enter phone number"
+            placeholderTextColor={COLORS.grayscale400}
+            style={styles.textInput}
+            editable={!isPlayersFull}
+            keyboardType="phone-pad"
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.addPlayerFullBtn, isPlayersFull && styles.addPlayerBtnDisabled]}
+          onPress={addPlayer}
+          disabled={isPlayersFull}
+        >
+          <Icon name="add" type="materialIcons" size={18} color="#fff" />
+          <Text style={styles.addPlayerFullBtnText}>Add Player</Text>
+        </TouchableOpacity>
+
+        {!!playersError && <Text style={styles.errorText}>{playersError}</Text>}
+        {isPlayersFull && !playersError && (
+          <Text style={styles.playersHint}>You've reached the max players for this team.</Text>
+        )}
+      </View>
+
+      {players.length > 0 && (
+        <View style={styles.playersList}>
+          {players.map((player, idx) => (
+            <View key={player.id} style={styles.playerRow}>
+              <View style={styles.playerAvatar}>
+                <Text style={styles.playerAvatarText}>{idx + 1}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.playerNameRow}>
+                  <Text style={styles.playerName}>{player.name}</Text>
+                  <View style={styles.ageRangeBadge}>
+                    <Text style={styles.ageRangeBadgeText}>{player.ageRange}</Text>
+                  </View>
+                </View>
+                <Text style={styles.playerContactText}>{player.email}</Text>
+                {!!player.phone && <Text style={styles.playerContactText}>{player.phone}</Text>}
+              </View>
+              <TouchableOpacity onPress={() => removePlayer(player.id)} style={styles.playerRemoveBtn}>
+                <Icon name="close" type="materialIcons" size={16} color="#ef4444" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {players.length === 0 && (
+        <View style={styles.emptyPlayersState}>
+          <Icon name="person-add-alt" type="materialIcons" size={28} color={COLORS.grayscale400} />
+          <Text style={styles.emptyPlayersText}>No players added yet</Text>
+        </View>
+      )}
+    </View>
+  );
+
+  // Step 3 — Settings
   const renderStep2 = () => (
     <View>
       <View style={styles.sectionHeader}>
@@ -559,7 +816,7 @@ const AddTeamScreen = () => {
 
   // ─── Step renderer map ───────────────────────────────────────────────────────
 
-  const STEP_RENDERERS = [renderStep0, renderStep1, renderStep2];
+  const STEP_RENDERERS = [renderStep0, renderStep1, renderStepPlayers, renderStep2];
 
   const stepInfo = STEPS[currentStep];
   const progress = ((currentStep + 1) / TOTAL_STEPS) * 100;
@@ -783,6 +1040,62 @@ const styles = StyleSheet.create({
   optionLabelActive: { color: COLORS.primary },
   optionDesc: { fontSize: 12, color: '#888' },
   optionCheck: { position: 'absolute', top: 12, right: 12 },
+
+  // Players step
+  playersCounterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  playersCounterText: { fontSize: 13, fontWeight: '700', color: '#222' },
+  playersRemainingText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
+  playerFormCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+    padding: 16,
+    marginBottom: 16,
+  },
+  addPlayerFullBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  addPlayerFullBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  addPlayerBtnDisabled: { backgroundColor: '#ccc' },
+  playersHint: { fontSize: 12, color: '#888', marginTop: 8 },
+  playersList: { gap: 8, marginTop: 4 },
+  playerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  playerAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#f0f4ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  playerAvatarText: { fontSize: 12, fontWeight: '700', color: COLORS.primary },
+  playerNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  playerName: { fontSize: 14, fontWeight: '600', color: '#222' },
+  ageRangeBadge: { backgroundColor: '#f0f4ff', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
+  ageRangeBadgeText: { fontSize: 11, fontWeight: '700', color: COLORS.primary },
+  playerContactText: { fontSize: 12, color: '#888', marginTop: 2 },
+  playerRemoveBtn: { padding: 4, alignSelf: 'flex-start' },
+  emptyPlayersState: { alignItems: 'center', gap: 8, paddingVertical: 28 },
+  emptyPlayersText: { fontSize: 13, color: '#999' },
 
   // Settings
   subsectionCard: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e8e8e8', padding: 16, marginBottom: 16 },

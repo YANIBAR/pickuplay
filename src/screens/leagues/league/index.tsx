@@ -9,6 +9,9 @@ import {
   Switch,
   StatusBar,
   Platform,
+  Modal,
+  TextInput,
+  FlatList,
 } from 'react-native';
 import { COLORS, FONTS, SIZES } from '@constants';
 import { Icon } from '@components';
@@ -43,6 +46,21 @@ interface LeagueDetail {
   };
 }
 
+interface MyTeam {
+  id: string;
+  name: string;
+  logoUrl: string;
+  playersCount: number;
+}
+
+interface LeagueTeam {
+  id: string;
+  name: string;
+  logoUrl: string;
+  playersCount: number;
+  maxPlayers: number;
+}
+
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 const LEAGUE: LeagueDetail = {
@@ -73,6 +91,47 @@ const LEAGUE: LeagueDetail = {
     liveScoresEnabled: true,
   },
 };
+
+// Mock: teams the current user manages/belongs to (empty array = user has no team yet)
+const MY_TEAMS: MyTeam[] = [
+  {
+    id: 'mt1',
+    name: 'Westside Wolves',
+    logoUrl: 'https://images.unsplash.com/photo-1614632537190-23e4146777db?w=200',
+    playersCount: 14,
+  },
+  {
+    id: 'mt2',
+    name: 'River City FC',
+    logoUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200',
+    playersCount: 9,
+  },
+];
+
+// Mock: teams already registered in this league, available for a player to request to join
+const LEAGUE_TEAMS: LeagueTeam[] = [
+  {
+    id: 'lt1',
+    name: 'Downtown Dynamos',
+    logoUrl: 'https://images.unsplash.com/photo-1614632537190-23e4146777db?w=200',
+    playersCount: 16,
+    maxPlayers: 22,
+  },
+  {
+    id: 'lt2',
+    name: 'Northland Strikers',
+    logoUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200',
+    playersCount: 20,
+    maxPlayers: 22,
+  },
+  {
+    id: 'lt3',
+    name: 'Plaza United',
+    logoUrl: 'https://images.unsplash.com/photo-1552318965-6e6be7484ada?w=200',
+    playersCount: 11,
+    maxPlayers: 22,
+  },
+];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -183,6 +242,86 @@ const ToggleRow = ({
   </View>
 );
 
+// ─── Registration popup sub-components ────────────────────────────────────────
+
+type RegisterStep = 'choose' | 'teamPick' | 'teamCreate' | 'playerPick' | 'playerMessage' | 'success';
+type RegisterMode = 'team' | 'player' | null;
+
+const RegisterOptionCard = ({
+  icon,
+  title,
+  description,
+  onPress,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity style={styles.registerOptionCard} activeOpacity={0.8} onPress={onPress}>
+    <View style={styles.registerOptionIconWrap}>
+      <Icon type="materialCommunityIcons" name={icon as any} size={26} color={COLORS.primary} />
+    </View>
+    <View style={styles.registerOptionText}>
+      <Text style={styles.registerOptionTitle}>{title}</Text>
+      <Text style={styles.registerOptionDesc}>{description}</Text>
+    </View>
+    <Icon type="materialCommunityIcons" name="chevron-right" size={20} color={COLORS.gray3} />
+  </TouchableOpacity>
+);
+
+const MyTeamRow = ({
+  team,
+  selected,
+  onPress,
+}: {
+  team: MyTeam;
+  selected: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.teamRow, selected && styles.teamRowSelected]}
+    activeOpacity={0.8}
+    onPress={onPress}
+  >
+    <Image source={{ uri: team.logoUrl }} style={styles.teamRowLogo} />
+    <View style={styles.teamRowInfo}>
+      <Text style={styles.teamRowName}>{team.name}</Text>
+      <Text style={styles.teamRowMeta}>{team.playersCount} players</Text>
+    </View>
+    <View style={[styles.radioOuter, selected && styles.radioOuterActive]}>
+      {selected && <View style={styles.radioInner} />}
+    </View>
+  </TouchableOpacity>
+);
+
+const LeagueTeamRow = ({
+  team,
+  selected,
+  onPress,
+}: {
+  team: LeagueTeam;
+  selected: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.teamRow, selected && styles.teamRowSelected]}
+    activeOpacity={0.8}
+    onPress={onPress}
+  >
+    <Image source={{ uri: team.logoUrl }} style={styles.teamRowLogo} />
+    <View style={styles.teamRowInfo}>
+      <Text style={styles.teamRowName}>{team.name}</Text>
+      <Text style={styles.teamRowMeta}>
+        {team.playersCount}/{team.maxPlayers} players
+      </Text>
+    </View>
+    <View style={[styles.radioOuter, selected && styles.radioOuterActive]}>
+      {selected && <View style={styles.radioInner} />}
+    </View>
+  </TouchableOpacity>
+);
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const SEASON_ICONS: Record<string, string> = {
@@ -218,6 +357,16 @@ const FORMAT_OPTIONS = [
 export default function LeagueDetailScreen({ navigation }: any) {
   const [league, setLeague] = useState<LeagueDetail>(LEAGUE);
 
+  // Registration popup state
+  const [registerVisible, setRegisterVisible] = useState(false);
+  const [registerMode, setRegisterMode] = useState<RegisterMode>(null);
+  const [registerStep, setRegisterStep] = useState<RegisterStep>('choose');
+  const [selectedMyTeamId, setSelectedMyTeamId] = useState<string | null>(null);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [selectedLeagueTeamId, setSelectedLeagueTeamId] = useState<string | null>(null);
+  const [joinMessage, setJoinMessage] = useState('');
+  const [successText, setSuccessText] = useState('');
+
   const toggleSetting = (key: keyof LeagueDetail['settings']) => {
     setLeague(prev => ({
       ...prev,
@@ -229,6 +378,79 @@ export default function LeagueDetailScreen({ navigation }: any) {
   };
 
   const seasonColor = SEASON_COLORS[league.season];
+
+  const openRegister = () => {
+    setRegisterMode(null);
+    setRegisterStep('choose');
+    setSelectedMyTeamId(null);
+    setNewTeamName('');
+    setSelectedLeagueTeamId(null);
+    setJoinMessage('');
+    setRegisterVisible(true);
+  };
+
+  const closeRegister = () => setRegisterVisible(false);
+
+  const chooseTeamMode = () => {
+    setRegisterMode('team');
+    setRegisterStep(MY_TEAMS.length > 0 ? 'teamPick' : 'teamCreate');
+  };
+
+  const choosePlayerMode = () => {
+    setRegisterMode('player');
+    setRegisterStep('playerPick');
+  };
+
+  const confirmTeamRegistration = () => {
+    const team = MY_TEAMS.find(t => t.id === selectedMyTeamId);
+    setSuccessText(`${team?.name ?? 'Your team'} has been registered for ${league.name}.`);
+    setRegisterStep('success');
+  };
+
+  const confirmCreateAndRegister = () => {
+    if (!newTeamName.trim()) return;
+    setSuccessText(`"${newTeamName.trim()}" was created and registered for ${league.name}.`);
+    setRegisterStep('success');
+  };
+
+  const confirmPlayerRequest = () => {
+    const team = LEAGUE_TEAMS.find(t => t.id === selectedLeagueTeamId);
+    setSuccessText(`Your request to join ${team?.name ?? 'the team'} has been sent.`);
+    setRegisterStep('success');
+  };
+
+  const registerModalTitle = () => {
+    switch (registerStep) {
+      case 'choose':
+        return 'Register';
+      case 'teamPick':
+        return 'Choose Your Team';
+      case 'teamCreate':
+        return 'Create a Team';
+      case 'playerPick':
+        return 'Join as Player';
+      case 'playerMessage':
+        return 'Send Request';
+      case 'success':
+        return 'Success';
+      default:
+        return 'Register';
+    }
+  };
+
+  const canGoBack = registerStep !== 'choose' && registerStep !== 'success';
+
+  const handleBack = () => {
+    if (registerStep === 'teamPick' || registerStep === 'teamCreate' || registerStep === 'playerPick') {
+      setRegisterStep('choose');
+      setRegisterMode(null);
+      return;
+    }
+    if (registerStep === 'playerMessage') {
+      setRegisterStep('playerPick');
+      return;
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -282,6 +504,12 @@ export default function LeagueDetailScreen({ navigation }: any) {
               <Text style={[styles.badgeText, { color: COLORS.primary }]}>{league.sport}</Text>
             </View>
           </View>
+
+          {/* ── Register CTA ── */}
+          <TouchableOpacity style={styles.registerBtn} activeOpacity={0.85} onPress={openRegister}>
+            <Icon type="materialCommunityIcons" name="clipboard-check-outline" size={18} color={COLORS.white} />
+            <Text style={styles.registerBtnText}>Register</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.body}>
@@ -376,6 +604,198 @@ export default function LeagueDetailScreen({ navigation }: any) {
           <View style={styles.bottomPad} />
         </View>
       </ScrollView>
+
+      {/* ── Registration Modal ── */}
+      <Modal
+        visible={registerVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={closeRegister}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity style={styles.modalBackdropTouch} activeOpacity={1} onPress={closeRegister} />
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              {canGoBack ? (
+                <TouchableOpacity onPress={handleBack} style={styles.modalHeaderBtn}>
+                  <Icon type="materialCommunityIcons" name="arrow-left" size={22} color={COLORS.black} />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.modalHeaderBtn} />
+              )}
+              <Text style={styles.modalTitle}>{registerModalTitle()}</Text>
+              <TouchableOpacity onPress={closeRegister} style={styles.modalHeaderBtn}>
+                <Icon type="materialCommunityIcons" name="close" size={22} color={COLORS.black} />
+              </TouchableOpacity>
+            </View>
+
+            {/* ── Step: choose ── */}
+            {registerStep === 'choose' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>How would you like to register for {league.name}?</Text>
+
+                <RegisterOptionCard
+                  icon="account-group"
+                  title="Register as a Team"
+                  description="Choose one of your teams or create a new one"
+                  onPress={chooseTeamMode}
+                />
+                <RegisterOptionCard
+                  icon="account"
+                  title="Join as a Player"
+                  description="Browse teams and request to join one"
+                  onPress={choosePlayerMode}
+                />
+              </View>
+            )}
+
+            {/* ── Step: teamPick ── */}
+            {registerStep === 'teamPick' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>Select the team you want to register</Text>
+                <FlatList
+                  data={MY_TEAMS}
+                  keyExtractor={item => item.id}
+                  style={{ maxHeight: 260 }}
+                  renderItem={({ item }) => (
+                    <MyTeamRow
+                      team={item}
+                      selected={selectedMyTeamId === item.id}
+                      onPress={() => setSelectedMyTeamId(item.id)}
+                    />
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                />
+
+                <TouchableOpacity
+                  style={styles.createTeamLink}
+                  onPress={() => navigation.navigate('addTeam', { leagueId: league.name })}
+                >
+                  <Icon type="materialCommunityIcons" name="plus-circle-outline" size={18} color={COLORS.primary} />
+                  <Text style={styles.createTeamLinkText}>Create a new team instead</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, !selectedMyTeamId && styles.primaryBtnDisabled]}
+                  disabled={!selectedMyTeamId}
+                  onPress={confirmTeamRegistration}
+                >
+                  <Text style={styles.primaryBtnText}>Register Team</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Step: teamCreate ── */}
+            {registerStep === 'teamCreate' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>Give your new team a name to register it for {league.name}</Text>
+
+                <View style={styles.inputWrap}>
+                  <Icon type="materialCommunityIcons" name="account-group-outline" size={20} color={COLORS.gray3} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Team name"
+                    placeholderTextColor={COLORS.gray3}
+                    value={newTeamName}
+                    onChangeText={setNewTeamName}
+                  />
+                </View>
+
+                {MY_TEAMS.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.createTeamLink}
+                    onPress={() => setRegisterStep('teamPick')}
+                  >
+                    <Icon type="materialCommunityIcons" name="account-group" size={18} color={COLORS.primary} />
+                    <Text style={styles.createTeamLinkText}>Use an existing team instead</Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, !newTeamName.trim() && styles.primaryBtnDisabled]}
+                  disabled={!newTeamName.trim()}
+                  onPress={confirmCreateAndRegister}
+                >
+                  <Text style={styles.primaryBtnText}>Create & Register</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Step: playerPick ── */}
+            {registerStep === 'playerPick' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>Choose a team to send a join request to</Text>
+                <FlatList
+                  data={LEAGUE_TEAMS}
+                  keyExtractor={item => item.id}
+                  style={{ maxHeight: 300 }}
+                  renderItem={({ item }) => (
+                    <LeagueTeamRow
+                      team={item}
+                      selected={selectedLeagueTeamId === item.id}
+                      onPress={() => setSelectedLeagueTeamId(item.id)}
+                    />
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                />
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, !selectedLeagueTeamId && styles.primaryBtnDisabled]}
+                  disabled={!selectedLeagueTeamId}
+                  onPress={() => setRegisterStep('playerMessage')}
+                >
+                  <Text style={styles.primaryBtnText}>Continue</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Step: playerMessage ── */}
+            {registerStep === 'playerMessage' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>
+                  Send a message to{' '}
+                  {LEAGUE_TEAMS.find(t => t.id === selectedLeagueTeamId)?.name ?? 'the team'} with your
+                  request
+                </Text>
+
+                <View style={styles.textAreaWrap}>
+                  <TextInput
+                    style={styles.textArea}
+                    placeholder="Introduce yourself — position, experience, availability..."
+                    placeholderTextColor={COLORS.gray3}
+                    value={joinMessage}
+                    onChangeText={setJoinMessage}
+                    multiline
+                    numberOfLines={5}
+                    textAlignVertical="top"
+                  />
+                </View>
+
+                <TouchableOpacity style={styles.primaryBtn} onPress={confirmPlayerRequest}>
+                  <Text style={styles.primaryBtnText}>Send Request</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Step: success ── */}
+            {registerStep === 'success' && (
+              <View style={styles.modalBody}>
+                <View style={styles.successIconWrap}>
+                  <Icon type="materialCommunityIcons" name="check-circle" size={56} color="#4CAF50" />
+                </View>
+                <Text style={styles.successText}>{successText}</Text>
+
+                <TouchableOpacity style={styles.primaryBtn} onPress={closeRegister}>
+                  <Text style={styles.primaryBtnText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -480,6 +900,29 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+
+  // Register CTA
+  registerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 13,
+    paddingHorizontal: 28,
+    borderRadius: 99,
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  registerBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.white,
   },
 
   // Body
@@ -682,5 +1125,221 @@ const styles = StyleSheet.create({
 
   bottomPad: {
     height: 40,
+  },
+
+  // ── Registration Modal ──
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  modalBackdropTouch: {
+    flex: 1,
+  },
+  modalSheet: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+    maxHeight: '85%',
+  },
+  modalHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: COLORS.grayscale300,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  modalHeaderBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: COLORS.black,
+  },
+  modalBody: {
+    paddingTop: 8,
+    gap: 12,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: COLORS.gray3,
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+
+  // Register option cards (choose step)
+  registerOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
+    backgroundColor: COLORS.white,
+  },
+  registerOptionIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: `${COLORS.primary}15`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  registerOptionText: {
+    flex: 1,
+    gap: 3,
+  },
+  registerOptionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.black,
+  },
+  registerOptionDesc: {
+    fontSize: 12,
+    color: COLORS.gray3,
+    lineHeight: 16,
+  },
+
+  // Team rows (shared: my teams + league teams)
+  teamRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
+    backgroundColor: COLORS.white,
+  },
+  teamRowSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: `${COLORS.primary}08`,
+  },
+  teamRowLogo: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  teamRowInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  teamRowName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.black,
+  },
+  teamRowMeta: {
+    fontSize: 12,
+    color: COLORS.gray3,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: COLORS.grayscale300,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioOuterActive: {
+    borderColor: COLORS.primary,
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: COLORS.primary,
+  },
+
+  createTeamLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+  },
+  createTeamLinkText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+
+  // Inputs
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
+    backgroundColor: COLORS.white,
+  },
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.black,
+    padding: 0,
+  },
+  textAreaWrap: {
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
+    backgroundColor: COLORS.white,
+    padding: 12,
+  },
+  textArea: {
+    fontSize: 14,
+    color: COLORS.black,
+    minHeight: 100,
+    padding: 0,
+  },
+
+  // Primary button (shared across modal steps)
+  primaryBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    marginTop: 6,
+  },
+  primaryBtnDisabled: {
+    opacity: 0.4,
+  },
+  primaryBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+
+  // Success step
+  successIconWrap: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  successText: {
+    fontSize: 15,
+    color: COLORS.black,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginTop: 8,
   },
 });

@@ -246,7 +246,8 @@
     "termsConditions": "Terms and Conditions",
     "helpCenter": "Help Center",
     "logout": "Logout",
-    "changePassword": "Change Password"
+    "changePassword": "Change Password",
+    "requests": "Requests",
   },
   "writeReview": {
     "deliveryCompleted": "Delivery Completed!",

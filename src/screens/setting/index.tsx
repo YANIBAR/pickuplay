@@ -165,7 +165,7 @@ const Profile = () => {
             />
 
             <SettingsItem
-              icon={icons.user}
+              icon={icons.bell3}
               name={t('settings.requests')}
               onPress={() => navigate('teamRequests')}
               hasArrowRight={false}
@@ -200,13 +200,13 @@ const Profile = () => {
               </View>
             </TouchableOpacity>
 
-            {/* Payment Methods 
+            {/* Payment Methods */}
             <SettingsItem
               icon={icons.installment}
               name={t('settings.paymentMethods')}
               onPress={() => navigate('Payment')}
               hasArrowRight={false}
-            />*/}
+            />
 
           </>
         )}

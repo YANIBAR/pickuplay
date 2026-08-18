@@ -71,6 +71,10 @@
 	<string>PickuPlay uses your location to help you discover nearby games and activities, and to provide location-based features even when the app is running in the background.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>venmo</string>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Feather.ttf</string>

@@ -32,6 +32,10 @@ interface LeagueDetail {
     maxPlayersPerTeam: number;
   };
   format: 'round_robin' | 'double_round_robin' | 'knockout' | 'group_stage' | 'custom';
+  customFormat?: {
+    summary: string;
+    stages: string[]; // ordered list of stage descriptions
+  };
   settings: {
     pointsForWin: number;
     pointsForDraw: number;
@@ -62,7 +66,20 @@ const LEAGUE: LeagueDetail = {
     minPlayersPerTeam: 11,
     maxPlayersPerTeam: 22,
   },
-  format: 'round_robin',
+  format: 'custom',
+  customFormat: {
+    summary:
+      'Teams are split into 4 groups of 4. Group winners and runners-up cross over into a knockout bracket, ending in a semifinal and final.',
+    stages: [
+      '4 groups of 4 teams play round robin within their group',
+      '1st in Group A vs 2nd in Group B',
+      '1st in Group B vs 2nd in Group C',
+      '1st in Group C vs 2nd in Group D',
+      '1st in Group D vs 2nd in Group A',
+      'Winners advance to the Semifinals',
+      'Semifinal winners meet in the Final',
+    ],
+  },
   settings: {
     pointsForWin: 3,
     pointsForDraw: 1,
@@ -114,30 +131,43 @@ const RegistrationRow = ({ label, value }: { label: string; value: string }) => 
   </View>
 );
 
+const CustomFormatExplainer = ({ summary, stages }: { summary: string; stages: string[] }) => (
+  <View style={styles.customFormatCard}>
+    <View style={styles.customFormatHeader}>
+      <Icon type="materialCommunityIcons" name="information-outline" size={18} color={COLORS.primary} />
+      <Text style={styles.customFormatTitle}>How this format works</Text>
+    </View>
+    <Text style={styles.customFormatSummary}>{summary}</Text>
+    <View style={styles.customFormatSteps}>
+      {stages.map((stage, i) => (
+        <View key={i} style={styles.customFormatStepRow}>
+          <View style={styles.customFormatStepDot}>
+            <Text style={styles.customFormatStepNum}>{i + 1}</Text>
+          </View>
+          <Text style={styles.customFormatStepText}>{stage}</Text>
+        </View>
+      ))}
+    </View>
+  </View>
+);
 const FormatOption = ({
   label,
-  value,
-  active,
   icon,
 }: {
   label: string;
-  value: string;
-  active: boolean;
   icon: string;
 }) => (
-  <View style={[styles.formatOption, active && styles.formatOptionActive]}>
+  <View style={[styles.formatOption, styles.formatOptionActive]}>
     <Icon
       type="materialCommunityIcons"
       name={icon as any}
       size={22}
-      color={active ? COLORS.primary : COLORS.gray3}
+      color={COLORS.primary}
     />
-    <Text style={[styles.formatLabel, active && styles.formatLabelActive]}>{label}</Text>
-    {active && (
-      <View style={styles.formatBadge}>
-        <Text style={styles.formatBadgeText}>Active</Text>
-      </View>
-    )}
+    <Text style={[styles.formatLabel, styles.formatLabelActive]}>{label}</Text>
+    <View style={styles.formatBadge}>
+      <Text style={styles.formatBadgeText}>Active</Text>
+    </View>
   </View>
 );
 
@@ -153,13 +183,11 @@ const ToggleRow = ({
   label,
   description,
   value,
-  onToggle,
 }: {
   icon: string;
   label: string;
   description: string;
   value: boolean;
-  onToggle: (v: boolean) => void;
 }) => (
   <View style={styles.toggleRow}>
     <View style={[styles.toggleIconWrap, value && styles.toggleIconWrapActive]}>
@@ -174,12 +202,6 @@ const ToggleRow = ({
       <Text style={styles.toggleLabel}>{label}</Text>
       <Text style={styles.toggleDescription}>{description}</Text>
     </View>
-    <Switch
-      value={value}
-      onValueChange={onToggle}
-      trackColor={{ false: COLORS.grayscale300, true: `${COLORS.primary}55` }}
-      thumbColor={value ? COLORS.primary : COLORS.gray3}
-    />
   </View>
 );
 
@@ -206,11 +228,11 @@ const VISIBILITY_ICONS: Record<string, string> = {
 };
 
 const FORMAT_OPTIONS = [
+  { value: 'custom', label: 'Custom', icon: 'pencil-ruler' },
   { value: 'round_robin', label: 'Round Robin', icon: 'rotate-right' },
   { value: 'double_round_robin', label: 'Double Round Robin', icon: 'sync' },
   { value: 'knockout', label: 'Knockout', icon: 'tournament' },
   { value: 'group_stage', label: 'Group Stage', icon: 'view-grid' },
-  { value: 'custom', label: 'Custom', icon: 'pencil-ruler' },
 ];
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
@@ -320,14 +342,19 @@ export default function LeagueDetailScreen({ navigation }: any) {
           {/* ── League Format ── */}
           <SectionHeader label="League Format" />
           <View style={styles.formatGrid}>
-            {FORMAT_OPTIONS.map(opt => (
-              <FormatOption
-                key={opt.value}
-                {...opt}
-                active={league.format === opt.value}
-              />
-            ))}
+            {(() => {
+              const activeFormat = FORMAT_OPTIONS.find(opt => opt.value === league.format);
+              return activeFormat ? (
+                <FormatOption label={activeFormat.label} icon={activeFormat.icon} />
+              ) : null;
+            })()}
           </View>
+          {league.format === 'custom' && league.customFormat && (
+            <CustomFormatExplainer
+              summary={league.customFormat.summary}
+              stages={league.customFormat.stages}
+            />
+          )}
 
           {/* ── Points System ── */}
           <SectionHeader label="Points System" />
@@ -338,17 +365,23 @@ export default function LeagueDetailScreen({ navigation }: any) {
           </View>
 
           {/* ── Feature Toggles ── */}
-          <SectionHeader label="Features" />
+          {/*<SectionHeader label="Features" />
           <View style={styles.card}>
             <ToggleRow
               icon="whistle"
               label="Referees"
               description="Assign referees to matches"
               value={league.settings.refereesEnabled}
-              onToggle={() => toggleSetting('refereesEnabled')}
             />
             <View style={styles.divider} />
             <ToggleRow
+              icon="tshirt-crew"
+              label="jersey"
+              description=""
+              value={true}
+            />
+            <View style={styles.divider} />
+             <ToggleRow
               icon="chart-bar"
               label="Statistics"
               description="Track detailed match stats"
@@ -371,7 +404,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
               value={league.settings.liveScoresEnabled}
               onToggle={() => toggleSetting('liveScoresEnabled')}
             />
-          </View>
+          </View>*/}
 
           <View style={styles.bottomPad} />
         </View>
@@ -683,4 +716,57 @@ const styles = StyleSheet.create({
   bottomPad: {
     height: 40,
   },
+  customFormatCard: {
+  marginTop: 12,
+  backgroundColor: `${COLORS.primary}08`,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: `${COLORS.primary}30`,
+  padding: 14,
+},
+customFormatHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 6,
+  marginBottom: 8,
+},
+customFormatTitle: {
+  fontSize: 13,
+  fontWeight: '700',
+  color: COLORS.primary,
+},
+customFormatSummary: {
+  fontSize: 13,
+  color: COLORS.gray3,
+  lineHeight: 19,
+  marginBottom: 12,
+},
+customFormatSteps: {
+  gap: 8,
+},
+customFormatStepRow: {
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  gap: 8,
+},
+customFormatStepDot: {
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  backgroundColor: COLORS.primary,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: 1,
+},
+customFormatStepNum: {
+  fontSize: 10,
+  fontWeight: '700',
+  color: COLORS.white,
+},
+customFormatStepText: {
+  flex: 1,
+  fontSize: 13,
+  color: COLORS.black,
+  lineHeight: 18,
+},
 });

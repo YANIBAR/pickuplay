@@ -7,7 +7,7 @@ import {
   TouchableOpacityProps,
   ViewStyle,
 } from 'react-native';
-import { ActivityIndicator } from '@components';
+import { ActivityIndicator, Icon } from '@components';
 import { COLORS } from '@constants';
 import styles from './styles';
 
@@ -16,6 +16,7 @@ type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
   color?: string;
+  icon?: string;
   size?: Size;
   textColor?: string;
   textSize?: number;
@@ -28,6 +29,7 @@ interface ButtonProps extends TouchableOpacityProps {
 const Button: FC<ButtonProps> = ({
   title,
   color,
+  icon,
   textColor,
   textSize,
   filled = false,
@@ -62,6 +64,7 @@ const Button: FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator size="small" color={COLORS.white} />
       ) : (
+        
         <Text
           style={[
             styles.text,
@@ -69,7 +72,8 @@ const Button: FC<ButtonProps> = ({
             disabled && { color: '#FFFFFF' },
           ]}>
           {title}
-        </Text>
+            <Icon type="ionicons" name={icon} color="white" style={{ marginRight: 8 }} />
+          </Text>
       )}
     </TouchableOpacity>
   );

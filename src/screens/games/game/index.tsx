@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Image, Share, Alert, Clipboard, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Linking, Image, Share, Alert, Clipboard, ImageSourcePropType } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
@@ -165,13 +165,13 @@ const handleImageError = (id: string) => {
   };
   
 
-    const [joinModalVisible, setJoinModalVisible] = useState(false);
+  const [joinModalVisible, setJoinModalVisible] = useState(false);
 
-        const [numPlayers, setNumPlayers] = useState(0);
-        const [promoCode, setPromoCode] = useState('');
+  const [numPlayers, setNumPlayers] = useState(0);
+  const [promoCode, setPromoCode] = useState('');
 
-        const [discountPrice, setDiscountPrice] = useState('');
-      const handleCloneGame = async () => {
+  const [discountPrice, setDiscountPrice] = useState('');
+  const handleCloneGame = async () => {
         try {
           const dates = Object.keys(selectedDates);
           if (dates.length === 0) {
@@ -191,58 +191,95 @@ const handleImageError = (id: string) => {
       setNumPlayers(0);
       setPromoCode('');
     };
-        const handleConfirmJoin = async () => {
-            try {
-              
-              const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers-1}`);
-        
-              if (response.status === 200) {
-                // Success - clear form and close modal
-                setJoinModalVisible(false);
-                setNumPlayers(0);
-                setPromoCode('');
-                
-                // Optional: show success message or navigate
-                Alert.alert(t('games.successJoined'));
-                
-                // Optional: refresh game state or navigate
-                // await fetchGameDetails(game.id);
-              }
-            } catch (error) {
-              const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
-              Alert.alert(errorMessage);
-            } 
-          };
-        const ApplyDiscount = (code: string) => {
-              const promoCodes: Record<string, number> = {
-                "PUP10%": 0.1,
-                "PUP20%": 0.2,
-                "PUP50%": 0.5,
-              };
-        
-              const discount = promoCodes[code];
-              const players = parseInt(numPlayers) || 1;
-              if (discount) {
-                const pricePerPlayer = game.price * (1 - discount);
-                setDiscountPrice((pricePerPlayer * players).toFixed(2)); // 👈 multiply by players
-              } else {
-                Alert.alert('Invalid promo code');
-                setDiscountPrice('');
-              }
-            };
-            const handleJoinGame = (e: any) => {
-              e.stopPropagation();
-              setJoinModalVisible(true);
-            };
+    // Redirect to Venmo to complete payment for the join
+    const handleVenmoPayment = async (amount: number) => {
+      const note = encodeURIComponent(`Pickuplay - ${game.title}`);
+      const recipient = 'yanibar'; // Venmo username, no @
 
-          const handleInviteGame = async (e: any) => {
-            e.stopPropagation();
-            try {
-              const response = await authenticatedApi.post(`games/inviteToGame`, { gameId: game.id });
-            } catch (error) {
-              console.error('Failed to invite to game:', error);
-            }
+      const venmoAppUrl = `venmo://paycharge?txn=pay&recipients=${recipient}&amount=${amount}&note=${note}`;
+      const venmoWebUrl = `https://venmo.com/${recipient}?txn=pay&amount=${amount}&note=${note}`;
+
+      try {
+        const supported = await Linking.canOpenURL(venmoAppUrl);
+        await Linking.openURL(supported ? venmoAppUrl : venmoWebUrl);
+      } catch (error) {
+        Alert.alert(t('common.error'), t('game.venmo.failedToOpen') || 'Could not open Venmo.');
+      }
+    };
+
+    const handlePaypalPayment = async (amount: number) => {
+      const note = encodeURIComponent(`Pickuplay - ${game.title}`);
+      const recipient = 'yanibar'; // PayPal.me username
+
+      // paypal.me links open the PayPal app automatically if installed (universal link),
+      // otherwise fall back to the browser — no separate app/web URL needed.
+      const paypalUrl = `https://paypal.me/${recipient}/${amount}?note=${note}`;
+
+      try {
+        await Linking.openURL(paypalUrl);
+      } catch (error) {
+        Alert.alert(t('common.error'), t('game.paypal.failedToOpen') || 'Could not open PayPal.');
+      }
+    };
+
+    const handleConfirmJoin = async (paymentMethod?: 'venmo' | 'paypal') => {
+      try {
+        const players = parseInt(numPlayers) || 1;
+        const total = discountPrice
+          ? parseFloat(discountPrice)
+          : (game.price || 0) * players;
+
+        if (total > 0 && paymentMethod) {
+          if (paymentMethod === 'venmo') {
+            await handleVenmoPayment(total);
+          } else if (paymentMethod === 'paypal') {
+            await handlePaypalPayment(total);
+          }
+        }
+
+        const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers-1}`);
+
+        if (response.status === 200) {
+          setJoinModalVisible(false);
+          setNumPlayers(0);
+          setPromoCode('');
+          Alert.alert(t('games.successJoined'));
+        }
+      } catch (error) {
+        const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
+        Alert.alert(errorMessage);
+      }
+    };
+    const ApplyDiscount = (code: string) => {
+          const promoCodes: Record<string, number> = {
+            "PUP10%": 0.1,
+            "PUP20%": 0.2,
+            "PUP50%": 0.5,
           };
+    
+          const discount = promoCodes[code];
+          const players = parseInt(numPlayers) || 1;
+          if (discount) {
+            const pricePerPlayer = game.price * (1 - discount);
+            setDiscountPrice((pricePerPlayer * players).toFixed(2)); // 👈 multiply by players
+          } else {
+            Alert.alert('Invalid promo code');
+            setDiscountPrice('');
+          }
+        };
+        const handleJoinGame = (e: any) => {
+          e.stopPropagation();
+          setJoinModalVisible(true);
+        };
+
+      const handleInviteGame = async (e: any) => {
+        e.stopPropagation();
+        try {
+          const response = await authenticatedApi.post(`games/inviteToGame`, { gameId: game.id });
+        } catch (error) {
+          console.error('Failed to invite to game:', error);
+        }
+      };
   return (
     <>
     <SafeAreaView style={styles.area}>
@@ -498,7 +535,7 @@ const handleImageError = (id: string) => {
                   </View>
   
                   <View style={styles.gameInfoSection}>
-                    <Text style={styles.gameNameModal}>{game.title}</Text>
+                    <Text style={styles.gameNameModal}>{game.title} </Text>
                     <Text style={styles.gameType}>{game.sportType?.name?.toUpperCase() ?? ''}</Text>
                   </View>
   
@@ -584,23 +621,27 @@ const handleImageError = (id: string) => {
                   </View>
   
                   <View style={styles.buttonContainer}>
-                    <Button
-                      title="Cancel"
-                      style={{
-                        width: (SIZES.width) / 3,
-                        backgroundColor: COLORS.transparentPrimary,
-                        borderRadius: 32,
-                        borderColor: COLORS.transparentPrimary
-                      }}
-                      textColor={COLORS.primary}
-                      onPress={handleCloseModal}
-                    />
-                    <Button
-                      title="Confirm"
-                      filled
-                      style={styles.confirmButton}
-                      onPress={handleConfirmJoin}
-                    />
+
+                    {(discountPrice ? parseFloat(discountPrice) : (game.price || 0) * (numPlayers || 1)) > 0 ? (
+                    <View style={{ width: '100%', marginTop: 12, gap: 10 }}>
+                      <Button
+                        title="Pay with Venmo"
+                        icon="logo-venmo"
+                        filled
+                        style={{ backgroundColor: '#3D95CE', borderRadius: 32 }}
+                        onPress={() => handleConfirmJoin('venmo')}
+                      />
+                    </View>
+                  ) : (
+                    <View style={styles.buttonContainer}>
+                      <Button
+                        title="Confirm"
+                        filled
+                        style={styles.confirmButton}
+                        onPress={() => handleConfirmJoin()}
+                      />
+                    </View>
+                  )}
                   </View>
                 </View>
               ) : (

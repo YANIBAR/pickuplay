@@ -5,7 +5,7 @@ const homeLogo = require('@assets/images/home-logo.png') as ImageSourcePropType;
 const scanCard = require('@assets/images/scan_card.png');
 const icon = require('@assets/images/icon.png');
 const matchups = require('@assets/images/matchups.png');
-const leagueCover = require('@assets/images/league-cover.png');
+const competitionCover = require('@assets/images/competition-cover.png');
 
 const images = {
   logo,
@@ -13,7 +13,7 @@ const images = {
   scanCard,
   icon,
   matchups,
-  leagueCover
+  competitionCover
 };
 
 export default images;

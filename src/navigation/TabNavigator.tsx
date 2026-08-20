@@ -4,7 +4,7 @@ import {
   mapFieldsScreen,
   GamesScreen,
   AddGameScreen,
-  LeaguesScreen,
+  CompetitionsScreen,
   ProfileOnboardingScreen,
   MyProfileScreen
 } from '@screens';
@@ -82,10 +82,10 @@ const TabNavigator = () => {
       )}
 
       <Tab.Screen
-        name="Leagues"
-        component={LeaguesScreen}
+        name="Competitions"
+        component={CompetitionsScreen}
         options={{
-          tabBarLabel: t('menu.leagues'),
+          tabBarLabel: t('menu.competitions'),
           tabBarIcon: ({ color, size }) => (
             <Icon name="trophy" type="materialCommunityIcons" color={color} size={size} />
           ),

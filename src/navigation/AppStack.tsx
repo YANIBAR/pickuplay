@@ -17,8 +17,8 @@ import {
   ForgotPasswordEmailScreen,
   CreateNewPasswordScreen,
   TeamsScreen,
-  LeaguesScreen,
-  AddLeaguesScreen,
+  CompetitionsScreen,
+  AddCompetitionsScreen,
   ScheduleScreen,
   GamesScreen,
   GameScreen,
@@ -35,8 +35,8 @@ import {
   ChatScreen,
   ProfileOnboardingScreen,
   MyProfileScreen,
-  LeagueDetailScreen,
-  EditLeaguesScreen,
+  CompetitionDetailScreen,
+  EditCompetitionsScreen,
   AddTeamScreen,
   TeamDetailScreen,
   TeamRequestsScreen
@@ -66,10 +66,10 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="addTeam" component={AddTeamScreen} />
       <Stack.Screen name="teamDetail" component={TeamDetailScreen} />
       <Stack.Screen name="teamRequests" component={TeamRequestsScreen} />
-      <Stack.Screen name="leagues" component={LeaguesScreen} />
-      <Stack.Screen name="addLeague" component={AddLeaguesScreen} />
-      <Stack.Screen name="editLeague" component={EditLeaguesScreen} />
-      <Stack.Screen name="leagueDetail" component={LeagueDetailScreen} />
+      <Stack.Screen name="competitions" component={CompetitionsScreen} />
+      <Stack.Screen name="addCompetition" component={AddCompetitionsScreen} />
+      <Stack.Screen name="editCompetition" component={EditCompetitionsScreen} />
+      <Stack.Screen name="competitionDetail" component={CompetitionDetailScreen} />
       <Stack.Screen name="booking" component={ScheduleScreen} />
       <Stack.Screen name="Games" component={GamesScreen} />
       <Stack.Screen name="myGames" component={MyGamesScreen} />

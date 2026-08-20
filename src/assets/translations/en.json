@@ -379,7 +379,7 @@
   },
   "menu": {
     "chat": "Chat",
-    "leagues": "Leagues",
+    "competitions": "Competitions",
     "schedule": "Schedule",
     "games": "Games",
     "user": "Profile",
@@ -449,16 +449,16 @@
     "createMatchup": "Create Matchup",
     "findTeams": "Find Teams"
   },
-  "leagues": {
+  "competitions": {
     "comingSoon": "Coming soon",
-    "createLeagueComingSoon": "The league creation feature is coming soon. Stay tuned!",
-    "createLeague": "Create League",
+    "createCompetitionComingSoon": "The competition creation feature is coming soon. Stay tuned!",
+    "createCompetition": "Create Competition",
     "findTeams": "Find Teams",
-    "startLeague": "Start your own league",
-    "noLeagues": "No leagues available.",
-    "description": "Leagues are a great way to organize regular competitions and events.",
-    "joinLeague": "Join a League",
-    "joinLeagueDescription": "Join as a player or as a team to participate in exciting leagues.",
+    "startCompetition": "Start your own competition",
+    "noCompetitions": "No competitions available.",
+    "description": "Competitions are a great way to organize regular competitions and events.",
+    "joinCompetition": "Join a Competition",
+    "joinCompetitionDescription": "Join as a player or as a team to participate in exciting competitions.",
     "joinAsPlayer": "Join as Player",
     "joinAsTeam": "Join as Team"
   },

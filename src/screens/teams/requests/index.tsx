@@ -108,7 +108,7 @@ const TeamInboxScreen = () => {
       challenger_team_format: 11,
       proposed_date: '2026-07-18T15:00:00Z',
       proposed_venue: 'Swope Soccer Village',
-      message: 'Looking for a friendly before the league starts. We are a competitive level team, hope you\'re up for it!',
+      message: 'Looking for a friendly before the competition starts. We are a competitive level team, hope you\'re up for it!',
       status: 'pending',
       created_at: new Date(Date.now() - 25 * 60000).toISOString(), // 25m ago
     },

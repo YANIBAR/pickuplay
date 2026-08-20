@@ -23,7 +23,7 @@ type Season = 'fall' | 'spring' | 'summer' | 'winter';
 type Visibility = 'public' | 'private' | 'invite-only';
 type Format = 'round_robin' | 'double_round_robin' | 'knockout' | 'group_stage' | 'custom';
 
-interface LeagueForm {
+interface CompetitionForm {
   name: string;
   sport: string;
   description: string;
@@ -53,11 +53,11 @@ interface LeagueForm {
 
 // ─── Initial state ────────────────────────────────────────────────────────────
 
-const INITIAL: LeagueForm = {
-  name: 'Premier City League',
+const INITIAL: CompetitionForm = {
+  name: 'Premier City Competition',
   sport: 'Football',
   description:
-    'The most competitive amateur football league in the city, bringing together top local talent every season.',
+    'The most competitive amateur football competition in the city, bringing together top local talent every season.',
   season: 'fall',
   city: 'Kansas City',
   visibility: 'public',
@@ -106,7 +106,7 @@ const FORMATS: { value: Format; label: string; icon: string; sub: string }[] = [
 ];
 
 const TOGGLES: {
-  key: keyof LeagueForm['settings'];
+  key: keyof CompetitionForm['settings'];
   label: string;
   sub: string;
   icon: string;
@@ -214,29 +214,29 @@ const PointStepper = ({
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
-export default function EditLeagueScreen({ navigation }: any) {
-  const [form, setForm] = useState<LeagueForm>(INITIAL);
+export default function EditCompetitionScreen({ navigation }: any) {
+  const [form, setForm] = useState<CompetitionForm>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [saving, setSaving] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   // ── helpers ──
-  const set = (field: keyof LeagueForm, value: any) =>
+  const set = (field: keyof CompetitionForm, value: any) =>
     setForm(prev => ({ ...prev, [field]: value }));
 
-  const setReg = (field: keyof LeagueForm['registration'], value: string) =>
+  const setReg = (field: keyof CompetitionForm['registration'], value: string) =>
     setForm(prev => ({ ...prev, registration: { ...prev.registration, [field]: value } }));
 
-  const setSetting = (field: keyof LeagueForm['settings'], value: any) =>
+  const setSetting = (field: keyof CompetitionForm['settings'], value: any) =>
     setForm(prev => ({ ...prev, settings: { ...prev.settings, [field]: value } }));
 
-  const toggleSetting = (key: keyof LeagueForm['settings']) =>
+  const toggleSetting = (key: keyof CompetitionForm['settings']) =>
     setSetting(key, !form.settings[key]);
 
   // ── validation ──
   const validate = (): boolean => {
     const e: Partial<Record<string, string>> = {};
-    if (!form.name.trim())        e.name = 'League name is required';
+    if (!form.name.trim())        e.name = 'Competition name is required';
     if (!form.sport.trim())       e.sport = 'Sport is required';
     if (!form.city.trim())        e.city = 'City is required';
     if (!form.registration.openDate.trim())  e.openDate = 'Open date is required';
@@ -256,7 +256,7 @@ export default function EditLeagueScreen({ navigation }: any) {
     // simulate API call
     await new Promise(res => setTimeout(res, 1200));
     setSaving(false);
-    Alert.alert('Saved', 'League updated successfully.');
+    Alert.alert('Saved', 'Competition updated successfully.');
     navigation?.goBack();
   };
 
@@ -280,7 +280,7 @@ export default function EditLeagueScreen({ navigation }: any) {
           <TouchableOpacity style={styles.headerBtn} onPress={handleDiscard}>
             <Icon type="materialCommunityIcons" name="close" size={22} color={COLORS.black} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit League</Text>
+          <Text style={styles.headerTitle}>Edit Competition</Text>
           <TouchableOpacity
             style={[styles.saveBtn, saving && styles.saveBtnLoading]}
             onPress={handleSave}
@@ -339,11 +339,11 @@ export default function EditLeagueScreen({ navigation }: any) {
 
             <View style={styles.card}>
               <View style={styles.fieldWrap}>
-                <FieldLabel label="League Name" required />
+                <FieldLabel label="Competition Name" required />
                 <StyledInput
                   value={form.name}
                   onChangeText={v => { set('name', v); setErrors(e => ({ ...e, name: '' })); }}
-                  placeholder="e.g. Premier City League"
+                  placeholder="e.g. Premier City Competition"
                   maxLength={60}
                   error={errors.name}
                 />
@@ -380,7 +380,7 @@ export default function EditLeagueScreen({ navigation }: any) {
                 <StyledInput
                   value={form.description}
                   onChangeText={v => set('description', v)}
-                  placeholder="Describe your league…"
+                  placeholder="Describe your competition…"
                   multiline
                   numberOfLines={4}
                   maxLength={300}
@@ -510,8 +510,8 @@ export default function EditLeagueScreen({ navigation }: any) {
               </View>
             </View>
 
-            {/* ── League Format ── */}
-            <SectionHeader label="League Format" icon="trophy-outline" />
+            {/* ── Competition Format ── */}
+            <SectionHeader label="Competition Format" icon="trophy-outline" />
             <View style={styles.card}>
               {FORMATS.map((f, i) => {
                 const active = form.format === f.value;
@@ -605,8 +605,8 @@ export default function EditLeagueScreen({ navigation }: any) {
                 style={styles.dangerBtn}
                 onPress={() =>
                   Alert.alert(
-                    'Delete League',
-                    'This will permanently delete the league and all its data. This cannot be undone.',
+                    'Delete Competition',
+                    'This will permanently delete the competition and all its data. This cannot be undone.',
                     [
                       { text: 'Cancel', style: 'cancel' },
                       { text: 'Delete', style: 'destructive', onPress: () => {} },
@@ -615,7 +615,7 @@ export default function EditLeagueScreen({ navigation }: any) {
                 }
               >
                 <Icon type="materialCommunityIcons" name="trash-can-outline" size={18} color="#E53935" />
-                <Text style={styles.dangerText}>Delete League</Text>
+                <Text style={styles.dangerText}>Delete Competition</Text>
               </TouchableOpacity>
             </View>
 

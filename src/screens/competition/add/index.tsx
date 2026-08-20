@@ -27,7 +27,7 @@ import { StyleSheet } from 'react-native';
 
 interface FormData {
   // Basic Info
-  leagueName: string;
+  competitionName: string;
   sport: number;
   description: string;
   logo?: string;
@@ -45,11 +45,15 @@ interface FormData {
   // Registration
   registrationOpen: string;
   registrationClose: string;
-  maxTeams: string;
+  teamsNumber: string;
   minPlayersPerTeam: string;
   maxPlayersPerTeam: string;
+  // How teams will be labeled/displayed, e.g. "Team A" vs "Team 1" vs "Yellow Team"
+  teamNamingScheme: 'alphabet' | 'number' | 'color';
   // Format
   format: 'round_robin' | 'double_round_robin' | 'knockout' | 'group_stage' | 'custom';
+  // Only used when format === 'custom'
+  customFormatExplanation: string;
   // Settings
   pointsWin: string;
   pointsDraw: string;
@@ -76,7 +80,7 @@ const TOTAL_STEPS = STEPS.length;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const AddLeagueScreen = () => {
+const AddCompetitionScreen = () => {
   const { t } = useTranslation();
   const { navigate } = useNavigation();
   const [currentStep, setCurrentStep] = useState(0); // 0-indexed
@@ -105,7 +109,7 @@ const AddLeagueScreen = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     defaultValues: {
-      leagueName: '',
+      competitionName: '',
       sport: 0,
       description: '',
       logo: '',
@@ -119,10 +123,12 @@ const AddLeagueScreen = () => {
       visibility: 'public',
       registrationOpen: '',
       registrationClose: '',
-      maxTeams: '',
+      teamsNumber: '',
       minPlayersPerTeam: '',
       maxPlayersPerTeam: '',
+      teamNamingScheme: 'alphabet',
       format: 'round_robin',
+      customFormatExplanation: '',
       pointsWin: '3',
       pointsDraw: '1',
       pointsLoss: '0',
@@ -136,6 +142,7 @@ const AddLeagueScreen = () => {
 
   const visibility = watch('visibility');
   const format = watch('format');
+  const teamNamingScheme = watch('teamNamingScheme');
 
   // ─── Fetch data ─────────────────────────────────────────────────────────────
 
@@ -222,7 +229,7 @@ const AddLeagueScreen = () => {
     const formData = new FormData();
     formData.append('image', { uri: file.uri, name: file.fileName || 'image.jpg', type: file.type || 'image/jpeg' });
     const token = await AsyncStorage.getItem('access_token');
-    await fetch(`${JAVA_API}leagues/${id}/${endpoint}`, {
+    await fetch(`${JAVA_API}competitions/${id}/${endpoint}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       body: formData,
@@ -232,12 +239,12 @@ const AddLeagueScreen = () => {
   // ─── Step validation ─────────────────────────────────────────────────────────
 
   const STEP_FIELDS: Record<number, (keyof FormData)[]> = {
-    0: ['leagueName', 'sport', 'description'],
+    0: ['competitionName', 'sport', 'description'],
     1: ['seasonName', 'startDate', 'endDate'],
     2: ['city', 'country'],
     3: ['visibility'],
-    4: ['registrationOpen', 'registrationClose', 'maxTeams', 'minPlayersPerTeam', 'maxPlayersPerTeam'],
-    5: ['format'],
+    4: ['registrationOpen', 'registrationClose', 'teamsNumber', 'minPlayersPerTeam', 'maxPlayersPerTeam', 'teamNamingScheme'],
+    5: ['format', 'customFormatExplanation'],
     6: ['pointsWin', 'pointsDraw', 'pointsLoss'],
   };
 
@@ -253,7 +260,7 @@ const AddLeagueScreen = () => {
 
   const onSubmit = async (data: FormData) => {
     const payload = {
-      name: data.leagueName.trim(),
+      name: data.competitionName.trim(),
       sportId: data.sport,
       description: data.description,
       seasonName: data.seasonName,
@@ -265,10 +272,12 @@ const AddLeagueScreen = () => {
       visibility: data.visibility,
       registrationOpen: data.registrationOpen,
       registrationClose: data.registrationClose,
-      maxTeams: parseInt(data.maxTeams, 10),
+      teamsNumber: parseInt(data.teamsNumber, 10),
       minPlayersPerTeam: parseInt(data.minPlayersPerTeam, 10),
       maxPlayersPerTeam: parseInt(data.maxPlayersPerTeam, 10),
+      teamNamingScheme: data.teamNamingScheme,
       format: data.format,
+      customFormatExplanation: data.format === 'custom' ? data.customFormatExplanation : null,
       pointsWin: parseInt(data.pointsWin, 10),
       pointsDraw: parseInt(data.pointsDraw, 10),
       pointsLoss: parseInt(data.pointsLoss, 10),
@@ -278,16 +287,16 @@ const AddLeagueScreen = () => {
       enableLiveScores: data.enableLiveScores,
     };
     try {
-      const response = await authenticatedApi.post('leagues/create', payload);
-      const league = response.result.data;
+      const response = await authenticatedApi.post('competitions/create', payload);
+      const competition = response.result.data;
       await Promise.all([
-        uploadImage(league.id, logoImage, 'upload-logo'),
-        uploadImage(league.id, bannerImage, 'upload-banner'),
+        uploadImage(competition.id, logoImage, 'upload-logo'),
+        uploadImage(competition.id, bannerImage, 'upload-banner'),
       ]);
-      Alert.alert('Success', 'League created successfully!');
-      navigate('league', { league_id: league.id });
+      Alert.alert('Success', 'Competition created successfully!');
+      navigate('competition', { competition_id: competition.id });
     } catch (error) {
-      Alert.alert('Error', (error as any).response?.data?.message || 'Failed to create league.');
+      Alert.alert('Error', (error as any).response?.data?.message || 'Failed to create competition.');
     }
   };
 
@@ -409,8 +418,8 @@ const AddLeagueScreen = () => {
         <Text style={styles.sectionTitle}>Basic Information</Text>
       </View>
 
-      {renderTextInput('leagueName', 'League Name *', 'Enter league name', {
-        required: 'League name is required',
+      {renderTextInput('competitionName', 'Competition Name *', 'Enter competition name', {
+        required: 'Competition name is required',
         minLength: { value: 3, message: 'At least 3 characters' },
       })}
 
@@ -445,10 +454,10 @@ const AddLeagueScreen = () => {
         />
       </View>
 
-      {renderImagePicker('logo', 'League Logo', logoImage, 'logo')}
-      {renderImagePicker('banner', 'League Banner', bannerImage, 'banner')}
+      {renderImagePicker('logo', 'Competition Logo', logoImage, 'logo')}
+      {renderImagePicker('banner', 'Competition Banner', bannerImage, 'banner')}
 
-      {renderTextInput('description', 'Description *', 'Describe the league...', {
+      {renderTextInput('description', 'Description *', 'Describe the competition...', {
         required: 'Description is required',
         minLength: { value: 10, message: 'At least 10 characters' },
       }, { multiline: true, numberOfLines: 5, textAlignVertical: 'top', style: { minHeight: 110 } })}
@@ -536,6 +545,10 @@ const AddLeagueScreen = () => {
     { value: 'invite_only', label: 'Invite Only', desc: 'Visible but join by invitation only',  icon: 'mail' },
   ];
 
+  // TODO: revisit this step later — visibility settings currently only cover
+  // the competition itself (public/private/invite_only). Still need to add
+  // comment visibility controls (e.g. who can comment: everyone / members
+  // only / off) once that's designed.
   const renderStep3 = () => (
     <View>
       <View style={styles.sectionHeader}>
@@ -572,6 +585,12 @@ const AddLeagueScreen = () => {
     </View>
   );
 
+  const TEAM_NAMING_OPTIONS: { label: string; value: FormData['teamNamingScheme'] }[] = [
+    { label: 'Alphabet (Team A, Team B...)', value: 'alphabet' },
+    { label: 'Number (Team 1, Team 2...)',   value: 'number' },
+    { label: 'Color (Yellow Team, Blue Team...)', value: 'color' },
+  ];
+
   const renderStep4 = () => (
     <View>
       <View style={styles.sectionHeader}>
@@ -597,10 +616,38 @@ const AddLeagueScreen = () => {
         onCancel={() => setRegCloseVisible(false)}
       />
 
-      {renderTextInput('maxTeams', 'Maximum Teams *', 'e.g. 16', {
+      {renderTextInput('teamsNumber', 'Teams Number *', 'e.g. 16', {
         required: 'Required',
         pattern: { value: /^\d+$/, message: 'Numbers only' },
       }, { keyboardType: 'numeric' })}
+
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>Team Naming *</Text>
+        <Controller
+          name="teamNamingScheme"
+          control={control}
+          rules={{ required: 'Team naming is required' }}
+          render={({ field: { onChange, value } }) => (
+            <View>
+              <Dropdown
+                style={[styles.dropdown, errors.teamNamingScheme && styles.inputError]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                iconStyle={styles.iconStyle}
+                data={TEAM_NAMING_OPTIONS}
+                maxHeight={250}
+                labelField="label"
+                valueField="value"
+                placeholder="Select how teams are shown"
+                value={value}
+                onBlur={async () => await trigger('teamNamingScheme')}
+                onChange={item => { onChange(item.value); trigger('teamNamingScheme'); }}
+              />
+              {errors.teamNamingScheme && <Text style={styles.errorText}>{errors.teamNamingScheme.message}</Text>}
+            </View>
+          )}
+        />
+      </View>
 
       <View style={{ flexDirection: 'row', gap: 10 }}>
         <View style={{ flex: 1 }}>
@@ -631,7 +678,7 @@ const AddLeagueScreen = () => {
     <View>
       <View style={styles.sectionHeader}>
         <Icon name="sports" type="materialIcons" size={20} color={COLORS.primary} />
-        <Text style={styles.sectionTitle}>League Format</Text>
+        <Text style={styles.sectionTitle}>Competition Format</Text>
       </View>
 
       <Controller
@@ -657,6 +704,21 @@ const AddLeagueScreen = () => {
           </View>
         )}
       />
+
+      {format === 'custom' && (
+        <View style={{ marginTop: 16 }}>
+          {renderTextInput(
+            'customFormatExplanation',
+            'Explain how your custom format works *',
+            'Describe how matches, standings, and progression work for this format...',
+            {
+              validate: (value: string) =>
+                format !== 'custom' || !!value?.trim() || 'Please explain how your custom format works',
+            },
+            { multiline: true, numberOfLines: 5, textAlignVertical: 'top', style: { minHeight: 110 } }
+          )}
+        </View>
+      )}
     </View>
   );
 
@@ -724,7 +786,7 @@ const AddLeagueScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
-      <Header title="Create League" />
+      <Header title="Create Competition" />
 
       {/* Step header */}
       <View style={styles.stepHeader}>
@@ -782,7 +844,7 @@ const AddLeagueScreen = () => {
             ) : (
               <>
                 <Icon name="check" type="materialIcons" size={16} color="#fff" />
-                <Text style={styles.primaryButtonText}>Create League</Text>
+                <Text style={styles.primaryButtonText}>Create Competition</Text>
               </>
             )}
           </TouchableOpacity>
@@ -972,4 +1034,4 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 }); 
 
-export default AddLeagueScreen;
+export default AddCompetitionScreen;

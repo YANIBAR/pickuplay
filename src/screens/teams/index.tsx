@@ -200,7 +200,7 @@ function SectionLabel({ label, hint }) {
   );
 }
 
-export default function NoLeaguePage() {
+export default function NoCompetitionPage() {
   const { t } = useTranslation();
   const { navigate } = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);

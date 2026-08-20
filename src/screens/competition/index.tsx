@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decodeToken } from '@services/auth/auth.utils';
 import { useNavigation } from '@react-navigation/native';
 
-export default function NoLeaguePage() {
+export default function NoCompetitionPage() {
   const { t } = useTranslation();
   const { navigate } = useNavigation();
   const [role, setRole] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function NoLeaguePage() {
   const teams = [
   {
     id: 1,
-    name: 'KC soccer league',
+    name: 'KC soccer competition',
     sport: 'Soccer',
     location: 'Brooklyn, NY',
     players: '2 / 8 Teams',
@@ -61,12 +61,12 @@ export default function NoLeaguePage() {
   return (
     <SafeAreaView style={styles.container}>
         
-      <Header title={t('menu.leagues')} />
+      <Header title={t('menu.competitions')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Image
-            source={images.leagueCover}
+            source={images.competitionCover}
             resizeMode="contain"
             style={styles.logo}
           />
@@ -74,50 +74,50 @@ export default function NoLeaguePage() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          <Text style={styles.mainTitle}>{t("leagues.startLeague")}</Text>
+          <Text style={styles.mainTitle}>{t("competitions.startCompetition")}</Text>
 
           <Text style={styles.subtitle}>
-            {t("leagues.noLeagues")}
+            {t("competitions.noCompetitions")}
           </Text>
 
           <Text style={styles.description}>
-            {t("leagues.description")}
+            {t("competitions.description")}
           </Text>
 
           {/* Action Buttons */}
           <View style={styles.buttonContainer}>
             {(role === 'ORGANIZER' || role === 'ADMIN') && (
-              <TouchableOpacity style={styles.primaryButton}  onPress={() => navigate("addLeague")}>
+              <TouchableOpacity style={styles.primaryButton}  onPress={() => navigate("addCompetition")}>
                   <Text style={styles.primaryButtonText}>
-                    {t("leagues.createLeague")}
+                    {t("competitions.createCompetition")}
                   </Text>
                 </TouchableOpacity>
             )}
             <TouchableOpacity style={styles.secondaryButton} onPress={() => navigate("teams")}>
               <Text style={styles.secondaryButtonText}>
-                {t("leagues.findTeams")}
+                {t("competitions.findTeams")}
               </Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.leagueList}>
+          <View style={styles.competitionList}>
                   
                 { teams.map((team) => (
-                  <TouchableOpacity key={team.id} style={styles.leagueCard} onPress={() => navigate("leagueDetail")}>
+                  <TouchableOpacity key={team.id} style={styles.competitionCard} onPress={() => navigate("competitionDetail")}>
                     <Image
                       source={{ uri: team.image }}
-                      style={styles.leagueImage}
+                      style={styles.competitionImage}
                     />
 
-                    <View style={styles.leagueInfo}>
-                      <Text style={styles.leagueName}>{team.name}</Text>
+                    <View style={styles.competitionInfo}>
+                      <Text style={styles.competitionName}>{team.name}</Text>
 
-                      <Text style={styles.leagueSport}>{team.sport}</Text>
+                      <Text style={styles.competitionSport}>{team.sport}</Text>
 
-                      <Text style={styles.leagueLocation}>
+                      <Text style={styles.competitionLocation}>
                         {team.location}
                       </Text>
 
-                      <Text style={styles.leaguePlayers}>
+                      <Text style={styles.competitionPlayers}>
                         {team.players}
                       </Text>
                     </View>
@@ -127,21 +127,21 @@ export default function NoLeaguePage() {
           </View>
           {(role === 'ORGANIZER' || role === 'ADMIN') && (
             <View style={styles.joinSection}>
-              <Text style={styles.joinTitle}>{t("leagues.joinLeague")}</Text>
+              <Text style={styles.joinTitle}>{t("competitions.joinCompetition")}</Text>
               <Text style={styles.joinDescription}>
-                {t("leagues.joinLeagueDescription")}
+                {t("competitions.joinCompetitionDescription")}
               </Text>
 
               <View style={styles.joinButtonContainer}>
                 <TouchableOpacity style={styles.joinButton}>
                   <Text style={styles.joinButtonText}>
-                    {t("leagues.joinAsPlayer")}
+                    {t("competitions.joinAsPlayer")}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.joinButton}>
                   <Text style={styles.joinButtonText}>
-                    {t("leagues.joinAsTeam")}
+                    {t("competitions.joinAsTeam")}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -338,11 +338,11 @@ const styles = StyleSheet.create({
     color: '#888',
     lineHeight: 18,
   },
-  leagueList: {
+  competitionList: {
     gap: 16,
   },
 
-  leagueCard: {
+  competitionCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -358,39 +358,39 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 
-  leagueImage: {
+  competitionImage: {
     width: 110,
     height: 110,
     borderRadius: 16,
     backgroundColor: '#ddd',
   },
 
-  leagueInfo: {
+  competitionInfo: {
     flex: 1,
     marginLeft: 14,
     justifyContent: 'space-between',
   },
 
-  leagueName: {
+  competitionName: {
     fontSize: 20,
     fontWeight: '700',
     color: '#111',
   },
 
-  leagueSport: {
+  competitionSport: {
     fontSize: 15,
     color: COLORS.primary,
     fontWeight: '600',
     marginTop: 2,
   },
 
-  leagueLocation: {
+  competitionLocation: {
     fontSize: 14,
     color: '#777',
     marginTop: 4,
   },
 
-  leaguePlayers: {
+  competitionPlayers: {
     fontSize: 14,
     color: '#999',
     marginTop: 4,

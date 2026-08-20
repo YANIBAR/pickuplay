@@ -15,7 +15,7 @@ import { Icon } from '@components';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface LeagueDetail {
+interface CompetitionDetail {
   name: string;
   sport: string;
   description: string;
@@ -49,11 +49,11 @@ interface LeagueDetail {
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
-const LEAGUE: LeagueDetail = {
-  name: 'KC Soccer League',
+const LEAGUE: CompetitionDetail = {
+  name: 'KC Soccer Competition',
   sport: 'Soccer',
   description:
-    'The most competitive amateur soccer league in the city, bringing together top local talent every season.',
+    'The most competitive amateur soccer competition in the city, bringing together top local talent every season.',
   season: 'fall',
   city: 'Kansas City',
   visibility: 'public',
@@ -237,11 +237,11 @@ const FORMAT_OPTIONS = [
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
-export default function LeagueDetailScreen({ navigation }: any) {
-  const [league, setLeague] = useState<LeagueDetail>(LEAGUE);
+export default function CompetitionDetailScreen({ navigation }: any) {
+  const [competition, setCompetition] = useState<CompetitionDetail>(LEAGUE);
 
-  const toggleSetting = (key: keyof LeagueDetail['settings']) => {
-    setLeague(prev => ({
+  const toggleSetting = (key: keyof CompetitionDetail['settings']) => {
+    setCompetition(prev => ({
       ...prev,
       settings: {
         ...prev.settings,
@@ -250,7 +250,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
     }));
   };
 
-  const seasonColor = SEASON_COLORS[league.season];
+  const seasonColor = SEASON_COLORS[competition.season];
 
   return (
     <View style={styles.screen}>
@@ -259,7 +259,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
 
         {/* ── Banner + Logo ── */}
         <View style={styles.bannerWrap}>
-          <Image source={{ uri: league.bannerUrl }} style={styles.banner} resizeMode="cover" />
+          <Image source={{ uri: competition.bannerUrl }} style={styles.banner} resizeMode="cover" />
           <View style={styles.bannerOverlay} />
 
           {/* Back button */}
@@ -268,40 +268,40 @@ export default function LeagueDetailScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {/* Edit button */}
-          <TouchableOpacity style={styles.editBtn} onPress={() => navigation?.navigate('editLeague', { league })}>
+          <TouchableOpacity style={styles.editBtn} onPress={() => navigation?.navigate('editCompetition', { competition })}>
             <Icon type="materialCommunityIcons" name="pencil" size={20} color={COLORS.white} />
           </TouchableOpacity>
 
           {/* Logo circle */}
           <View style={styles.logoRing}>
-            <Image source={{ uri: league.logoUrl }} style={styles.logo} resizeMode="cover" />
+            <Image source={{ uri: competition.logoUrl }} style={styles.logo} resizeMode="cover" />
           </View>
         </View>
 
-        {/* ── League Name & Meta ── */}
+        {/* ── Competition Name & Meta ── */}
         <View style={styles.heroSection}>
-          <Text style={styles.leagueName}>{league.name}</Text>
+          <Text style={styles.competitionName}>{competition.name}</Text>
           <View style={styles.metaRow}>
             <View style={[styles.badge, { backgroundColor: `${seasonColor}22`, borderColor: seasonColor }]}>
               <Icon
                 type="materialCommunityIcons"
-                name={SEASON_ICONS[league.season] as any}
+                name={SEASON_ICONS[competition.season] as any}
                 size={13}
                 color={seasonColor}
               />
               <Text style={[styles.badgeText, { color: seasonColor }]}>
-                {league.season.charAt(0).toUpperCase() + league.season.slice(1)}
+                {competition.season.charAt(0).toUpperCase() + competition.season.slice(1)}
               </Text>
             </View>
             <View style={[styles.badge, { backgroundColor: '#E8F5E922', borderColor: '#4CAF50' }]}>
-              <Icon type="materialCommunityIcons" name={VISIBILITY_ICONS[league.visibility] as any} size={13} color="#4CAF50" />
+              <Icon type="materialCommunityIcons" name={VISIBILITY_ICONS[competition.visibility] as any} size={13} color="#4CAF50" />
               <Text style={[styles.badgeText, { color: '#4CAF50' }]}>
-                {league.visibility.charAt(0).toUpperCase() + league.visibility.slice(1)}
+                {competition.visibility.charAt(0).toUpperCase() + competition.visibility.slice(1)}
               </Text>
             </View>
             <View style={[styles.badge, { backgroundColor: `${COLORS.primary}15`, borderColor: COLORS.primary }]}>
               <Icon type="materialCommunityIcons" name="run" size={13} color={COLORS.primary} />
-              <Text style={[styles.badgeText, { color: COLORS.primary }]}>{league.sport}</Text>
+              <Text style={[styles.badgeText, { color: COLORS.primary }]}>{competition.sport}</Text>
             </View>
           </View>
         </View>
@@ -310,58 +310,58 @@ export default function LeagueDetailScreen({ navigation }: any) {
 
           {/* ── Basic Info Cards ── */}
           <View style={styles.cardGrid}>
-            <InfoCard icon="city" label="City" value={league.city} />
-            <InfoCard icon="soccer-field" label="Sport" value={league.sport} accent />
+            <InfoCard icon="city" label="City" value={competition.city} />
+            <InfoCard icon="soccer-field" label="Sport" value={competition.sport} accent />
           </View>
 
           {/* ── Description ── */}
           <View style={styles.descBlock}>
-            <Text style={styles.descText}>{league.description}</Text>
+            <Text style={styles.descText}>{competition.description}</Text>
           </View>
 
           {/* ── Registration ── */}
           <SectionHeader label="Registration" />
           <View style={styles.card}>
-            <RegistrationRow label="Opens" value={league.registration.openDate} />
+            <RegistrationRow label="Opens" value={competition.registration.openDate} />
             <View style={styles.divider} />
-            <RegistrationRow label="Closes" value={league.registration.closeDate} />
+            <RegistrationRow label="Closes" value={competition.registration.closeDate} />
             <View style={styles.divider} />
-            <RegistrationRow label="Max Teams" value={String(league.registration.maxTeams)} />
+            <RegistrationRow label="Max Teams" value={String(competition.registration.maxTeams)} />
             <View style={styles.divider} />
             <RegistrationRow
               label="Min Players / Team"
-              value={String(league.registration.minPlayersPerTeam)}
+              value={String(competition.registration.minPlayersPerTeam)}
             />
             <View style={styles.divider} />
             <RegistrationRow
               label="Max Players / Team"
-              value={String(league.registration.maxPlayersPerTeam)}
+              value={String(competition.registration.maxPlayersPerTeam)}
             />
           </View>
 
-          {/* ── League Format ── */}
-          <SectionHeader label="League Format" />
+          {/* ── Competition Format ── */}
+          <SectionHeader label="Competition Format" />
           <View style={styles.formatGrid}>
             {(() => {
-              const activeFormat = FORMAT_OPTIONS.find(opt => opt.value === league.format);
+              const activeFormat = FORMAT_OPTIONS.find(opt => opt.value === competition.format);
               return activeFormat ? (
                 <FormatOption label={activeFormat.label} icon={activeFormat.icon} />
               ) : null;
             })()}
           </View>
-          {league.format === 'custom' && league.customFormat && (
+          {competition.format === 'custom' && competition.customFormat && (
             <CustomFormatExplainer
-              summary={league.customFormat.summary}
-              stages={league.customFormat.stages}
+              summary={competition.customFormat.summary}
+              stages={competition.customFormat.stages}
             />
           )}
 
           {/* ── Points System ── */}
           <SectionHeader label="Points System" />
           <View style={styles.pointsRow}>
-            <PointsBox label="Win" value={league.settings.pointsForWin} />
-            <PointsBox label="Draw" value={league.settings.pointsForDraw} />
-            <PointsBox label="Loss" value={league.settings.pointsForLoss} />
+            <PointsBox label="Win" value={competition.settings.pointsForWin} />
+            <PointsBox label="Draw" value={competition.settings.pointsForDraw} />
+            <PointsBox label="Loss" value={competition.settings.pointsForLoss} />
           </View>
 
           {/* ── Feature Toggles ── */}
@@ -371,7 +371,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
               icon="whistle"
               label="Referees"
               description="Assign referees to matches"
-              value={league.settings.refereesEnabled}
+              value={competition.settings.refereesEnabled}
             />
             <View style={styles.divider} />
             <ToggleRow
@@ -385,7 +385,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
               icon="chart-bar"
               label="Statistics"
               description="Track detailed match stats"
-              value={league.settings.statisticsEnabled}
+              value={competition.settings.statisticsEnabled}
               onToggle={() => toggleSetting('statisticsEnabled')}
             />
             <View style={styles.divider} /> 
@@ -393,7 +393,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
               icon="star-outline"
               label="Player Ratings"
               description="Allow post-match player ratings"
-              value={league.settings.playerRatingsEnabled}
+              value={competition.settings.playerRatingsEnabled}
               onToggle={() => toggleSetting('playerRatingsEnabled')}
             />
             <View style={styles.divider} />
@@ -401,7 +401,7 @@ export default function LeagueDetailScreen({ navigation }: any) {
               icon="broadcast"
               label="Live Scores"
               description="Publish scores in real time"
-              value={league.settings.liveScoresEnabled}
+              value={competition.settings.liveScoresEnabled}
               onToggle={() => toggleSetting('liveScoresEnabled')}
             />
           </View>*/}
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
   },
-  leagueName: {
+  competitionName: {
     fontSize: 22,
     fontWeight: '700',
     color: COLORS.black,

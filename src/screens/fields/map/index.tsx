@@ -34,7 +34,7 @@ const getGameIcon = (type: string) => {
     };
     return iconMap[type] || 'sports';
   };
-export default function NoLeaguePage() {
+export default function NoCompetitionPage() {
   const { t } = useTranslation();
   const [role, setRole] = useState<string | null>(null);
   const { navigate } = useNavigation();

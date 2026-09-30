@@ -39,7 +39,7 @@ import {
   EditCompetitionsScreen,
   AddTeamScreen,
   TeamDetailScreen,
-  TeamRequestsScreen
+  JoinRequestsScreen
 } from '@screens';
 import TabNavigator from './TabNavigator';
 
@@ -65,7 +65,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="teams" component={TeamsScreen} />
       <Stack.Screen name="addTeam" component={AddTeamScreen} />
       <Stack.Screen name="teamDetail" component={TeamDetailScreen} />
-      <Stack.Screen name="teamRequests" component={TeamRequestsScreen} />
+      <Stack.Screen name="joinRequests" component={JoinRequestsScreen} />
       <Stack.Screen name="competitions" component={CompetitionsScreen} />
       <Stack.Screen name="addCompetition" component={AddCompetitionsScreen} />
       <Stack.Screen name="editCompetition" component={EditCompetitionsScreen} />

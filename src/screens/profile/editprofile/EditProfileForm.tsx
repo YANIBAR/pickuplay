@@ -22,6 +22,7 @@ const EditProfileForm = ({ onShowgame }) => {
     email: '',
     phone: '',
     city: '',
+    skillLevel: '',
   });
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
@@ -42,6 +43,13 @@ const EditProfileForm = ({ onShowgame }) => {
     { label: 'Overland Park', value: 'overland_park' },
     { label: 'Blue Springs', value: 'blue_springs' },
     { label: 'Liberty', value: 'liberty' },  
+  ];
+
+  const SkillLevel = [
+    { label: 'Beginner', value: 'beginner' },
+    { label: 'Intermediate', value: 'intermediate' },
+    { label: 'Advanced', value: 'advanced' },
+    { label: 'Pro', value: 'pro' },
   ];
   const handleDeleteAccount = async () => {
     try {
@@ -86,7 +94,7 @@ const EditProfileForm = ({ onShowgame }) => {
       await AsyncStorage.setItem("email", user.email);
       await AsyncStorage.setItem("phone", user.phone);
       await AsyncStorage.setItem("city", user.city);
-      navigate("profile");
+      navigate("myProfile");
       if (response.status === 200 || response.status === 201) {
         Alert.alert('Success', 'Profile updated successfully');
       } else {
@@ -156,6 +164,20 @@ const EditProfileForm = ({ onShowgame }) => {
               placeholder={t('edit_game.select_city') }
               value={user.city}
               onChange={item => handleChange('city', item.value)}
+              style={[styles.dropdown ]}
+            />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Skill level</Text>
+          <Dropdown
+              data={SkillLevel}
+              labelField="label"
+              valueField="value"
+              search={true}
+              placeholder={t('edit_game.select_skill') }
+              value={user.skillLevel}
+              onChange={item => handleChange('skillLevel', item.value)}
               style={[styles.dropdown ]}
             />
         </View>

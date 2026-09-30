@@ -167,6 +167,7 @@ const Login = () => {
   // On successful login
   const storeToken = async (token: string, refreshToken: string) => {
     try {
+      console.log(token);
       await AsyncStorage.setItem('access_token', token);
       await AsyncStorage.setItem('refresh_token', refreshToken);
     } catch (error) {

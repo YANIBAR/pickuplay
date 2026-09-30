@@ -167,7 +167,7 @@ const Profile = () => {
             <SettingsItem
               icon={icons.bell3}
               name={t('settings.requests')}
-              onPress={() => navigate('teamRequests')}
+              onPress={() => navigate('joinRequests')}
               hasArrowRight={false}
             />
             

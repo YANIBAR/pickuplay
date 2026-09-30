@@ -2,85 +2,286 @@ import { StyleSheet } from 'react-native';
 import { COLORS, SIZES } from '@constants';
 
 export default StyleSheet.create({
-  area: {
-    flex: 1,
-    backgroundColor: COLORS.white
-  },
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: COLORS.white
+    backgroundColor: '#f5f5f5',
   },
-  title: {
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+  },
+  header: {
+    alignItems: 'center',
+  },
+  iconBtn: {
+    marginHorizontal: 8
+  },
+  logoContainer: {
+    marginBottom: 12,
+  },
+  whistleIcon: {
+    width: 180,
+    height: 180
+  },
+  logo: {
+    width: 400,
+    height: 270,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  brandName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1FAC9B',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  mainTitle: {
     fontSize: 28,
-    fontFamily: "bold",
-    color: COLORS.white,
-    textAlign: "center",
-    marginVertical: 22
+    fontWeight: '700',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: "regular",
-    color: COLORS.white,
-    textAlign: "center",
-    paddingHorizontal: 3
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 32,
   },
-  backIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 16,
-    tintColor: COLORS.white
+  illustrationContainer: {
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 32,
   },
-  scanView: {
-    alignItems: "center",
-    marginVertical: 64
+  emptyStateIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#e8f5f2',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  scanContainer: {
-    width: 332,
-    height: 332,
-    borderRadius: 32,
-    backgroundColor: COLORS.white
+  emptyStateText: {
+    fontSize: 60,
   },
-  cardImageContainer: {
+  description: {
+    fontSize: 15,
+    color: '#555',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32,
   },
-  cardImage: {
-    width: 340,
-    height: 340,
+  buttonContainer: {
+    gap: 12,
+    marginBottom: 40,
   },
-  bottomContainer: {
-    position: "absolute",
-    bottom: 28,
-    right: 0,
-    left: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 64
+  primaryButton: {
+    backgroundColor: '#1FAC9B',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#1FAC9B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  btn: {
-    height: 56,
-    width: 56,
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.grayscale100
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  btnIcon: {
-    height: 20,
-    width: 20,
-    tintColor: COLORS.primary
+  secondaryButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#1FAC9B',
   },
-  cameraBtn: {
-    height: 108,
-    width: 108,
-    borderRadius: 999,
-    backgroundColor: COLORS.primary,
-    alignItems: "center",
-    justifyContent: "center",
+  secondaryButtonText: {
+    color: '#1FAC9B',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  cameraIcon: {
-    height: 44,
-    width: 44,
-    tintColor: COLORS.white
+  joinSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  joinTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  joinDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  joinButtonContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  joinButton: {
+    flex: 1,
+    backgroundColor: '#1FAC9B',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#1FAC9B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  featuresContainer: {
+    gap: 16,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featureEmoji: {
+    fontSize: 24,
+  },
+  featureContent: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  featureDesc: {
+    fontSize: 13,
+    color: '#888',
+    lineHeight: 18,
+  },
+  competitionList: {
+    gap: 16,
+  },
+
+  competitionCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    overflow: 'hidden',
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+
+  competitionImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 16,
+    backgroundColor: '#ddd',
+  },
+
+  competitionInfo: {
+    flex: 1,
+    marginLeft: 14,
+    justifyContent: 'space-between',
+  },
+
+  competitionName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111',
+  },
+
+  competitionSport: {
+    fontSize: 15,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+
+  competitionLocation: {
+    fontSize: 14,
+    color: '#777',
+    marginTop: 4,
+  },
+
+  competitionPlayers: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+
+
+  matchupButton: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+
+  matchupButtonText: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  mvpBadge: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    backgroundColor: '#E8FFFA',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+
+  mvpBadgeText: {
+    color: '#19C2A0',
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.5,
   }
 })

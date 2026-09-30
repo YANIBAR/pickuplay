@@ -134,7 +134,7 @@ const OTPVerification = () => {
       }
 
       if (next_navigation === 'resetPassword') {
-        await publicApi.post('auth/verify-reset-otp', { email, otp });
+        await publicApi.post('otp/verify', { email, otp });
       }
 
       setVisible(true);
@@ -316,7 +316,6 @@ const OTPVerification = () => {
         </ErrorModal>
       </View>
 
-          <SuccessModal visible={visible} onClose={onClose} />
     </SafeAreaView>
   );
 };

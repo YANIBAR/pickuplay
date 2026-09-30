@@ -1,95 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   Image,
   ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Switch,
   StatusBar,
   Platform,
+  Modal,
+  TextInput,
+  FlatList,
+  LayoutAnimation,
+  UIManager,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
-import { COLORS, FONTS, SIZES } from '@constants';
-import { Icon } from '@components';
+import { COLORS } from '@constants';
+import { Button, Icon } from '@components';
+import styles from './styles';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { formatDateLong } from '@utils/dateUtils';
+import { CompetitionTeam, Competition } from '../types';
+import InfoCard from './components/infoCard';
+import RegistrationRow from './components/registrationRow';
+import ToggleRow from './components/toggleRow';
+import TeamAccordionItem from './components/teamAccordionItem';
+import { API_BASE_URL } from '@env';
+import axios from 'axios';
+import { authenticatedApi } from '@services/api';
+import { authCompetitionsdApi } from '@services/competitionApi';
+import  PaymentApiClient  from '@services/payment';
+import NumericInput from '@components/NumericInput';
+import { decodeToken } from '@services/auth/auth.utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface CompetitionDetail {
-  name: string;
-  sport: string;
-  description: string;
-  season: 'fall' | 'spring' | 'summer' | 'winter';
-  city: string;
-  visibility: 'public' | 'private' | 'invite-only';
-  bannerUrl: string;
-  logoUrl: string;
-  registration: {
-    openDate: string;
-    closeDate: string;
-    maxTeams: number;
-    minPlayersPerTeam: number;
-    maxPlayersPerTeam: number;
-  };
-  format: 'round_robin' | 'double_round_robin' | 'knockout' | 'group_stage' | 'custom';
-  customFormat?: {
-    summary: string;
-    stages: string[]; // ordered list of stage descriptions
-  };
-  settings: {
-    pointsForWin: number;
-    pointsForDraw: number;
-    pointsForLoss: number;
-    refereesEnabled: boolean;
-    statisticsEnabled: boolean;
-    playerRatingsEnabled: boolean;
-    liveScoresEnabled: boolean;
-  };
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
+// Mock: teams already registered in this com, available for a player to request to join
+const COMPETITION_TEAMS: CompetitionTeam[] = [
+  
+];
 
-const LEAGUE: CompetitionDetail = {
-  name: 'KC Soccer Competition',
-  sport: 'Soccer',
-  description:
-    'The most competitive amateur soccer competition in the city, bringing together top local talent every season.',
-  season: 'fall',
-  city: 'Kansas City',
-  visibility: 'public',
-  bannerUrl: 'https://media.istockphoto.com/id/928200604/vector/soccer-game-match-goal-moment-with-ball-in-the-net-mesh-football-ball-in-goal-banners-for.jpg?s=612x612&w=0&k=20&c=3Hh3YZCSjELpf9HafD3l9F5OA7rne_jvTz0lAV4FVJ8=',
-  logoUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200',
-  registration: {
-    openDate: 'Aug 1, 2025',
-    closeDate: 'Sep 15, 2025',
-    maxTeams: 16,
-    minPlayersPerTeam: 11,
-    maxPlayersPerTeam: 22,
-  },
-  format: 'custom',
-  customFormat: {
-    summary:
-      'Teams are split into 4 groups of 4. Group winners and runners-up cross over into a knockout bracket, ending in a semifinal and final.',
-    stages: [
-      '4 groups of 4 teams play round robin within their group',
-      '1st in Group A vs 2nd in Group B',
-      '1st in Group B vs 2nd in Group C',
-      '1st in Group C vs 2nd in Group D',
-      '1st in Group D vs 2nd in Group A',
-      'Winners advance to the Semifinals',
-      'Semifinal winners meet in the Final',
-    ],
-  },
-  settings: {
-    pointsForWin: 3,
-    pointsForDraw: 1,
-    pointsForLoss: 0,
-    refereesEnabled: true,
-    statisticsEnabled: true,
-    playerRatingsEnabled: false,
-    liveScoresEnabled: true,
-  },
-};
+// Teams from COMPETITION_TEAMS with no players yet — the only ones eligible to be
+// registered as a new team entry (already-populated teams are simply hidden here).
+const EMPTY_COMPETITION_TEAMS: CompetitionTeam[] = COMPETITION_TEAMS.filter(t => t.playersCount === 0);
+
+
+
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -99,127 +57,120 @@ const SectionHeader = ({ label }: { label: string }) => (
   </View>
 );
 
-const InfoCard = ({
+// ─── Registration popup sub-components ────────────────────────────────────────
+
+type RegisterStep = 'choose' | 'teamPick' | 'teamCreate' | 'teamDetails' | 'playerPick' | 'playerMessage' | 'success';
+type RegisterMode = 'team' | 'player' | null;
+type PlayerLevel = 'beginner' | 'intermediate' | 'advanced';
+
+const PLAYER_LEVELS: { value: PlayerLevel; label: string }[] = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' },
+];
+
+
+const RegisterOptionCard = ({
   icon,
-  label,
-  value,
-  accent,
-}: {
-  icon: string;
-  label: string;
-  value: string;
-  accent?: boolean;
-}) => (
-  <View style={[styles.infoCard, accent && styles.infoCardAccent]}>
-    <Icon
-      type="materialCommunityIcons"
-      name={icon as any}
-      size={20}
-      color={accent ? COLORS.white : COLORS.secondary}
-    />
-    <Text style={[styles.infoCardLabel, accent && styles.infoCardLabelAccent]}>{label}</Text>
-    <Text style={[styles.infoCardValue, accent && styles.infoCardValueAccent]} numberOfLines={1}>
-      {value}
-    </Text>
-  </View>
-);
-
-const RegistrationRow = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.regRow}>
-    <Text style={styles.regLabel}>{label}</Text>
-    <Text style={styles.regValue}>{value}</Text>
-  </View>
-);
-
-const CustomFormatExplainer = ({ summary, stages }: { summary: string; stages: string[] }) => (
-  <View style={styles.customFormatCard}>
-    <View style={styles.customFormatHeader}>
-      <Icon type="materialCommunityIcons" name="information-outline" size={18} color={COLORS.primary} />
-      <Text style={styles.customFormatTitle}>How this format works</Text>
-    </View>
-    <Text style={styles.customFormatSummary}>{summary}</Text>
-    <View style={styles.customFormatSteps}>
-      {stages.map((stage, i) => (
-        <View key={i} style={styles.customFormatStepRow}>
-          <View style={styles.customFormatStepDot}>
-            <Text style={styles.customFormatStepNum}>{i + 1}</Text>
-          </View>
-          <Text style={styles.customFormatStepText}>{stage}</Text>
-        </View>
-      ))}
-    </View>
-  </View>
-);
-const FormatOption = ({
-  label,
-  icon,
-}: {
-  label: string;
-  icon: string;
-}) => (
-  <View style={[styles.formatOption, styles.formatOptionActive]}>
-    <Icon
-      type="materialCommunityIcons"
-      name={icon as any}
-      size={22}
-      color={COLORS.primary}
-    />
-    <Text style={[styles.formatLabel, styles.formatLabelActive]}>{label}</Text>
-    <View style={styles.formatBadge}>
-      <Text style={styles.formatBadgeText}>Active</Text>
-    </View>
-  </View>
-);
-
-const PointsBox = ({ label, value }: { label: string; value: number }) => (
-  <View style={styles.pointsBox}>
-    <Text style={styles.pointsValue}>{value}</Text>
-    <Text style={styles.pointsLabel}>{label}</Text>
-  </View>
-);
-
-const ToggleRow = ({
-  icon,
-  label,
+  title,
   description,
-  value,
+  onPress,
 }: {
   icon: string;
-  label: string;
+  title: string;
   description: string;
-  value: boolean;
+  onPress: () => void;
 }) => (
-  <View style={styles.toggleRow}>
-    <View style={[styles.toggleIconWrap, value && styles.toggleIconWrapActive]}>
-      <Icon
-        type="materialCommunityIcons"
-        name={icon as any}
-        size={20}
-        color={value ? COLORS.primary : COLORS.gray3}
-      />
+  <TouchableOpacity style={styles.registerOptionCard} activeOpacity={0.8} onPress={onPress}>
+    <View style={styles.registerOptionIconWrap}>
+      <Icon type="materialCommunityIcons" name={icon as any} size={26} color={COLORS.primary} />
     </View>
-    <View style={styles.toggleText}>
-      <Text style={styles.toggleLabel}>{label}</Text>
-      <Text style={styles.toggleDescription}>{description}</Text>
+    <View style={styles.registerOptionText}>
+      <Text style={styles.registerOptionTitle}>{title}</Text>
+      <Text style={styles.registerOptionDesc}>{description}</Text>
     </View>
-  </View>
+    <Icon type="materialCommunityIcons" name="chevron-right" size={20} color={COLORS.gray3} />
+  </TouchableOpacity>
 );
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const SEASON_ICONS: Record<string, string> = {
-  fall: 'leaf',
-  spring: 'flower',
-  summer: 'weather-sunny',
-  winter: 'snowflake',
+const TEAM_COLOR_MAP: Record<string, string> = {
+  yellow: COLORS.yellow,
+  red: COLORS.red,
+  green: COLORS.green,
+  blue: COLORS.blue,
+  orange: COLORS.orange,
+  purple: COLORS.purple,
 };
 
-const SEASON_COLORS: Record<string, string> = {
-  fall: '#E07B39',
-  spring: '#4CAF50',
-  summer: '#F9A825',
-  winter: '#42A5F5',
+const FALLBACK_TEAM_COLOR = COLORS.secondary;
+
+export function getTeamColor(teamName: string): string {
+  return TEAM_COLOR_MAP[teamName?.toLowerCase()] ?? FALLBACK_TEAM_COLOR;
+}
+const CompetitionTeamRow = ({
+  team,
+  maxPlayers,
+  selected,
+  onPress,
+}: {
+  team: CompetitionTeam;
+  maxPlayers: number;
+  selected: boolean;
+  onPress: () => void;
+}) => {
+  const isFull = team.playersCount >= team.maxPlayers;
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.teamRow,
+        selected && styles.teamRowSelected,
+        isFull && styles.teamRowDisabled,
+      ]}
+      activeOpacity={isFull ? 1 : 0.8}
+      disabled={isFull}
+      onPress={onPress}
+    >
+      <View style={[styles.teamRowLogo, { backgroundColor: getTeamColor(team.name) }, isFull && styles.teamRowLogoDisabled]} />
+      <View style={styles.teamRowInfo}>
+        <Text style={[styles.teamRowName, isFull && styles.teamRowNameDisabled]}>{team.name}</Text>
+        <Text style={styles.teamRowMeta}>
+          {team.joinedPlayersCount}/{maxPlayers} players
+        </Text>
+      </View>
+      {isFull ? (
+        <View style={styles.fullBadge}>
+          <Text style={styles.fullBadgeText}>Full</Text>
+        </View>
+      ) : (
+        <View style={[styles.radioOuter, selected && styles.radioOuterActive]}>
+          {selected && <View style={styles.radioInner} />}
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 };
+
+const RANDOM_TEAM_ID = '__random__';
+
+const RandomTeamRow = ({ selected, onPress }: { selected: boolean; onPress: () => void }) => (
+  <TouchableOpacity
+    style={[styles.teamRow, styles.randomTeamRow, selected && styles.teamRowSelected]}
+    activeOpacity={0.8}
+    onPress={onPress}
+  >
+    <View style={styles.randomTeamIconWrap}>
+      <Icon type="materialCommunityIcons" name="shuffle-variant" size={22} color={COLORS.primary} />
+    </View>
+    <View style={styles.teamRowInfo}>
+      <Text style={styles.teamRowName}>Assign me to any team</Text>
+      <Text style={styles.teamRowMeta}>We'll match you with a team that has space</Text>
+    </View>
+    <View style={[styles.radioOuter, selected && styles.radioOuterActive]}>
+      {selected && <View style={styles.radioInner} />}
+    </View>
+  </TouchableOpacity>
+);
 
 const VISIBILITY_ICONS: Record<string, string> = {
   public: 'earth',
@@ -227,31 +178,199 @@ const VISIBILITY_ICONS: Record<string, string> = {
   'invite-only': 'account-group',
 };
 
-const FORMAT_OPTIONS = [
-  { value: 'custom', label: 'Custom', icon: 'pencil-ruler' },
-  { value: 'round_robin', label: 'Round Robin', icon: 'rotate-right' },
-  { value: 'double_round_robin', label: 'Double Round Robin', icon: 'sync' },
-  { value: 'knockout', label: 'Knockout', icon: 'tournament' },
-  { value: 'group_stage', label: 'Group Stage', icon: 'view-grid' },
-];
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
-export default function CompetitionDetailScreen({ navigation }: any) {
-  const [competition, setCompetition] = useState<CompetitionDetail>(LEAGUE);
+export default function CompetitionDetailScreen({ route }: { route: any }) {
+  const { competition_id } = route.params;
 
-  const toggleSetting = (key: keyof CompetitionDetail['settings']) => {
-    setCompetition(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        [key]: !prev.settings[key as keyof typeof prev.settings],
-      },
-    }));
+  const { navigate } = useNavigation();
+ 
+  // Registration popup state
+  const [registerVisible, setRegisterVisible] = useState(false);
+  const [registerMode, setRegisterMode] = useState<RegisterMode>(null);
+  const [registerStep, setRegisterStep] = useState<RegisterStep>('choose');
+  const [selectedMyTeamId, setSelectedMyTeamId] = useState<string | null>(null);
+  const [isTeam, setIsTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [selectedCompetitionTeamId, setSelectedCompetitionTeamId] = useState<string | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [skillLevel, setSkillLevel] = useState<PlayerLevel | null>(null);
+  const [joinMessage, setJoinMessage] = useState('');
+  const [guestCount, setGuestCount] = useState('');
+  const [successText, setSuccessText] = useState('');
+  const [errorText, setErrorText] = useState('');
+
+  const [competition, setCompetition] = useState<Competition | null>(null);
+  const [teams, setTeams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  // Teams accordion state
+  const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
+
+  // TODO: wire this up to a real PATCH /competition/:id call. For now this
+  // just flips the corresponding field locally so the switches are functional.
+  const toggleSetting = (setting: 'refereesEnabled' | 'statisticsEnabled' | 'playerRatingsEnabled') => {
+    setCompetition(prev => {
+      if (!prev) return prev;
+      const fieldMap = { refereesEnabled: 'referee', statisticsEnabled: 'prize', playerRatingsEnabled: 'pennies' } as const;
+      const field = fieldMap[setting];
+      return { ...prev, [field]: prev[field] ? 0 : 1 };
+    });
   };
 
-  const seasonColor = SEASON_COLORS[competition.season];
+  const toggleTeamAccordion = (teamId: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedTeamId(prev => (prev === teamId ? null : teamId));
+  };
 
+  const openRegister = () => {
+    setRegisterMode(null);
+    setRegisterStep('choose');
+    setSelectedMyTeamId(null);
+    setNewTeamName('');
+    setSelectedCompetitionTeamId(null);
+    setPhoneNumber('');
+    setSkillLevel(null);
+    setJoinMessage('');
+    setGuestCount(''); 
+    setRegisterVisible(true);
+  };
+
+  const closeRegister = () => setRegisterVisible(false);
+
+  const chooseTeamMode = () => {
+    setRegisterMode('team');
+    setGuestCount(competition?.teamSize);
+    setIsTeam(true);
+    setRegisterStep(EMPTY_COMPETITION_TEAMS.length > 0 ? 'teamPick' : 'teamCreate');
+  };
+
+  const choosePlayerMode = () => {
+    setRegisterMode('player');
+    setIsTeam(false);
+    setRegisterStep('playerPick');
+  };
+
+  const confirmRegistration = async () => {
+
+    const teams = EMPTY_COMPETITION_TEAMS.find(t => t.id === selectedMyTeamId);
+    
+    try {
+      const UpdateUserResponse = await authenticatedApi.patch(`profile`, {
+      phone: phoneNumber,
+      skillLevel: skillLevel,
+    });
+    console.log("selectedMyTeaew ew mId", selectedMyTeamId);
+      const response = await authCompetitionsdApi.post(
+        `competitions/${competition_id}/join`,
+        {
+          ...(selectedMyTeamId != null && { teamId: selectedMyTeamId }),
+          "competitionId": competition_id,
+          "isTeam": isTeam,
+          "guestCount": guestCount,
+          "comment": joinMessage,
+          
+        }
+      );
+
+      setSuccessText(`${teams?.name ?? 'Your team'} has been registered for ${competition?.name}.`);
+      setRegisterStep('success');
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // This is where your server's error message actually lives
+        const serverMessage = error.response?.data?.message;
+        console.log('Server message:', serverMessage);
+
+        if (error.response?.status === 409) {
+          // e.g. show a toast/alert: "You have already joined this competition."
+          Alert.alert('Already joined', serverMessage ?? 'You have already joined this competition.');
+        }
+      } else {
+        console.log('Unexpected error:', error);
+      }
+    }
+  };
+
+
+  const registerModalTitle = () => {
+    switch (registerStep) {
+      case 'choose':
+        return 'Register';
+      case 'teamPick':
+        return 'Choose Your Team';
+      case 'teamCreate':
+        return 'Create a Team';
+      case 'playerPick':
+        return 'Join as Player';
+      case 'playerMessage':
+        return 'Send Request';
+      case 'success':
+        return 'Success';
+      default:
+        return 'Register';
+    }
+  };
+
+  const canGoBack = registerStep !== 'choose' && registerStep !== 'success';
+
+  const handleBack = () => {
+    if (registerStep === 'teamPick' || registerStep === 'teamCreate' || registerStep === 'playerPick') {
+      setRegisterStep('choose');
+      setRegisterMode(null);
+      return;
+    }
+    if (registerStep === 'playerMessage') {
+      setRegisterStep('playerPick');
+      return;
+    }
+  };
+
+  useEffect(() => { 
+    const fetchCompetition = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch(`${API_BASE_URL}competitions/${competition_id}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch competition: ${response.status}`);
+        }
+
+        const data: Competition = await response.json();
+
+
+        setCompetition(data.data);
+
+        setTeams(data.data.teams);
+      } catch (err) {
+        console.error('Error fetching competition:', err);
+        setError('Unable to load competition.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompetition();
+  }, []);
+
+  const onVenmoPress = async () => {
+    let amount = competition?.pricePlayer * (guestCount + 1);
+    
+    const token = await AsyncStorage.getItem('access_token');
+    const userInfo = decodeToken(token);
+    const paymentNote = `Payment from ${userInfo.first_name} ${userInfo.last_name} for ${guestCount + 1} player ${guestCount + 1 === 1 ? '' : 's'}`;
+
+    console.log("amount : ", paymentNote);
+    const result = await PaymentApiClient.handleVenmoPayment(amount, paymentNote);
+
+    //if (result.success) {
+      // e.g. navigate to a "waiting for confirmation" screen,
+      // since Venmo doesn't return a callback — you can't know
+      // the payment actually completed just because the link opened
+    //}
+  };
+    const navigation = useNavigation<NavigationProp<any>>();
   return (
     <View style={styles.screen}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
@@ -259,50 +378,41 @@ export default function CompetitionDetailScreen({ navigation }: any) {
 
         {/* ── Banner + Logo ── */}
         <View style={styles.bannerWrap}>
-          <Image source={{ uri: competition.bannerUrl }} style={styles.banner} resizeMode="cover" />
+          <Image source={{ uri: competition?.coverPhoto}} style={styles.banner} resizeMode="cover" />
           <View style={styles.bannerOverlay} />
 
           {/* Back button */}
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation?.goBack()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Icon type="materialCommunityIcons" name="arrow-left" size={24} color={COLORS.white} />
           </TouchableOpacity>
 
           {/* Edit button */}
-          <TouchableOpacity style={styles.editBtn} onPress={() => navigation?.navigate('editCompetition', { competition })}>
+          <TouchableOpacity style={styles.editBtn} onPress={() => navigate('editCompetition', { competitionId: competition.id, initialCompetition: competition })}>
             <Icon type="materialCommunityIcons" name="pencil" size={20} color={COLORS.white} />
           </TouchableOpacity>
 
           {/* Logo circle */}
           <View style={styles.logoRing}>
-            <Image source={{ uri: competition.logoUrl }} style={styles.logo} resizeMode="cover" />
+            <Image source={{ uri: competition?.logo }} style={styles.logo} resizeMode="cover" />
           </View>
         </View>
 
         {/* ── Competition Name & Meta ── */}
         <View style={styles.heroSection}>
-          <Text style={styles.competitionName}>{competition.name}</Text>
-          <View style={styles.metaRow}>
-            <View style={[styles.badge, { backgroundColor: `${seasonColor}22`, borderColor: seasonColor }]}>
-              <Icon
-                type="materialCommunityIcons"
-                name={SEASON_ICONS[competition.season] as any}
-                size={13}
-                color={seasonColor}
-              />
-              <Text style={[styles.badgeText, { color: seasonColor }]}>
-                {competition.season.charAt(0).toUpperCase() + competition.season.slice(1)}
-              </Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: '#E8F5E922', borderColor: '#4CAF50' }]}>
-              <Icon type="materialCommunityIcons" name={VISIBILITY_ICONS[competition.visibility] as any} size={13} color="#4CAF50" />
-              <Text style={[styles.badgeText, { color: '#4CAF50' }]}>
-                {competition.visibility.charAt(0).toUpperCase() + competition.visibility.slice(1)}
-              </Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: `${COLORS.primary}15`, borderColor: COLORS.primary }]}>
-              <Icon type="materialCommunityIcons" name="run" size={13} color={COLORS.primary} />
-              <Text style={[styles.badgeText, { color: COLORS.primary }]}>{competition.sport}</Text>
-            </View>
+          <Text style={styles.comName}>{competition?.name}</Text>
+
+          {/* ── CTA Row ── */}
+          <View style={styles.ctaRow}>
+            {competition?.endRegistration && new Date() <= new Date(competition.endRegistration) && (
+              <TouchableOpacity style={styles.registerBtn} activeOpacity={0.85} onPress={openRegister}>
+                <Icon type="materialCommunityIcons" name="clipboard-check-outline" size={18} color={COLORS.white} />
+                <Text style={styles.registerBtnText}>Register</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.requestsBtn} activeOpacity={0.85} onPress={() => navigation?.navigate('joinRequests', {organizerId: 1})}>
+              <Icon type="materialCommunityIcons" name="bell-outline" size={18} color={COLORS.white} />
+              <Text style={styles.registerBtnText}>Requests</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -310,463 +420,318 @@ export default function CompetitionDetailScreen({ navigation }: any) {
 
           {/* ── Basic Info Cards ── */}
           <View style={styles.cardGrid}>
-            <InfoCard icon="city" label="City" value={competition.city} />
-            <InfoCard icon="soccer-field" label="Sport" value={competition.sport} accent />
+            <InfoCard icon="map" label="Location" value={competition?.address + ", " +  competition?.city} />
+            <InfoCard icon="calendar" label="Date" value={formatDateLong(new Date(competition?.startDate))} accent />
           </View>
 
           {/* ── Description ── */}
           <View style={styles.descBlock}>
-            <Text style={styles.descText}>{competition.description}</Text>
+            <Text style={styles.descText}>{competition?.description}</Text>
           </View>
 
           {/* ── Registration ── */}
           <SectionHeader label="Registration" />
           <View style={styles.card}>
-            <RegistrationRow label="Opens" value={competition.registration.openDate} />
+            <RegistrationRow label="Price" value={competition?.pricePlayer} />
             <View style={styles.divider} />
-            <RegistrationRow label="Closes" value={competition.registration.closeDate} />
+            <RegistrationRow label="Format" value={competition?.format} />
             <View style={styles.divider} />
-            <RegistrationRow label="Max Teams" value={String(competition.registration.maxTeams)} />
+            <RegistrationRow label="Registration Period" value={formatDateLong(new Date(competition?.startRegistration)) + ' · ' + formatDateLong(new Date(competition?.endRegistration))} />
             <View style={styles.divider} />
-            <RegistrationRow
-              label="Min Players / Team"
-              value={String(competition.registration.minPlayersPerTeam)}
-            />
+            <RegistrationRow label="Number of teams" value={String(competition?.nbrOfTeams)} />
             <View style={styles.divider} />
             <RegistrationRow
-              label="Max Players / Team"
-              value={String(competition.registration.maxPlayersPerTeam)}
+              label="Team Format"
+              value={String(competition?.teamSize) + ' player + ' + String(competition?.nbrOfSubs) + ' subs'}
+            />
+            <View style={styles.divider} />
+            <RegistrationRow
+              label="Gender & Age"
+              value={String(competition?.gender) + ' · +' + String(competition?.minimumAge) + ' years old'}
             />
           </View>
-
-          {/* ── Competition Format ── */}
-          <SectionHeader label="Competition Format" />
-          <View style={styles.formatGrid}>
-            {(() => {
-              const activeFormat = FORMAT_OPTIONS.find(opt => opt.value === competition.format);
-              return activeFormat ? (
-                <FormatOption label={activeFormat.label} icon={activeFormat.icon} />
-              ) : null;
-            })()}
-          </View>
-          {competition.format === 'custom' && competition.customFormat && (
-            <CustomFormatExplainer
-              summary={competition.customFormat.summary}
-              stages={competition.customFormat.stages}
-            />
-          )}
-
-          {/* ── Points System ── */}
-          <SectionHeader label="Points System" />
-          <View style={styles.pointsRow}>
-            <PointsBox label="Win" value={competition.settings.pointsForWin} />
-            <PointsBox label="Draw" value={competition.settings.pointsForDraw} />
-            <PointsBox label="Loss" value={competition.settings.pointsForLoss} />
-          </View>
-
+          
           {/* ── Feature Toggles ── */}
-          {/*<SectionHeader label="Features" />
-          <View style={styles.card}>
-            <ToggleRow
-              icon="whistle"
-              label="Referees"
-              description="Assign referees to matches"
-              value={competition.settings.refereesEnabled}
-            />
-            <View style={styles.divider} />
-            <ToggleRow
-              icon="tshirt-crew"
-              label="jersey"
-              description=""
-              value={true}
-            />
-            <View style={styles.divider} />
-             <ToggleRow
-              icon="chart-bar"
-              label="Statistics"
-              description="Track detailed match stats"
-              value={competition.settings.statisticsEnabled}
-              onToggle={() => toggleSetting('statisticsEnabled')}
-            />
-            <View style={styles.divider} /> 
-            <ToggleRow
-              icon="star-outline"
-              label="Player Ratings"
-              description="Allow post-match player ratings"
-              value={competition.settings.playerRatingsEnabled}
-              onToggle={() => toggleSetting('playerRatingsEnabled')}
-            />
-            <View style={styles.divider} />
-            <ToggleRow
-              icon="broadcast"
-              label="Live Scores"
-              description="Publish scores in real time"
-              value={competition.settings.liveScoresEnabled}
-              onToggle={() => toggleSetting('liveScoresEnabled')}
-            />
-          </View>*/}
+            <SectionHeader label="Features" />
+            <View style={styles.card}>
+              {/* NOTE: referee/prize/pennies are odd source fields for these three
+                  toggles — likely meant to be dedicated *Enabled flags from the API.
+                  Cast to boolean here so the Switch renders correctly either way. */}
+              <ToggleRow
+                icon="whistle"
+                label="Referees"
+                description="Assign referees to matches"
+                value={Boolean(competition?.referee)}
+                onToggle={() => toggleSetting('refereesEnabled')}
+              />
+              <View style={styles.divider} />
+              <ToggleRow
+                icon="trophy"
+                label="Prize"
+                description="this competition awards a prize"
+                value={Boolean(competition?.prize)}
+                onToggle={() => toggleSetting('statisticsEnabled')}
+              />
+              <View style={styles.divider} />
+              <ToggleRow
+                icon="tshirt-crew"
+                label="Player Ratings"
+                description="Provide pennies/bibs for teams"
+                value={Boolean(competition?.pennies)}
+                onToggle={() => toggleSetting('playerRatingsEnabled')}
+              />
+            </View>
+          {/* ── Teams (accordion with players) ── */}
+          <SectionHeader label="Teams" />
+          <View style={{ gap: 10 }}>
+            {competition?.teams.map(team => (
+              <TeamAccordionItem
+                key={team.id}
+                team={team}
+                maxPlayers={competition?.teamSize + competition?.nbrOfSubs}
+                expanded={expandedTeamId === team.id}
+                onToggle={() => toggleTeamAccordion(team.id)}
+                joinedPlayersCount={team.joinedPlayersCount}
+              />
+            ))}
+          </View>
 
           <View style={styles.bottomPad} />
         </View>
       </ScrollView>
+
+      {/* ── Registration Modal ── */}
+      <Modal
+        visible={registerVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={closeRegister}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity style={styles.modalBackdropTouch} activeOpacity={1} onPress={closeRegister} />
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              {canGoBack ? (
+                <TouchableOpacity onPress={handleBack} style={styles.modalHeaderBtn}>
+                  <Icon type="materialCommunityIcons" name="arrow-left" size={22} color={COLORS.black} />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.modalHeaderBtn} />
+              )}
+              <Text style={styles.modalTitle}>{registerModalTitle()}</Text>
+              <TouchableOpacity onPress={closeRegister} style={styles.modalHeaderBtn}>
+                <Icon type="materialCommunityIcons" name="close" size={22} color={COLORS.black} />
+              </TouchableOpacity>
+            </View>
+
+            {/* ── Step: choose ── */}
+            {registerStep === 'choose' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>How would you like to register for {competition?.name}?</Text>
+
+                <RegisterOptionCard
+                  icon="account-group"
+                  title="Register as a Team"
+                  description="Choose one of your teams or create a new one"
+                  onPress={chooseTeamMode}
+                />
+                <RegisterOptionCard
+                  icon="account"
+                  title="Join as a Player"
+                  description="Browse teams and request to join one"
+                  onPress={choosePlayerMode}
+                />
+              </View>
+            )}
+
+            {/* ── Step: teamPick ── */}
+            {registerStep === 'teamPick' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>Choose an available team to register for {competition?.name}</Text>
+                <FlatList
+                  data={competition?.teams.filter(t => t.joinedPlayersCount === 0) ?? []}
+                  keyExtractor={item => item.id}
+                  style={{ maxHeight: 260 }}
+                  renderItem={({ item }) => (
+                    <CompetitionTeamRow
+                      team={item}
+                      maxPlayers={competition?.teamSize + competition?.nbrOfSubs}
+                      selected={selectedMyTeamId === item.id}
+                      onPress={() => setSelectedMyTeamId(item.id)}
+                    />
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                />
+
+                {/*<TouchableOpacity
+                  style={styles.createTeamLink}
+                  onPress={() => navigate('addTeam', { comId: competition?.name })}
+                >
+                  <Icon type="materialCommunityIcons" name="plus-circle-outline" size={18} color={COLORS.primary} />
+                  <Text style={styles.createTeamLinkText}>Now you can create your own team to matchup other teams</Text>
+                </TouchableOpacity>*/}
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, !selectedMyTeamId && styles.primaryBtnDisabled]}
+                  disabled={!selectedMyTeamId}
+                  onPress={() => {
+                    setRegisterStep('playerMessage');
+                  }}
+                >
+                  <Text style={styles.primaryBtnText}>Register Team</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {/* ── Step: playerPick ── */}
+            {registerStep === 'playerPick' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>Pick a team to send a join request to, or let us assign you one</Text>
+                <FlatList
+                  data={competition?.teams.filter(t => (t.joinedPlayersCount != 0 && t.joinedPlayersCount!=(competition?.teamSize + competition?.nbrOfSubs))) ?? []}
+                  keyExtractor={item => item.id}
+                  style={{ maxHeight: 340 }}
+                  ListHeaderComponent={
+                    <RandomTeamRow
+                      selected={selectedCompetitionTeamId === "null"}
+                      onPress={() => setSelectedCompetitionTeamId("null")}
+                    />
+                  }
+                  ListHeaderComponentStyle={{ marginBottom: 8 }}
+                  renderItem={({ item }) => (
+                    <CompetitionTeamRow
+                      team={item}
+                      maxPlayers={competition?.teamSize + competition?.nbrOfSubs}
+                      selected={selectedCompetitionTeamId === item.id}
+                      onPress={() => setSelectedCompetitionTeamId(item.id)}
+                    />
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                />
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, !selectedCompetitionTeamId && styles.primaryBtnDisabled]}
+                  disabled={!selectedCompetitionTeamId}
+                  onPress={() => {
+                    setRegisterStep('playerMessage');
+                  }}
+                >
+                  <Text style={styles.primaryBtnText}>Continue</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Step: playerMessage ── */}
+            {registerStep === 'playerMessage' && (
+              <View style={styles.modalBody}>
+                <Text style={styles.modalSubtitle}>
+                  {selectedCompetitionTeamId === RANDOM_TEAM_ID
+                    ? 'A few details so the organizer can match you with a team'
+                    : `A few details for your request to ${competition?.teams.find(t => t.id === selectedCompetitionTeamId)?.name ?? 'the team'}`}
+                </Text>
+
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {/* Phone number */}
+                  <Text style={styles.fieldLabel}>Your Phone number</Text>
+                  <View style={styles.inputWrap}>
+                    <Icon type="materialCommunityIcons" name="phone-outline" size={20} color={COLORS.gray3} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="(555) 123-4567"
+                      placeholderTextColor={COLORS.gray3}
+                      value={phoneNumber}
+                      onChangeText={setPhoneNumber}
+                      keyboardType="phone-pad"
+                    />
+                  </View>
+
+                  {/* Skill level */}
+                  <Text style={[styles.fieldLabel, { marginTop: 14 }]}>Your Skill level</Text>
+                  <View style={styles.levelRow}>
+                    {PLAYER_LEVELS.map(level => (
+                      <TouchableOpacity
+                        key={level.value}
+                        style={[styles.levelChip, skillLevel === level.value && styles.levelChipActive]}
+                        activeOpacity={0.8}
+                        onPress={() => setSkillLevel(level.value)}
+                      >
+                        <Text style={[styles.levelChipText, skillLevel === level.value && styles.levelChipTextActive]}>
+                          {level.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  
+                  <Text style={[styles.fieldLabel, { marginTop: 14 }]}>Number of guests</Text>
+                  <View style={styles.inputWrap}>
+                    <NumericInput
+                      value={guestCount}
+                      onChange={setGuestCount}
+                      min={isTeam==true ? competition?.teamSize : 0}
+                      max={(competition?.teamSize + competition?.nbrOfSubs) - teams[1].joinedPlayersCount}
+                    />
+                  </View>
+
+                  {/* Comment */}
+                  <Text style={[styles.fieldLabel, { marginTop: 14 }]}>Comment</Text>
+                  <View style={styles.textAreaWrap}>
+                    <TextInput
+                      style={styles.textArea}
+                      placeholder="Position, availability, anything else the organizer should know..."
+                      placeholderTextColor={COLORS.gray3}
+                      value={joinMessage}
+                      onChangeText={setJoinMessage}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                    />
+                  </View>
+
+                  {/* Entry fee / Venmo */}
+                  <View style={styles.feeCard}>
+                    <View style={styles.feeCardHeader}>
+                      <Icon type="materialCommunityIcons" name="cash-multiple" size={20} color={COLORS.primary} />
+                      <Text style={styles.feeCardTitle}>Entry fee: ${competition?.pricePlayer}/Player</Text>
+                    </View>
+                    <Text style={styles.feeCardText}>
+                      Send {competition?.pricePlayer * (guestCount+1)} via Venmo to @yanibar so the host can match you with a team.
+                    </Text>
+                  </View>
+                </ScrollView>
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, (!phoneNumber.trim() || !skillLevel) && styles.primaryBtnDisabled]}
+                  disabled={!phoneNumber.trim() || !skillLevel}
+                  onPress={() => confirmRegistration(false)}
+                >
+                  <Text style={styles.primaryBtnText}>Send Request</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Step: success ── */}
+            {registerStep === 'success' && (
+              <View style={styles.modalBody}>
+                <View style={styles.successIconWrap}>
+                  <Icon type="materialCommunityIcons" name="check-circle" size={56} color={COLORS.primary} />
+                </View>
+                <Text style={styles.successText}>{successText}</Text>
+                  <View style={{ width: '100%', marginTop: 12, gap: 10 }}>
+                    <Button
+                      title="Pay with Venmo"
+                      icon="logo-venmo"
+                      filled
+                      style={{ backgroundColor: '#3D95CE', borderRadius: 32 }}
+                      onPress={() => onVenmoPress()}
+                    />
+                  </View>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const BANNER_H = 220;
-const LOGO_SIZE = 88;
-const LOGO_BORDER = 4;
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-
-  // Banner
-  bannerWrap: {
-    height: BANNER_H,
-    position: 'relative',
-  },
-  banner: {
-    width: '100%',
-    height: BANNER_H,
-  },
-  bannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-  },
-  backBtn: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 52 : 36,
-    left: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  editBtn: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 52 : 36,
-    right: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoRing: {
-    position: 'absolute',
-    bottom: -(LOGO_SIZE / 2),
-    alignSelf: 'center',
-    width: LOGO_SIZE + LOGO_BORDER * 2,
-    height: LOGO_SIZE + LOGO_BORDER * 2,
-    borderRadius: (LOGO_SIZE + LOGO_BORDER * 2) / 2,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  logo: {
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
-    borderRadius: LOGO_SIZE / 2,
-  },
-
-  // Hero
-  heroSection: {
-    marginTop: LOGO_SIZE / 2 + 12,
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
-  competitionName: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.black,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    justifyContent: 'center',
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 99,
-    borderWidth: 1,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
-  // Body
-  body: {
-    paddingHorizontal: 16,
-    marginTop: 20,
-  },
-
-  // Description
-  descBlock: {
-    backgroundColor: COLORS.grayscale100,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 4,
-  },
-  descText: {
-    fontSize: 14,
-    color: COLORS.gray3,
-    lineHeight: 21,
-  },
-
-  // Info cards (grid)
-  cardGrid: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 12,
-  },
-  infoCard: {
-    flex: 1,
-    backgroundColor: COLORS.grayscale100,
-    borderRadius: 12,
-    padding: 14,
-    gap: 4,
-  },
-  infoCardAccent: {
-    backgroundColor: COLORS.primary,
-  },
-  infoCardLabel: {
-    fontSize: 11,
-    color: COLORS.gray3,
-    fontWeight: '500',
-    marginTop: 6,
-  },
-  infoCardLabelAccent: {
-    color: 'rgba(255,255,255,0.75)',
-  },
-  infoCardValue: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.black,
-  },
-  infoCardValueAccent: {
-    color: COLORS.white,
-  },
-
-  // Section header
-  sectionHeader: {
-    marginTop: 24,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  sectionHeaderText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.black,
-  },
-
-  // Generic card
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
-    overflow: 'hidden',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.grayscale100,
-    marginHorizontal: 16,
-  },
-
-  // Registration rows
-  regRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-  },
-  regLabel: {
-    fontSize: 14,
-    color: COLORS.gray3,
-  },
-  regValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.black,
-  },
-
-  // Format
-  formatGrid: {
-    gap: 8,
-  },
-  formatOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
-    backgroundColor: COLORS.white,
-  },
-  formatOptionActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: `${COLORS.primary}08`,
-  },
-  formatLabel: {
-    flex: 1,
-    fontSize: 14,
-    color: COLORS.gray3,
-    fontWeight: '500',
-  },
-  formatLabelActive: {
-    color: COLORS.primary,
-    fontWeight: '700',
-  },
-  formatBadge: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 99,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  formatBadgeText: {
-    fontSize: 11,
-    color: COLORS.white,
-    fontWeight: '700',
-  },
-
-  // Points
-  pointsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  pointsBox: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 18,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: COLORS.grayscale200 ?? '#EBEBEB',
-    backgroundColor: COLORS.white,
-    gap: 4,
-  },
-  pointsValue: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.primary,
-  },
-  pointsLabel: {
-    fontSize: 12,
-    color: COLORS.gray3,
-    fontWeight: '500',
-  },
-
-  // Toggle rows
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  toggleIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.grayscale100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleIconWrapActive: {
-    backgroundColor: `${COLORS.primary}18`,
-  },
-  toggleText: {
-    flex: 1,
-    gap: 2,
-  },
-  toggleLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.black,
-  },
-  toggleDescription: {
-    fontSize: 12,
-    color: COLORS.gray3,
-  },
-
-  bottomPad: {
-    height: 40,
-  },
-  customFormatCard: {
-  marginTop: 12,
-  backgroundColor: `${COLORS.primary}08`,
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: `${COLORS.primary}30`,
-  padding: 14,
-},
-customFormatHeader: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 6,
-  marginBottom: 8,
-},
-customFormatTitle: {
-  fontSize: 13,
-  fontWeight: '700',
-  color: COLORS.primary,
-},
-customFormatSummary: {
-  fontSize: 13,
-  color: COLORS.gray3,
-  lineHeight: 19,
-  marginBottom: 12,
-},
-customFormatSteps: {
-  gap: 8,
-},
-customFormatStepRow: {
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  gap: 8,
-},
-customFormatStepDot: {
-  width: 20,
-  height: 20,
-  borderRadius: 10,
-  backgroundColor: COLORS.primary,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginTop: 1,
-},
-customFormatStepNum: {
-  fontSize: 10,
-  fontWeight: '700',
-  color: COLORS.white,
-},
-customFormatStepText: {
-  flex: 1,
-  fontSize: 13,
-  color: COLORS.black,
-  lineHeight: 18,
-},
-});

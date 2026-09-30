@@ -10,6 +10,7 @@ import { NotificationProvider, useNotifications } from '@contexts/NotificationCo
 import { notifications as initialNotifications } from '@data';
 import messaging, { getMessaging, requestPermission } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const navigationRef = createNavigationContainerRef();
 
@@ -24,6 +25,15 @@ function parseAttributes(attributes: unknown): Record<string, any> | undefined {
   }
   return undefined;
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000, // tune as you like
+      retry: 1,
+    },
+  },
+});
 
 const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) => {
   const { addNotification } = useNotifications();
@@ -106,18 +116,20 @@ const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) =>
   };
 
   return (
-    <NavigationContainer linking={linking} ref={navigationRef}>
-      <AuthProvider>
-        <AppStack initialRouteName={initialRoute} />
+    <QueryClientProvider client={queryClient}>
+      <NavigationContainer linking={linking} ref={navigationRef}>
+        <AuthProvider>
+          <AppStack initialRouteName={initialRoute} />
 
-        {toast && (
-          <View style={styles.toast}>
-            <Text style={styles.toastTitle}>{toast.title}</Text>
-            <Text style={styles.toastBody}>{toast.body}</Text>
-          </View>
-        )}
-      </AuthProvider>
-    </NavigationContainer>
+          {toast && (
+            <View style={styles.toast}>
+              <Text style={styles.toastTitle}>{toast.title}</Text>
+              <Text style={styles.toastBody}>{toast.body}</Text>
+            </View>
+          )}
+        </AuthProvider>
+      </NavigationContainer>
+    </QueryClientProvider>
   );
 };
 

@@ -21,85 +21,45 @@ type Nav = {
 const CreateNewPassword = () => {
   const { t } = useTranslation();
   const { navigate } = useNavigation<Nav>();
-  const [isChecked, setChecked] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const { email, otp} = useRoute().params;
   const [password, setPassword] = useState('');
   const handleResetPassword = async () => {
-  if (!email || !otp || !password) {
 
-    console.log('Resetting password with:', { email, otp, password });
-    Alert.alert('Error', 'Please fill in all fields');
-    return;
-  }
-
-
-  try {
-    const response = await publicApi.post(`auth/reset-password`, {
+    console.log('Password reset response:', `auth/reset-password`, 
       email,
       otp,
-      newPassword: password
-    });
-    if (response.status == 200) {
-      // Navigate to login after a short delay
-      navigate('login');
-      Alert.alert('Success', 'Password reset successfully');
-      
-    } else {
-      Alert.alert('Error', response.data.message || 'Password reset failed');
+      password);
+    if (!email || !otp || !password) {
+
+      console.log('Resetting password with:', { email, otp, password });
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
     }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Token verification failed';
-    navigate('login');
-    Alert.alert('Error', errorMessage);
-  } 
+
+
+    try {
+      console.log(email,
+        otp,
+        password);
+      const response = await publicApi.post(`auth/reset-password`, {
+        email,
+        otp,
+        newPassword: password
+      });
+      if (response.status == 200) {
+        // Navigate to login after a short delay
+        navigate('login');
+        Alert.alert('Success', 'Password reset successfully');
+        
+      } else {
+        Alert.alert('Error', response.data.message || 'Password reset failed');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Token verification failed';
+      navigate('login');
+      Alert.alert('Error', errorMessage);
+    } 
 };
-  // Render modal
-  const renderModal = () => {
-    return (
-      <Modal animationType="fade" transparent={true} visible={modalVisible}>
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={[styles.modalContainer]}>
-            <View
-              style={[
-                styles.modalSubContainer,
-                {
-                  backgroundColor: COLORS.White,
-                },
-              ]}>
-              <Image
-                source={illustrations.passwordSuccess}
-                resizeMode="contain"
-                style={styles.modalIllustration}
-              />
-              <Text style={styles.modalTitle}>{t('cnp.modal.congratulations')}</Text>
-              <Text
-                style={[
-                  styles.modalSubtitle,
-                  {
-                    color: COLORS.grayscale600,
-                  },
-                ]}>
-                {t('cnp.modal.accountReady')}
-              </Text>
-              <Button
-                title={t('cnp.modal.continue')}
-                filled
-                onPress={() => {
-                  setModalVisible(false);
-                  navigate('login');
-                }}
-                style={{
-                  width: '100%',
-                  marginTop: 12,
-                }}
-              />
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    );
-  };
 
   return (
     
@@ -145,12 +105,6 @@ const CreateNewPassword = () => {
         style={styles.button}
         onPress={handleResetPassword}
       />
-      <ErrorModal
-        title={"ERROR"}
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-      >
-      </ErrorModal>
     </SafeAreaView>
   );
 

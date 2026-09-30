@@ -460,7 +460,12 @@
     "joinCompetition": "Join a Competition",
     "joinCompetitionDescription": "Join as a player or as a team to participate in exciting competitions.",
     "joinAsPlayer": "Join as Player",
-    "joinAsTeam": "Join as Team"
+    "joinAsTeam": "Join as Team",
+    "registrationOpen": "Open",
+    "registrationClosed": "Closed",
+    "player": "Player",
+    "teams": "Teams",
+    "slots": "Slots"
   },
   "teams": {
     "title": "Find Teams",
@@ -637,6 +642,8 @@
     "start_time": "Start Time",
     "end_time": "End Time",
     "image_required": "Image is required",
+    "skill": "Skill level",
+    "select_skill": "Select skill level"
   },
   "image_upload": {
     "upload_image": "Upload Image",

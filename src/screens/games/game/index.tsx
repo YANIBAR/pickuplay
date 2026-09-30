@@ -17,6 +17,7 @@ import { toTitleCase } from '@utils/helpers';
 import { decodeToken } from '@services/auth/auth.utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
+import NumericInput from '@components/NumericInput';
 
 interface Game {
   id: number;
@@ -77,9 +78,9 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const { userData, error, refreshUserData } = useUserData(); 
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
-const handleImageError = (id: string) => {
-  setImageErrors(prev => ({ ...prev, [id]: true }));
-};
+  const handleImageError = (id: string) => {
+    setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>('all');
 
@@ -100,7 +101,6 @@ const handleImageError = (id: string) => {
     const fetchRole = async () => {
       const token =  await AsyncStorage.getItem('access_token');
       const userInfo = decodeToken(token);
-      console.log('Decoded token info:', userInfo);
       setRole(userInfo.role);
       return userInfo;
     };
@@ -167,7 +167,7 @@ const handleImageError = (id: string) => {
 
   const [joinModalVisible, setJoinModalVisible] = useState(false);
 
-  const [numPlayers, setNumPlayers] = useState(0);
+  const [numPlayers, setNumPlayers] = useState(1);
   const [promoCode, setPromoCode] = useState('');
 
   const [discountPrice, setDiscountPrice] = useState('');
@@ -178,7 +178,6 @@ const handleImageError = (id: string) => {
             Alert.alert(t('game.selectAtLeastOneDate'));
             return;
           }
-          console.log(`games/${game.id}/clone`, dates);
           const response = await authenticatedApi.post(`games/${game.id}/clone`, { dates : dates });
           setCalendarModalVisible(false);
           Alert.alert(t('game.cloneSuccess'));
@@ -188,7 +187,7 @@ const handleImageError = (id: string) => {
       }
     const handleCloseModal = () => {
       setJoinModalVisible(false);
-      setNumPlayers(0);
+      setNumPlayers(1);
       setPromoCode('');
     };
     // Redirect to Venmo to complete payment for the join
@@ -241,7 +240,7 @@ const handleImageError = (id: string) => {
 
         if (response.status === 200) {
           setJoinModalVisible(false);
-          setNumPlayers(0);
+          setNumPlayers(1);
           setPromoCode('');
           Alert.alert(t('games.successJoined'));
         }
@@ -544,47 +543,12 @@ const handleImageError = (id: string) => {
                   <View style={styles.fieldContainer}>
                     <Text style={styles.fieldLabel}>{t('schedule.numberOfPlayers')}</Text>
                     <View style={styles.playerCountContainer}>
-                      <TouchableOpacity 
-                        style={styles.counterButton}
-                        onPress={() => {
-                          const current = parseInt(numPlayers) || 1;
-                          if (current > 1) {
-                            setNumPlayers((current - 1));
-                          }
-                        }}
-                      >
-                        <Icon 
-                          type="materialCommunityIcons" 
-                          name="minus" 
-                          size={24} 
-                          color="white"
-                        />
-                      </TouchableOpacity>
-                      <View style={styles.playerCountDisplay}>
-                        <Icon 
-                          type="materialCommunityIcons" 
-                          name="account-multiple" 
-                          size={16} 
-                          color={COLORS.primary}
-                        />
-                        <Text style={styles.playerCountText}>
-                          {numPlayers || 1}
-                        </Text>
-                      </View>
-                      <TouchableOpacity 
-                        style={styles.counterButton}
-                        onPress={() => {
-                          const current = parseInt(numPlayers) || 1;
-                          setNumPlayers((current + 1));
-                        }}
-                      >
-                        <Icon 
-                          type="materialCommunityIcons" 
-                          name="plus" 
-                          size={24} 
-                          color="white"
-                        />
-                      </TouchableOpacity>
+                      <NumericInput
+                        value={numPlayers}
+                        onChange={setNumPlayers}
+                        min={1}
+                        max={game.availableSpots}
+                      />
                     </View>
                   </View>
   

@@ -42,7 +42,8 @@ const DatePickerModal: FC<DatePickerModalProps> = ({
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <DatePicker
-            mode="calendar"
+            
+            mode="datepicker"
             minimumDate={startDate}
             selected={selectedStartDate}
             onDateChange={handleDateChange}

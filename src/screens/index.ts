@@ -26,7 +26,7 @@ export { default as ChatScreen  } from './games/game/chat';
 export { default as TeamsScreen  } from './teams';
 export { default as AddTeamScreen  } from './teams/add';
 export { default as TeamDetailScreen  } from './teams/team';
-export { default as TeamRequestsScreen  } from './teams/requests';
+export { default as JoinRequestsScreen  } from './competition/requests';
 export { default as CompetitionsScreen  } from './competition';
 export { default as AddCompetitionsScreen  } from './competition/add';
 export { default as EditCompetitionsScreen  } from './competition/edit';

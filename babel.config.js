@@ -20,6 +20,7 @@ module.exports = {
           '@hocs': './src/shared/hocs',
           '@styles': './src/styles',
           '@utils': './src/utils/',
+          '@types': './src/types/',
         },
       },
     ],

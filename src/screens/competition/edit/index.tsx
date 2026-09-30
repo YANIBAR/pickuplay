@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,108 +14,20 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { launchCamera, launchImageLibrary, Asset } from 'react-native-image-picker';
 import { COLORS, SIZES } from '@constants';
 import { Icon } from '@components';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-type Season = 'fall' | 'spring' | 'summer' | 'winter';
-type Visibility = 'public' | 'private' | 'invite-only';
-type Format = 'round_robin' | 'double_round_robin' | 'knockout' | 'group_stage' | 'custom';
-
-interface CompetitionForm {
-  name: string;
-  sport: string;
-  description: string;
-  season: Season;
-  city: string;
-  visibility: Visibility;
-  bannerUrl: string;
-  logoUrl: string;
-  registration: {
-    openDate: string;
-    closeDate: string;
-    maxTeams: string;
-    minPlayersPerTeam: string;
-    maxPlayersPerTeam: string;
-  };
-  format: Format;
-  settings: {
-    pointsForWin: string;
-    pointsForDraw: string;
-    pointsForLoss: string;
-    refereesEnabled: boolean;
-    statisticsEnabled: boolean;
-    playerRatingsEnabled: boolean;
-    liveScoresEnabled: boolean;
-  };
-}
-
-// ─── Initial state ────────────────────────────────────────────────────────────
-
-const INITIAL: CompetitionForm = {
-  name: 'Premier City Competition',
-  sport: 'Football',
-  description:
-    'The most competitive amateur football competition in the city, bringing together top local talent every season.',
-  season: 'fall',
-  city: 'Kansas City',
-  visibility: 'public',
-  bannerUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800',
-  logoUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200',
-  registration: {
-    openDate: 'Aug 1, 2025',
-    closeDate: 'Sep 15, 2025',
-    maxTeams: '16',
-    minPlayersPerTeam: '11',
-    maxPlayersPerTeam: '22',
-  },
-  format: 'round_robin',
-  settings: {
-    pointsForWin: '3',
-    pointsForDraw: '1',
-    pointsForLoss: '0',
-    refereesEnabled: true,
-    statisticsEnabled: true,
-    playerRatingsEnabled: false,
-    liveScoresEnabled: true,
-  },
-};
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const SEASONS: { value: Season; label: string; icon: string; color: string }[] = [
-  { value: 'spring', label: 'Spring', icon: 'flower', color: '#4CAF50' },
-  { value: 'summer', label: 'Summer', icon: 'weather-sunny', color: '#F9A825' },
-  { value: 'fall',   label: 'Fall',   icon: 'leaf',          color: '#E07B39' },
-  { value: 'winter', label: 'Winter', icon: 'snowflake',     color: '#42A5F5' },
-];
-
-const VISIBILITIES: { value: Visibility; label: string; icon: string; sub: string }[] = [
-  { value: 'public',      label: 'Public',      icon: 'earth',         sub: 'Anyone can find & join' },
-  { value: 'private',     label: 'Private',     icon: 'lock',          sub: 'Hidden, link-only access' },
-  { value: 'invite-only', label: 'Invite Only', icon: 'account-group', sub: 'Approved members only' },
-];
-
-const FORMATS: { value: Format; label: string; icon: string; sub: string }[] = [
-  { value: 'round_robin',        label: 'Round Robin',        icon: 'rotate-right', sub: 'Every team plays each other once' },
-  { value: 'double_round_robin', label: 'Double Round Robin', icon: 'sync',         sub: 'Every team plays each other twice' },
-  { value: 'knockout',           label: 'Knockout',           icon: 'tournament',   sub: 'Single-elimination bracket' },
-  { value: 'group_stage',        label: 'Group Stage',        icon: 'view-grid',    sub: 'Groups then knockout rounds' },
-  { value: 'custom',             label: 'Custom',             icon: 'pencil-ruler', sub: 'Define your own structure' },
-];
-
-const TOGGLES: {
-  key: keyof CompetitionForm['settings'];
-  label: string;
-  sub: string;
-  icon: string;
-}[] = [
-  { key: 'refereesEnabled',      label: 'Referees',      sub: 'Assign referees to matches',        icon: 'whistle'    },
-  { key: 'statisticsEnabled',    label: 'Statistics',    sub: 'Track detailed match stats',         icon: 'chart-bar'  },
-  { key: 'playerRatingsEnabled', label: 'Player Ratings',sub: 'Allow post-match player ratings',    icon: 'star-outline'},
-  { key: 'liveScoresEnabled',    label: 'Live Scores',   sub: 'Publish scores in real time',        icon: 'broadcast'  },
-];
+import { authCompetitionsdApi } from '@services/competitionApi';
+import { useCompetition } from '@hooks/useCompetition';
+import { SPORT_TYPES, GENDERS, FORMATS, TOGGLES } from '@constants/competitionOptions';
+import publicApi from '@services/api';
+import { Dropdown } from 'react-native-element-dropdown';
+import { Controller, useForm } from 'react-hook-form';
+import Control from '@components/Control';
+import { CompetitionForm } from '@types/competition';
+import { useTranslation } from 'react-i18next';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { formatDate, formatDateForAPI, formatDateLongg, formatDateShort } from '@utils/dateUtils';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -134,6 +46,7 @@ const FieldLabel = ({ label, required }: { label: string; required?: boolean }) 
     {required && <Text style={styles.fieldRequired}>*</Text>}
   </View>
 );
+
 
 const StyledInput = ({
   value,
@@ -179,85 +92,137 @@ const StyledInput = ({
   </View>
 );
 
-const PointStepper = ({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) => {
-  const num = parseInt(value, 10) || 0;
-  return (
-    <View style={styles.stepperBox}>
-      <Text style={styles.stepperLabel}>{label}</Text>
-      <View style={styles.stepperControls}>
-        <TouchableOpacity
-          style={[styles.stepperBtn, num <= 0 && styles.stepperBtnDisabled]}
-          onPress={() => num > 0 && onChange(String(num - 1))}
-          disabled={num <= 0}
-        >
-          <Icon type="materialCommunityIcons" name="minus" size={18} color={num <= 0 ? COLORS.gray3 : COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.stepperValue}>{num}</Text>
-        <TouchableOpacity
-          style={styles.stepperBtn}
-          onPress={() => onChange(String(num + 1))}
-        >
-          <Icon type="materialCommunityIcons" name="plus" size={18} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Converts a react-native-image-picker Asset into a { uri, name, type } object FormData can upload. */
+const toUploadFile = (asset: Asset, prefix: string): PickedImage => ({
+  uri: asset.uri ?? '',
+  name: asset.fileName ?? `${prefix}-${Date.now()}.jpg`,
+  type: asset.type ?? 'image/jpeg',
+});
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
-export default function EditCompetitionScreen({ navigation }: any) {
-  const [form, setForm] = useState<CompetitionForm>(INITIAL);
+interface EditCompetitionScreenProps {
+  navigation?: any;
+}
+
+export default function EditCompetitionScreen({ navigation, route }: EditCompetitionScreenProps) {
+  
+  const { t } = useTranslation();
+  const { competitionId, initialCompetition, authToken = '' } = route?.params ?? {};
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    trigger,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<CompetitionForm>({
+    defaultValues: {
+      name: '', city: '', address: '', sportTypeId: '',
+      startDate: '', startRegistration: '', endRegistration: '',
+      nbrOfTeams: '', teamSize: '', nbrOfSubs: '',
+      format: 'RoundRobin', pricePlayer: '', gender: 'CoEd', minimumAge: '',
+      teamNames: [], comment: '', logo: null, coverPhoto: null,
+      pennies: false, prize: false, referee: false,
+    },
+  });
+
+  const {
+    data: competition,
+    isLoading,
+    isError,
+    error,
+  } = useCompetition(competitionId, initialCompetition);
+
+  const [cities, setCities] = useState<{ label: string; value: string }[]>([]);
+  const [form, setForm] = useState<CompetitionForm>(competition);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [saving, setSaving] = useState(false);
+  const [logoImage, setLogoImage] = useState<Asset | null>(null);
+  const [bannerImage, setBannerImage] = useState<Asset | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  
+  // Pickers visibility
+  const [isStartDateVisible, setStartDateVisible] = useState(false);
+  const [isRegOpenVisible, setRegOpenVisible] = useState(false);
+  const [isRegCloseVisible, setRegCloseVisible] = useState(false);
 
   // ── helpers ──
-  const set = (field: keyof CompetitionForm, value: any) =>
+  const set = <K extends keyof CompetitionForm>(field: K, value: CompetitionForm[K]) =>
     setForm(prev => ({ ...prev, [field]: value }));
 
-  const setReg = (field: keyof CompetitionForm['registration'], value: string) =>
-    setForm(prev => ({ ...prev, registration: { ...prev.registration, [field]: value } }));
+  const toggleSetting = (key: 'pennies' | 'prize' | 'referee') =>
+    setForm(prev => ({ ...prev, [key]: !prev[key] }));
 
-  const setSetting = (field: keyof CompetitionForm['settings'], value: any) =>
-    setForm(prev => ({ ...prev, settings: { ...prev.settings, [field]: value } }));
+  
+  // ── image pickers ──
+  const pickImage = (type: 'logo' | 'banner') => {
+    Alert.alert('Select Image', 'Choose source', [
+      { text: 'Camera', onPress: () => launchCameraFor(type) },
+      { text: 'Photo Library', onPress: () => launchGalleryFor(type) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
 
-  const toggleSetting = (key: keyof CompetitionForm['settings']) =>
-    setSetting(key, !form.settings[key]);
+  const launchCameraFor = (type: 'logo' | 'banner') => {
+    launchCamera({ mediaType: 'photo', quality: 0.8 }, res => {
+      if (!res.didCancel && res.assets?.[0]) applyImage(type, res.assets[0]);
+    });
+  };
 
-  // ── validation ──
-  const validate = (): boolean => {
-    const e: Partial<Record<string, string>> = {};
-    if (!form.name.trim())        e.name = 'Competition name is required';
-    if (!form.sport.trim())       e.sport = 'Sport is required';
-    if (!form.city.trim())        e.city = 'City is required';
-    if (!form.registration.openDate.trim())  e.openDate = 'Open date is required';
-    if (!form.registration.closeDate.trim()) e.closeDate = 'Close date is required';
-    const maxT = parseInt(form.registration.maxTeams, 10);
-    if (!maxT || maxT < 2) e.maxTeams = 'Must be at least 2 teams';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const launchGalleryFor = (type: 'logo' | 'banner') => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.8, selectionLimit: 1 }, res => {
+      if (!res.didCancel && res.assets?.[0]) applyImage(type, res.assets[0]);
+    });
+  };
+
+  const applyImage = (type: 'logo' | 'banner', asset: Asset) => {
+    const uploadFile = toUploadFile(asset, type);
+    if (type === 'logo') {
+      setLogoImage(asset);
+      set('logo', uploadFile);
+    } else {
+      setBannerImage(asset);
+      set('coverPhoto', uploadFile);
+    }
+  };
+
+  const removeImage = (type: 'logo' | 'banner') => {
+    if (type === 'logo') {
+      setLogoImage(null);
+      set('logo', null);
+    } else {
+      setBannerImage(null);
+      set('coverPhoto', null);
+    }
   };
 
   const handleSave = async () => {
-    if (!validate()) {
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-      return;
-    }
     setSaving(true);
-    // simulate API call
-    await new Promise(res => setTimeout(res, 1200));
-    setSaving(false);
-    Alert.alert('Saved', 'Competition updated successfully.');
-    navigation?.goBack();
+    console.log(`competitions/${competition.id}`, form);
+    try {
+      const response = await authCompetitionsdApi.patch(`competitions/${competition.id}`, 
+        form, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+
+      if (response.status!=200) {
+        console.log(response);
+        const message = await response.text().catch(() => '');
+        throw new Error(message || `Request failed with status ${response.status}`);
+      }
+
+      Alert.alert('Saved', 'Competition updated successfully.');
+      navigation?.goBack();
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Update failed', error?.message ?? 'Something went wrong while saving.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -265,6 +230,84 @@ export default function EditCompetitionScreen({ navigation }: any) {
       { text: 'Keep Editing', style: 'cancel' },
       { text: 'Discard', style: 'destructive', onPress: () => navigation?.goBack() },
     ]);
+  };
+  const getCities = async (): Promise<void> => {
+    try {
+      const response = await publicApi.get('cities');
+      const cityList = response.result.data;
+      setCities(
+        cityList
+          .map((city: any) => ({ label: city.name, value: city.name }))
+          .sort((a: any, b: any) => a.label.localeCompare(b.label))
+      );
+    } catch (error) {
+      Alert.alert('Error', (error as any).response?.data?.message);
+      setCities([]);
+    }
+  };
+
+  useEffect(() => {
+    getCities();
+  }, []);
+
+  const renderDateButton = (label: string, fieldName: keyof FormData, onPress: () => void) => (
+    <View style={styles.formGroup}>
+      <Text style={styles.formLabel}>{label} * </Text>
+      <Controller
+        name={fieldName}
+        control={control}
+        rules={{ required: `${label} is required` }}
+        render={({ field: { value } }) => (
+          <View>
+            <TouchableOpacity
+              style={[styles.dateButton, errors[fieldName] && styles.inputError]}
+              onPress={onPress}
+            >
+              <Text style={{ color: form[fieldName] ? COLORS.black : COLORS.grayscale400, fontSize: 14 }}>
+                {value ? formatDateLongg(value as string) : formatDateLongg(form[fieldName])}
+              </Text>
+              <Icon name="calendar-today" type="materialIcons" size={18} color={COLORS.grayscale400} />
+            </TouchableOpacity>
+            {errors[fieldName] && <Text style={styles.errorText}>{(errors[fieldName] as any)?.message}</Text>}
+          </View>
+        )}
+      />
+    </View>
+  );
+  // ── image picker UI ──
+  const renderImagePicker = (type: 'logo' | 'banner', label: string) => {
+    const image = type === 'logo' ? logoImage : bannerImage;
+    return (
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>{label}</Text>
+        {image ? (
+          <View style={styles.imagePreviewContainer}>
+            <Image
+              source={{ uri: image.uri }}
+              style={type === 'logo' ? styles.logoPreview : styles.bannerPreview}
+            />
+            <View style={styles.imageActions}>
+              <TouchableOpacity style={styles.imageActionBtn} onPress={() => pickImage(type)}>
+                <Icon type="materialIcons" name="edit" size={16} color={COLORS.primary} />
+                <Text style={[styles.imageActionText, { color: COLORS.primary }]}>Change</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.imageActionBtn, styles.removeBtn]} onPress={() => removeImage(type)}>
+                <Icon type="materialIcons" name="delete" size={16} color="#ef4444" />
+                <Text style={[styles.imageActionText, { color: '#ef4444' }]}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.imageUploadArea} onPress={() => pickImage(type)}>
+            <Icon type="materialIcons" name="add-photo-alternate" size={32} color={COLORS.grayscale400 ?? COLORS.gray3} />
+            <Text style={styles.imageUploadText}>Tap to {type === 'logo' ? 'upload logo' : 'add banner'}</Text>
+            <Text style={styles.imageUploadHint}>
+              {type === 'logo' ? 'Square image recommended' : 'Landscape image recommended'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -302,39 +345,15 @@ export default function EditCompetitionScreen({ navigation }: any) {
         >
 
           {/* ── Media ── */}
-          <View style={styles.mediaBlock}>
-            {/* Banner */}
-            <TouchableOpacity style={styles.bannerPicker} activeOpacity={0.8}>
-              {form.bannerUrl ? (
-                <Image source={{ uri: form.bannerUrl }} style={styles.bannerImage} resizeMode="cover" />
-              ) : (
-                <View style={styles.bannerPlaceholder}>
-                  <Icon type="materialCommunityIcons" name="image-plus" size={32} color={COLORS.gray3} />
-                  <Text style={styles.placeholderText}>Add Banner</Text>
-                </View>
-              )}
-              <View style={styles.bannerOverlay} />
-              <View style={styles.bannerEditChip}>
-                <Icon type="materialCommunityIcons" name="camera" size={14} color={COLORS.white} />
-                <Text style={styles.bannerEditText}>Edit Banner</Text>
-              </View>
-
-              {/* Logo picker on top of banner */}
-              <TouchableOpacity style={styles.logoPicker} activeOpacity={0.85}>
-                {form.logoUrl ? (
-                  <Image source={{ uri: form.logoUrl }} style={styles.logoImage} resizeMode="cover" />
-                ) : (
-                  <Icon type="materialCommunityIcons" name="shield-plus" size={28} color={COLORS.gray3} />
-                )}
-                <View style={styles.logoBadge}>
-                  <Icon type="materialCommunityIcons" name="camera" size={11} color={COLORS.white} />
-                </View>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </View>
+          <View style={styles.body}>
+            <SectionHeader label="Media" icon="image-multiple-outline" />
+            <View style={styles.card}>
+              {renderImagePicker('banner', 'Cover Photo')}
+              <View style={styles.fieldDivider} />
+              {renderImagePicker('logo', 'Logo')}
+            </View>
 
           {/* ── Basic Information ── */}
-          <View style={styles.body}>
             <SectionHeader label="Basic Information" icon="information-outline" />
 
             <View style={styles.card}>
@@ -343,7 +362,7 @@ export default function EditCompetitionScreen({ navigation }: any) {
                 <StyledInput
                   value={form.name}
                   onChangeText={v => { set('name', v); setErrors(e => ({ ...e, name: '' })); }}
-                  placeholder="e.g. Premier City Competition"
+                  placeholder="e.g. Sunday Soccer League"
                   maxLength={60}
                   error={errors.name}
                 />
@@ -352,163 +371,199 @@ export default function EditCompetitionScreen({ navigation }: any) {
               <View style={styles.fieldDivider} />
 
               <View style={styles.fieldWrap}>
-                <FieldLabel label="Sport" required />
-                <StyledInput
-                  value={form.sport}
-                  onChangeText={v => { set('sport', v); setErrors(e => ({ ...e, sport: '' })); }}
-                  placeholder="e.g. Football, Basketball…"
-                  error={errors.sport}
-                />
-              </View>
-
-              <View style={styles.fieldDivider} />
-
-              <View style={styles.fieldWrap}>
                 <FieldLabel label="City" required />
-                <StyledInput
+                {/* City */}
+                <Dropdown
+                  data={cities}
+                  search={true}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={t('Select city') }
                   value={form.city}
-                  onChangeText={v => { set('city', v); setErrors(e => ({ ...e, city: '' })); }}
-                  placeholder="e.g. Kansas City"
-                  error={errors.city}
+                  onChange={v => set('city', v)}
+                  style={[styles.dropdown]}
                 />
+
               </View>
 
               <View style={styles.fieldDivider} />
 
               <View style={styles.fieldWrap}>
-                <FieldLabel label="Description" />
+                <FieldLabel label="Address" required />
                 <StyledInput
-                  value={form.description}
-                  onChangeText={v => set('description', v)}
-                  placeholder="Describe your competition…"
+                  value={form.address}
+                  onChangeText={v => { set('address', v); setErrors(e => ({ ...e, address: '' })); }}
+                  placeholder="e.g. 123 Main St"
+                  error={errors.address}
+                />
+              </View>
+
+              <View style={styles.fieldDivider} />
+
+              <View style={styles.rowFields}>
+                <View style={{ flex: 1 }}>
+                  <FieldLabel label="Minimum Age" />
+                  <StyledInput
+                    value={String(form.minimumAge ?? '')}
+                    onChangeText={v => set('minimumAge', v)}
+                    placeholder="16"
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View style={styles.rowFieldGap} />
+                <View style={{ flex: 1 }}>
+                  <FieldLabel label="Price / Player ($)" />
+                  <StyledInput
+                    value={String(form.pricePlayer ?? '')}
+                    onChangeText={v => set('pricePlayer', v)}
+                    placeholder="10"
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.fieldDivider} />
+
+              <View style={styles.fieldWrap}>
+                <FieldLabel label="Comment" />
+                <StyledInput
+                  value={form.comment}
+                  onChangeText={v => set('comment', v)}
+                  placeholder="Anything players/teams should know…"
                   multiline
                   numberOfLines={4}
                   maxLength={300}
                 />
-                <Text style={styles.charCount}>{form.description.length}/300</Text>
+                <Text style={styles.charCount}>{form.comment.length}/300</Text>
               </View>
             </View>
 
-            {/* ── Season ── */}
-            <SectionHeader label="Season" icon="calendar-month-outline" />
+            {/* ── Sport ── */}
+            <SectionHeader label="Sport" icon="run" />
             <View style={styles.chipRow}>
-              {SEASONS.map(s => {
-                const active = form.season === s.value;
+              {SPORT_TYPES.map(s => {
+                const active = form.sportType === s.id;
                 return (
                   <TouchableOpacity
-                    key={s.value}
-                    style={[
-                      styles.seasonChip,
-                      active && { borderColor: s.color, backgroundColor: `${s.color}18` },
-                    ]}
-                    onPress={() => set('season', s.value)}
+                    key={s.id}
+                    style={[styles.seasonChip, active && { borderColor: COLORS.primary, backgroundColor: `${COLORS.primary}18` }]}
+                    onPress={() => { set('sportTypeId', s.id); setErrors(e => ({ ...e, sportTypeId: '' })); }}
                   >
                     <Icon
                       type="materialCommunityIcons"
                       name={s.icon as any}
                       size={18}
-                      color={active ? s.color : COLORS.gray3}
+                      color={active ? COLORS.primary : COLORS.gray3}
                     />
-                    <Text style={[styles.chipLabel, active && { color: s.color, fontWeight: '700' }]}>
+                    <Text style={[styles.chipLabel, active && { color: COLORS.primary, fontWeight: '700' }]}>
                       {s.label}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
+            {!!errors.sportTypeId && (
+              <View style={[styles.errorRow, { marginTop: 6 }]}>
+                <Icon type="materialCommunityIcons" name="alert-circle-outline" size={13} color="#E53935" />
+                <Text style={styles.errorText}>{errors.sportTypeId}</Text>
+              </View>
+            )}
 
-            {/* ── Visibility ── */}
-            <SectionHeader label="Visibility" icon="eye-outline" />
-            <View style={styles.card}>
-              {VISIBILITIES.map((v, i) => {
-                const active = form.visibility === v.value;
+            {/* ── Gender ── */}
+            <SectionHeader label="Gender" icon="account-group-outline" />
+            <View style={styles.chipRow}>
+              {GENDERS.map(g => {
+                const active = form.gender === g.value;
                 return (
-                  <React.Fragment key={v.value}>
-                    {i > 0 && <View style={styles.fieldDivider} />}
-                    <TouchableOpacity
-                      style={styles.radioRow}
-                      onPress={() => set('visibility', v.value)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={[styles.radioIconWrap, active && styles.radioIconWrapActive]}>
-                        <Icon
-                          type="materialCommunityIcons"
-                          name={v.icon as any}
-                          size={19}
-                          color={active ? COLORS.primary : COLORS.gray3}
-                        />
-                      </View>
-                      <View style={styles.radioText}>
-                        <Text style={[styles.radioLabel, active && styles.radioLabelActive]}>
-                          {v.label}
-                        </Text>
-                        <Text style={styles.radioSub}>{v.sub}</Text>
-                      </View>
-                      <View style={[styles.radioCircle, active && styles.radioCircleActive]}>
-                        {active && <View style={styles.radioInner} />}
-                      </View>
-                    </TouchableOpacity>
-                  </React.Fragment>
+                  <TouchableOpacity
+                    key={g.value}
+                    style={[styles.seasonChip, active && { borderColor: COLORS.primary, backgroundColor: `${COLORS.primary}18` }]}
+                    onPress={() => set('gender', g.value)}
+                  >
+                    <Icon
+                      type="materialCommunityIcons"
+                      name={g.icon as any}
+                      size={18}
+                      color={active ? COLORS.primary : COLORS.gray3}
+                    />
+                    <Text style={[styles.chipLabel, active && { color: COLORS.primary, fontWeight: '700' }]}>
+                      {g.label}
+                    </Text>
+                  </TouchableOpacity>
                 );
               })}
             </View>
 
-            {/* ── Registration ── */}
-            <SectionHeader label="Registration" icon="clipboard-text-outline" />
+            {/* ── Schedule ── */}
+            <SectionHeader label="Schedule" icon="calendar-clock-outline" />
             <View style={styles.card}>
-              <View style={styles.fieldWrap}>
-                <FieldLabel label="Registration Opens" required />
-                <StyledInput
-                  value={form.registration.openDate}
-                  onChangeText={v => { setReg('openDate', v); setErrors(e => ({ ...e, openDate: '' })); }}
-                  placeholder="e.g. Aug 1, 2025"
-                  error={errors.openDate}
-                />
-              </View>
-              <View style={styles.fieldDivider} />
-              <View style={styles.fieldWrap}>
-                <FieldLabel label="Registration Closes" required />
-                <StyledInput
-                  value={form.registration.closeDate}
-                  onChangeText={v => { setReg('closeDate', v); setErrors(e => ({ ...e, closeDate: '' })); }}
-                  placeholder="e.g. Sep 15, 2025"
-                  error={errors.closeDate}
-                />
-              </View>
-              <View style={styles.fieldDivider} />
-              <View style={styles.fieldWrap}>
-                <FieldLabel label="Maximum Teams" required />
-                <StyledInput
-                  value={form.registration.maxTeams}
-                  onChangeText={v => { setReg('maxTeams', v); setErrors(e => ({ ...e, maxTeams: '' })); }}
-                  placeholder="e.g. 16"
-                  keyboardType="number-pad"
-                  error={errors.maxTeams}
-                />
-              </View>
-              <View style={styles.fieldDivider} />
+              {renderDateButton('Start Date', 'startDate', () => setStartDateVisible(true))}
+              <DateTimePickerModal
+                isVisible={isStartDateVisible}
+                date={new Date()}
+                mode="datetime" // use "datetime" since your format includes time
+                minimumDate={new Date()}
+                onConfirm={(date) => { setValue('startDate', formatDateForAPI(date)); trigger('startDate'); setStartDateVisible(false); }}
+                onCancel={() => setStartDateVisible(false)}
+              />
+
+              {renderDateButton('Registration Opens', 'startRegistration', () => setRegOpenVisible(true))}
+              <DateTimePickerModal
+                isVisible={isRegOpenVisible}
+                mode="datetime"
+                minimumDate={new Date()}
+                onConfirm={(date) => { setValue('startRegistration', formatDateForAPI(date)); trigger('startRegistration'); setRegOpenVisible(false); }}
+                onCancel={() => setRegOpenVisible(false)}
+              />
+
+              {renderDateButton('Registration Closes', 'endRegistration', () => setRegCloseVisible(true))}
+              <DateTimePickerModal
+                isVisible={isRegCloseVisible}
+                mode="datetime"
+                minimumDate={new Date()}
+                onConfirm={(date) => { setValue('endRegistration', formatDateForAPI(date)); trigger('endRegistration'); setRegCloseVisible(false); }}
+                onCancel={() => setRegCloseVisible(false)}
+              />
+            </View>
+
+            {/* ── Teams ── */}
+            <SectionHeader label="Teams" icon="account-multiple-outline" />
+            <View style={styles.card}>
               <View style={styles.rowFields}>
                 <View style={{ flex: 1 }}>
-                  <FieldLabel label="Min Players / Team" />
+                  <FieldLabel label="Number of Teams" required />
                   <StyledInput
-                    value={form.registration.minPlayersPerTeam}
-                    onChangeText={v => setReg('minPlayersPerTeam', v)}
-                    placeholder="11"
+                    value={String(form.nbrOfSubs ?? '')}
+                    onChangeText={v => { set('nbrOfTeams', v); setErrors(e => ({ ...e, nbrOfTeams: '' })); }}
+                    placeholder="4"
                     keyboardType="number-pad"
+                    error={errors.nbrOfTeams}
                   />
                 </View>
                 <View style={styles.rowFieldGap} />
                 <View style={{ flex: 1 }}>
-                  <FieldLabel label="Max Players / Team" />
+                  <FieldLabel label="Team Size" required />
                   <StyledInput
-                    value={form.registration.maxPlayersPerTeam}
-                    onChangeText={v => setReg('maxPlayersPerTeam', v)}
-                    placeholder="22"
+                    value={String(form.teamSize ?? '')}
+                    onChangeText={v => { set('teamSize', v); setErrors(e => ({ ...e, teamSize: '' })); }}
+                    placeholder="5"
                     keyboardType="number-pad"
+                    error={errors.teamSize}
                   />
                 </View>
               </View>
+              <View style={styles.fieldDivider} />
+              <View style={styles.fieldWrap}>
+                <FieldLabel label="Substitutes / Team" />
+                <StyledInput
+                  value={String(form.nbrOfSubs ?? '')}
+                  onChangeText={v => set('nbrOfSubs', v)}
+                  placeholder="2"
+                  keyboardType="number-pad"
+                />
+              </View>
             </View>
+
 
             {/* ── Competition Format ── */}
             <SectionHeader label="Competition Format" icon="trophy-outline" />
@@ -546,31 +601,11 @@ export default function EditCompetitionScreen({ navigation }: any) {
               })}
             </View>
 
-            {/* ── Points System ── */}
-            <SectionHeader label="Points System" icon="counter" />
-            <View style={styles.pointsRow}>
-              <PointStepper
-                label="Win"
-                value={form.settings.pointsForWin}
-                onChange={v => setSetting('pointsForWin', v)}
-              />
-              <PointStepper
-                label="Draw"
-                value={form.settings.pointsForDraw}
-                onChange={v => setSetting('pointsForDraw', v)}
-              />
-              <PointStepper
-                label="Loss"
-                value={form.settings.pointsForLoss}
-                onChange={v => setSetting('pointsForLoss', v)}
-              />
-            </View>
-
             {/* ── Features ── */}
             <SectionHeader label="Features" icon="toggle-switch-outline" />
             <View style={styles.card}>
               {TOGGLES.map((t, i) => {
-                const value = form.settings[t.key] as boolean;
+                const value = form[t.key];
                 return (
                   <React.Fragment key={t.key}>
                     {i > 0 && <View style={styles.fieldDivider} />}
@@ -685,91 +720,78 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
 
-  // Media
-  mediaBlock: {
-    marginBottom: 8,
+  // Media / image pickers
+  formGroup: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 10,
   },
-  bannerPicker: {
-    height: BANNER_H,
+  formLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gray3,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  imageUploadArea: {
+    height: 140,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: COLORS.grayscale300 ?? '#CCC',
     backgroundColor: COLORS.grayscale100,
-    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 6,
   },
-  bannerImage: {
-    width: '100%',
-    height: BANNER_H,
-    position: 'absolute',
-  },
-  bannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.28)',
-  },
-  bannerPlaceholder: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  placeholderText: {
+  imageUploadText: {
     fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.black,
+  },
+  imageUploadHint: {
+    fontSize: 12,
     color: COLORS.gray3,
   },
-  bannerEditChip: {
-    position: 'absolute',
-    bottom: LOGO_SIZE / 2 + 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 99,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+  imagePreviewContainer: {
+    gap: 10,
   },
-  bannerEditText: {
-    fontSize: 13,
-    color: COLORS.white,
-    fontWeight: '600',
+  bannerPreview: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    backgroundColor: COLORS.grayscale100,
   },
-  logoPicker: {
-    position: 'absolute',
-    bottom: -(LOGO_SIZE / 2),
-    alignSelf: 'center',
+  logoPreview: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
     borderRadius: LOGO_SIZE / 2,
-    borderWidth: 4,
-    borderColor: COLORS.white,
     backgroundColor: COLORS.grayscale100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-    overflow: 'hidden',
   },
-  logoImage: {
-    width: LOGO_SIZE - 8,
-    height: LOGO_SIZE - 8,
-    borderRadius: (LOGO_SIZE - 8) / 2,
+  imageActions: {
+    flexDirection: 'row',
+    gap: 10,
   },
-  logoBadge: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: COLORS.primary,
+  imageActionBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.white,
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 99,
+    backgroundColor: `${COLORS.primary}18`,
+  },
+  removeBtn: {
+    backgroundColor: '#FFEBEE',
+  },
+  imageActionText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 
   body: {
     paddingHorizontal: 16,
-    paddingTop: LOGO_SIZE / 2 + 16,
+    paddingTop: 24,
   },
 
   // Section header
@@ -831,6 +853,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: -2,
   },
+
+  dropdown: {
+      width: '100%',
+      paddingHorizontal: SIZES.padding,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: COLORS.grayscale300,
+      marginVertical: 5,
+      flexDirection: 'row',
+      height: SIZES.InputHeight,
+      alignItems: 'center',
+    },
   input: {
     fontSize: 15,
     color: COLORS.black,
@@ -839,7 +873,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1.5,
     borderColor: COLORS.grayscale200 ?? '#EBEBEB',
-    backgroundColor: COLORS.grayscale100,
   },
   inputMultiline: {
     minHeight: 96,
@@ -875,7 +908,7 @@ const styles = StyleSheet.create({
     width: 10,
   },
 
-  // Season chips
+  // Chips (sport / gender)
   chipRow: {
     flexDirection: 'row',
     gap: 8,
@@ -898,7 +931,7 @@ const styles = StyleSheet.create({
     color: COLORS.gray3,
   },
 
-  // Radio rows (visibility + format)
+  // Radio rows (format)
   radioRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -952,7 +985,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
 
-  // Points stepper
+  // Points stepper (kept for reuse elsewhere)
   pointsRow: {
     flexDirection: 'row',
     gap: 10,
@@ -998,6 +1031,46 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  // Team names
+  teamNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  removeTeamBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#FFEBEE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addTeamBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 14,
+  },
+  addTeamText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+// Date button
+  dateButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: SIZES.InputHeight || 48,
+  },
   // Toggle rows
   toggleRow: {
     flexDirection: 'row',

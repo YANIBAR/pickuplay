@@ -428,9 +428,9 @@ const FilterPillRow = ({
             <Icon type="fontAwesome" name="caret-down" size={14} color={COLORS.gray} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.headerFilterIcon} onPress={() => setSportModalVisible(true)}>
+          {/* <TouchableOpacity style={styles.headerFilterIcon} onPress={() => setSportModalVisible(true)}>
             <Icon type="materialCommunityIcons" name="tune-variant" size={22} color={COLORS.black} />
-          </TouchableOpacity>
+          </TouchableOpacity>*/}
         </View>
 
         {/* Sport icon filter row */}

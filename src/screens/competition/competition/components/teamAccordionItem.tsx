@@ -5,7 +5,7 @@ import { Icon } from '@components';
 import { JAVA_API, API_BASE_URL } from '@env';
 import styles from '../styles';
 import { CompetitionTeam, CompetitionPlayer } from '../../types';
-import { authCompetitionsdApi } from '@services/competitionApi';
+import publicCompetitionApi, { authCompetitionsdApi } from '@services/competitionApi';
 
 const TEAM_COLOR_MAP: Record<string, string> = {
   yellow: COLORS.yellow,
@@ -83,7 +83,7 @@ export default function TeamAccordionItem({
         setLoadingPlayers(true);
         setPlayersError(null);
 
-        const response = await authCompetitionsdApi.get(`teams/${team.id}`);
+        const response = await publicCompetitionApi.get(`teams/${team.id}`);
         
 
         if (response.status!=200) {

@@ -1264,28 +1264,28 @@ PODS:
   - GoogleDataTransport (10.1.1):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
-  - GoogleUtilities/AppDelegateSwizzler (8.1.2):
+  - GoogleUtilities/AppDelegateSwizzler (8.1.4):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Environment (8.1.2):
+  - GoogleUtilities/Environment (8.1.4):
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Logger (8.1.2):
+  - GoogleUtilities/Logger (8.1.4):
     - GoogleUtilities/Environment
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Network (8.1.2):
+  - GoogleUtilities/Network (8.1.4):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Privacy
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (8.1.2)":
+  - "GoogleUtilities/NSData+zlib (8.1.4)":
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (8.1.2)
-  - GoogleUtilities/Reachability (8.1.2):
+  - GoogleUtilities/Privacy (8.1.4)
+  - GoogleUtilities/Reachability (8.1.4):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GoogleUtilities/UserDefaults (8.1.2):
+  - GoogleUtilities/UserDefaults (8.1.4):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - "gRPC-C++ (1.69.0)":
@@ -4369,131 +4369,6 @@ PODS:
     - SocketRocket
     - Yoga
   - SocketRocket (0.7.1)
-  - Stripe (26.6.0):
-    - StripeApplePay (= 26.6.0)
-    - StripeCore (= 26.6.0)
-    - StripeIssuing (= 26.6.0)
-    - StripePayments (= 26.6.0)
-    - StripePaymentsUI (= 26.6.0)
-    - StripeUICore (= 26.6.0)
-  - stripe-react-native (0.74.0):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - stripe-react-native/Core (= 0.74.0)
-    - stripe-react-native/NewArch (= 0.74.0)
-    - Yoga
-  - stripe-react-native/Core (0.74.0):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Stripe (= 26.6.0)
-    - StripeApplePay (= 26.6.0)
-    - StripeFinancialConnections (= 26.6.0)
-    - StripePayments (= 26.6.0)
-    - StripePaymentSheet (= 26.6.0)
-    - StripePaymentsUI (= 26.6.0)
-    - Yoga
-  - stripe-react-native/NewArch (0.74.0):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Yoga
-  - StripeApplePay (26.6.0):
-    - StripeCore (= 26.6.0)
-  - StripeCore (26.6.0)
-  - StripeFinancialConnections (26.6.0):
-    - StripeCore (= 26.6.0)
-    - StripeUICore (= 26.6.0)
-  - StripeIssuing (26.6.0):
-    - StripeCore (= 26.6.0)
-    - StripePayments (= 26.6.0)
-    - StripePaymentsUI (= 26.6.0)
-  - StripePayments (26.6.0):
-    - StripeCore (= 26.6.0)
-    - StripePayments/Stripe3DS2 (= 26.6.0)
-  - StripePayments/Stripe3DS2 (26.6.0):
-    - StripeCore (= 26.6.0)
-  - StripePaymentSheet (26.6.0):
-    - StripeApplePay (= 26.6.0)
-    - StripeCore (= 26.6.0)
-    - StripePayments (= 26.6.0)
-    - StripePaymentsUI (= 26.6.0)
-  - StripePaymentsUI (26.6.0):
-    - StripeCore (= 26.6.0)
-    - StripePayments (= 26.6.0)
-    - StripeUICore (= 26.6.0)
-  - StripeUICore (26.6.0):
-    - StripeCore (= 26.6.0)
   - VisionCamera (4.7.3):
     - VisionCamera/Core (= 4.7.3)
     - VisionCamera/React (= 4.7.3)
@@ -4596,7 +4471,6 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - SocketRocket (~> 0.7.1)
-  - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - VisionCamera (from `../node_modules/react-native-vision-camera`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -4623,15 +4497,6 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - SocketRocket
-    - Stripe
-    - StripeApplePay
-    - StripeCore
-    - StripeFinancialConnections
-    - StripeIssuing
-    - StripePayments
-    - StripePaymentSheet
-    - StripePaymentsUI
-    - StripeUICore
 
 EXTERNAL SOURCES:
   boost:
@@ -4817,8 +4682,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
-  stripe-react-native:
-    :path: "../node_modules/@stripe/stripe-react-native"
   VisionCamera:
     :path: "../node_modules/react-native-vision-camera"
   Yoga:
@@ -4845,7 +4708,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   GoogleDataTransport: a24e58982ab3ba2f64d79613e027fe7f57e88539
-  GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
+  GoogleUtilities: db34c1c11c6f2eccb6fab2340cb8ceb1451299dc
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
   gRPC-Core: 860978b7db482de8b4f5e10677216309b5ff6330
   hermes-engine: 273e30e7fb618279934b0b95ffab60ecedb7acf5
@@ -4937,16 +4800,6 @@ SPEC CHECKSUMS:
   RNSVG: 6765c72b6cc74f8e475fabcdc3040b934c786d9d
   RNVectorIcons: e355dd0998d6b9020e560922a66614eb9636501b
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Stripe: 2aa937a5b3dc1db7b42392a70cd4d4534dd2e77b
-  stripe-react-native: 024cb12ae12c9b461a58412d20747d67f04f90c6
-  StripeApplePay: 73d55b6586e0acf7c5897100bf3dc7924488cf2d
-  StripeCore: 06bafa6087c3fa240460d9feb6729543d1634961
-  StripeFinancialConnections: 648b3cba2b42198fce9c1f3e5f997543031a76f4
-  StripeIssuing: dfd966fd0c32dc2d38c5cea8f18d88969967eaaf
-  StripePayments: c20f9058b588fb4f677822d6d415d8d59ae21fc3
-  StripePaymentSheet: 87e00057a5867f6a594bd1285494b6efe43639a9
-  StripePaymentsUI: 8af6ccdeea136ef2c8b942b27e6a33c4ff84e877
-  StripeUICore: 500ec9fd1c7c733a33f28c6a4b75423b87496ee4
   VisionCamera: 7187b3dac1ff3071234ead959ce311875748e14f
   Yoga: 526f25666395d30c297d53154398ffd249eaf9e1
 

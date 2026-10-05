@@ -19,6 +19,7 @@ import {
   TeamsScreen,
   CompetitionsScreen,
   AddCompetitionsScreen,
+  CompetitionStandingsScreen,
   ScheduleScreen,
   GamesScreen,
   GameScreen,
@@ -70,6 +71,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="addCompetition" component={AddCompetitionsScreen} />
       <Stack.Screen name="editCompetition" component={EditCompetitionsScreen} />
       <Stack.Screen name="competitionDetail" component={CompetitionDetailScreen} />
+      <Stack.Screen name="CompetitionStandings" component={CompetitionStandingsScreen} />
       <Stack.Screen name="booking" component={ScheduleScreen} />
       <Stack.Screen name="Games" component={GamesScreen} />
       <Stack.Screen name="myGames" component={MyGamesScreen} />

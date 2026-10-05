@@ -31,6 +31,7 @@ export { default as CompetitionsScreen  } from './competition';
 export { default as AddCompetitionsScreen  } from './competition/add';
 export { default as EditCompetitionsScreen  } from './competition/edit';
 export { default as CompetitionDetailScreen  } from './competition/competition';
+export { default as CompetitionStandingsScreen  } from './competition/competitionStandings';
 export { default as GamesScreen } from './games';
 export { default as MyGamesScreen } from './games/myGames';
 export { default as AddGameScreen } from './games/add';

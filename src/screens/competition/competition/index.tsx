@@ -24,6 +24,7 @@ import InfoCard from './components/infoCard';
 import RegistrationRow from './components/registrationRow';
 import ToggleRow from './components/toggleRow';
 import TeamAccordionItem from './components/teamAccordionItem';
+import MatchResultModal from './components/matchResultModal';
 import { API_BASE_URL } from '@env';
 import axios from 'axios';
 import { authenticatedApi } from '@services/api';
@@ -100,6 +101,9 @@ const TEAM_COLOR_MAP: Record<string, string> = {
   blue: COLORS.blue,
   orange: COLORS.orange,
   purple: COLORS.purple,
+  pink: '#EC4899',
+  black: '#111827',
+  white: '#FFFFFF',
 };
 
 const FALLBACK_TEAM_COLOR = COLORS.secondary;
@@ -131,7 +135,7 @@ const CompetitionTeamRow = ({
       disabled={isFull}
       onPress={onPress}
     >
-      <View style={[styles.teamRowLogo, { backgroundColor: getTeamColor(team.name) }, isFull && styles.teamRowLogoDisabled]} />
+      <View style={[styles.teamRowLogo, { backgroundColor: getTeamColor((team as any).color) }, isFull && styles.teamRowLogoDisabled]} />
       <View style={styles.teamRowInfo}>
         <Text style={[styles.teamRowName, isFull && styles.teamRowNameDisabled]}>{team.name}</Text>
         <Text style={styles.teamRowMeta}>
@@ -199,6 +203,9 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
   const [guestCount, setGuestCount] = useState('');
   const [successText, setSuccessText] = useState('');
   const [errorText, setErrorText] = useState('');
+
+  // Match result popup state
+  const [resultVisible, setResultVisible] = useState(false);
 
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
@@ -409,9 +416,13 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
                 <Text style={styles.registerBtnText}>Register</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.requestsBtn} activeOpacity={0.85} onPress={() => navigation?.navigate('joinRequests', {organizerId: 1})}>
+            {/*<TouchableOpacity style={styles.requestsBtn} activeOpacity={0.85} onPress={() => navigation?.navigate('joinRequests', {organizerId: 1})}>
               <Icon type="materialCommunityIcons" name="bell-outline" size={18} color={COLORS.white} />
               <Text style={styles.registerBtnText}>Requests</Text>
+            </TouchableOpacity>*/}
+            <TouchableOpacity style={styles.requestsBtn} activeOpacity={0.85} onPress={() => setResultVisible(true)}>
+              <Icon type="materialCommunityIcons" name="trophy-outline" size={18} color={COLORS.white} />
+              <Text style={styles.registerBtnText}>Results</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -483,6 +494,13 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
             </View>
           {/* ── Teams (accordion with players) ── */}
           <SectionHeader label="Teams" />
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}
+            onPress={() => navigation.navigate('CompetitionStandings', { competitionId: competition_id })}
+          >
+            <Icon type="materialCommunityIcons" name="format-list-numbered" size={18} color={COLORS.primary} />
+            <Text style={{ color: COLORS.primary, fontWeight: '600' }}>View standings</Text>
+          </TouchableOpacity>
           <View style={{ gap: 10 }}>
             {competition?.teams.map(team => (
               <TeamAccordionItem
@@ -499,6 +517,15 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
           <View style={styles.bottomPad} />
         </View>
       </ScrollView>
+
+      {/* ── Match Result Modal ── */}
+      <MatchResultModal
+        visible={resultVisible}
+        onClose={() => setResultVisible(false)}
+        competitionId={competition_id}
+        teams={competition?.teams ?? []}
+        getTeamColor={getTeamColor}
+      />
 
       {/* ── Registration Modal ── */}
       <Modal

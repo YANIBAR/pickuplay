@@ -1,27 +1,38 @@
 import { Alert, Linking, Platform } from "react-native";
-import { t } from "i18next"; // adjust to your actual i18n import
+import { t } from "i18next";
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+  PaymentSheetError,
+} from "@stripe/stripe-react-native";
+import { authenticatedApi } from "@services/api";
+import { authPaymentApi } from "./paymentApi";
 
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
 
 export type PaymentMethod = "venmo" | "paypal" | "stripe";
-
 export type DiscountType = "percentage" | "fixed";
 
 export interface Competition {
   id: string;
   name: string;
-  entryFee: number; // base price before any discount
+  /** Price per player, before any discount. */
+  entryFee: number;
 }
 
 export interface PromoCode {
   code: string;
   discountType: DiscountType;
-  value: number; // percentage (0-100) or fixed amount, depending on discountType
-  maxDiscount?: number; // caps a percentage discount, optional
-  minAmount?: number; // minimum order amount required to use this code
-  expiresAt?: string; // ISO date string
+  /** Percentage (0-100) or fixed amount, depending on discountType. */
+  value: number;
+  /** Caps a percentage discount. */
+  maxDiscount?: number;
+  /** Minimum order amount required to use this code. */
+  minAmount?: number;
+  /** ISO date string. */
+  expiresAt?: string;
   usageLimit?: number;
   timesUsed?: number;
   active: boolean;
@@ -38,19 +49,23 @@ export interface PaymentResult {
   success: boolean;
   method: PaymentMethod;
   amount: number;
+  /** Stripe only: id of the PaymentIntent, to send to the backend when joining. */
+  paymentIntentId?: string;
+  /** True when the user dismissed the payment UI themselves (not an error). */
+  canceled?: boolean;
   error?: string;
 }
 
-// Minimal client contract for whatever talks to your backend
-// (validate promo codes server-side, create Stripe payment intents, etc.)
-export interface PaymentApiClient {
-  validatePromoCode(code: string, competitionId: string, subtotal: number): Promise<PromoCode | null>;
-  createStripePaymentIntent(amount: number, competitionId: string): Promise<{ clientSecret: string }>;
+export interface StripeIntent {
+  clientSecret: string;
+  paymentIntentId?: string;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Errors
-// ─────────────────────────────────────────────────────────────
+/** Contract for whatever talks to your backend. Secrets stay on the server. */
+export interface PaymentApiClient {
+  validatePromoCode(code: string, competitionId: string, subtotal: number): Promise<PromoCode | null>;
+  createStripePaymentIntent(amountInCents: number, competitionId: string): Promise<StripeIntent>;
+}
 
 export class PromoCodeError extends Error {
   constructor(message: string) {
@@ -60,166 +75,164 @@ export class PromoCodeError extends Error {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Discount / Promo helpers
+// Config & small helpers
 // ─────────────────────────────────────────────────────────────
 
-/** Pure function: computes discount amount for a given subtotal and promo. Never returns more than the subtotal. */
+const VENMO_RECIPIENT = "yanibar"; // Venmo username, no @
+const PAYPAL_RECIPIENT = "yanibar"; // PayPal.me handle
+const MERCHANT_NAME = "PickuPlay";
+const PAYMENT_NOTE_PREFIX = "Pickuplay";
+
+/** i18next returns the key when a translation is missing, so use defaultValue instead of `||`. */
+const tr = (key: string, defaultValue: string, options?: Record<string, unknown>): string =>
+  t(key, { defaultValue, ...options }) as string;
+
+const round2 = (value: number): number => Math.round(value * 100) / 100;
+const toCents = (value: number): number => Math.round(value * 100);
+
+// ─────────────────────────────────────────────────────────────
+// Pricing / promo helpers (pure)
+// ─────────────────────────────────────────────────────────────
+
+/** Computes the discount for a subtotal. Throws PromoCodeError if the code can't be used. Never exceeds the subtotal. */
 export function calculateDiscount(subtotal: number, promo: PromoCode): number {
   if (!promo.active) {
-    throw new PromoCodeError(t("payment.promo.inactive") || "This promo code is no longer active.");
+    throw new PromoCodeError(tr("payment.promo.inactive", "This promo code is no longer active."));
   }
-
   if (promo.expiresAt && new Date(promo.expiresAt).getTime() < Date.now()) {
-    throw new PromoCodeError(t("payment.promo.expired") || "This promo code has expired.");
+    throw new PromoCodeError(tr("payment.promo.expired", "This promo code has expired."));
   }
-
   if (promo.usageLimit != null && (promo.timesUsed ?? 0) >= promo.usageLimit) {
-    throw new PromoCodeError(t("payment.promo.limitReached") || "This promo code has reached its usage limit.");
+    throw new PromoCodeError(tr("payment.promo.limitReached", "This promo code has reached its usage limit."));
   }
-
   if (promo.minAmount != null && subtotal < promo.minAmount) {
     throw new PromoCodeError(
-      t("payment.promo.minAmount", { amount: promo.minAmount }) ||
-        `This promo code requires a minimum order of $${promo.minAmount}.`
+      tr("payment.promo.minAmount", `This promo code requires a minimum order of $${promo.minAmount}.`, {
+        amount: promo.minAmount,
+      })
     );
   }
 
-  let discount =
-    promo.discountType === "percentage" ? (subtotal * promo.value) / 100 : promo.value;
-
+  let discount = promo.discountType === "percentage" ? (subtotal * promo.value) / 100 : promo.value;
   if (promo.discountType === "percentage" && promo.maxDiscount != null) {
     discount = Math.min(discount, promo.maxDiscount);
   }
-
   return Math.min(discount, subtotal);
 }
 
-/** Builds a full price breakdown from a base amount, optional promo. Rounds to cents. */
+/** Full price breakdown, rounded to cents. */
 export function buildPriceBreakdown(subtotal: number, promo?: PromoCode | null): PriceBreakdown {
   const discountAmount = promo ? calculateDiscount(subtotal, promo) : 0;
-  const total = Math.max(0, round2(subtotal - discountAmount));
-
   return {
     subtotal: round2(subtotal),
     discountAmount: round2(discountAmount),
     promoCode: promo?.code,
-    total,
+    total: Math.max(0, round2(subtotal - discountAmount)),
   };
 }
 
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
+/**
+ * Like buildPriceBreakdown, but if the promo stops being valid (e.g. the player
+ * count dropped below its minimum) it falls back to the undiscounted price
+ * instead of throwing. Handy for render-time use.
+ */
+export function buildPriceBreakdownSafe(subtotal: number, promo?: PromoCode | null): PriceBreakdown {
+  try {
+    return buildPriceBreakdown(subtotal, promo);
+  } catch (error) {
+    if (error instanceof PromoCodeError) return buildPriceBreakdown(subtotal);
+    throw error;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Payment Service
+// Default backend client
+// NOTE: endpoint paths are assumptions, adjust to your Java API.
 // ─────────────────────────────────────────────────────────────
 
-const VENMO_RECIPIENT = "yanibar"; // Venmo username, no @
-const PAYPAL_RECIPIENT = "yanibar"; // PayPal.me handle, adjust as needed
+const defaultApiClient: PaymentApiClient = {
+  async validatePromoCode(code, competitionId, subtotal) {
+    try {
+      const { data } = await authenticatedApi.post<PromoCode>("payments/promo/validate", {
+        code,
+        competitionId,
+        subtotal,
+      });
+      return data ?? null;
+    } catch (error: any) {
+      if (error?.response?.status === 404) return null; // unknown code
+      throw error;
+    }
+  },
+
+  async createStripePaymentIntent(amountInCents) {
+    // Backend responds: { type, message, data: "pi_xxx_secret_yyy" }
+    const response = await authPaymentApi.post("create-intent", { amountInCents });
+    const clientSecret: string | undefined = response?.data?.data;
+
+    if (!clientSecret) {
+      throw new Error("Backend did not return a client secret.");
+    }
+
+    return {
+      clientSecret,
+      paymentIntentId: clientSecret.split("_secret_")[0],
+    };
+  },
+};
+
+// ─────────────────────────────────────────────────────────────
+// Payment service
+// ─────────────────────────────────────────────────────────────
 
 class PaymentService {
-  private api?: PaymentApiClient;
+  private api: PaymentApiClient = defaultApiClient;
 
-  /** Wire up a backend client (used for promo validation + Stripe intents). */
+  /** Override the backend client (tests, different environments). */
   configure(api: PaymentApiClient) {
     this.api = api;
   }
 
-  // ── Promo codes ─────────────────────────────────────────
+  // ── Pricing ──────────────────────────────────────────────
 
-  /**
-   * Validates a promo code against the backend (source of truth) and returns
-   * the resulting price breakdown. Throws PromoCodeError with a user-facing
-   * message on failure.
-   */
-  async applyPromoCode(code: string, competition: Competition): Promise<PriceBreakdown> {
+  /** Price breakdown with no promo, for the initial render. */
+  getBaseBreakdown(competition: Competition, quantity = 1): PriceBreakdown {
+    return buildPriceBreakdown(competition.entryFee * quantity);
+  }
+
+  /** Validates a code with the backend (source of truth) and checks it applies to this order. */
+  async validatePromoCode(code: string, competition: Competition, quantity = 1): Promise<PromoCode> {
     const trimmed = code.trim();
     if (!trimmed) {
-      throw new PromoCodeError(t("payment.promo.empty") || "Enter a promo code.");
+      throw new PromoCodeError(tr("payment.promo.empty", "Enter a promo code."));
     }
 
-    if (!this.api) {
-      throw new PromoCodeError("PaymentService is not configured with an API client.");
-    }
-
-    const promo = await this.api.validatePromoCode(trimmed, competition.id, competition.entryFee);
-
+    const subtotal = round2(competition.entryFee * quantity);
+    const promo = await this.api.validatePromoCode(trimmed, competition.id, subtotal);
     if (!promo) {
-      throw new PromoCodeError(t("payment.promo.invalid") || "That promo code isn't valid.");
+      throw new PromoCodeError(tr("payment.promo.invalid", "That promo code isn't valid."));
     }
 
-    return buildPriceBreakdown(competition.entryFee, promo);
+    calculateDiscount(subtotal, promo); // throws if expired / below minimum / etc.
+    return promo;
   }
 
-  /** Local breakdown with no promo applied — useful for initial render before any code is entered. */
-  getBaseBreakdown(competition: Competition): PriceBreakdown {
-    return buildPriceBreakdown(competition.entryFee);
+  /** Convenience: validate a code and return the resulting breakdown. */
+  async applyPromoCode(code: string, competition: Competition, quantity = 1): Promise<PriceBreakdown> {
+    const promo = await this.validatePromoCode(code, competition, quantity);
+    return buildPriceBreakdown(competition.entryFee * quantity, promo);
   }
 
-  // ── Venmo ────────────────────────────────────────────────
-  async handleVenmoPayment(amount: number, title: string): Promise<PaymentResult> {
-    const note = encodeURIComponent(`Pickuplay - ${title}`);
-    const formattedAmount = amount.toFixed(2);
+  // ── Dispatch ─────────────────────────────────────────────
 
-    const venmoAppUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_RECIPIENT}&amount=${formattedAmount}&note=${note}`;
-    const venmoWebUrl = `https://venmo.com/${VENMO_RECIPIENT}?txn=pay&amount=${formattedAmount}&note=${note}`;
-
-    return this.openPaymentLink("venmo", amount, venmoAppUrl, venmoWebUrl, "payment.venmo.failedToOpen");
-  }
-
-  // ── PayPal ───────────────────────────────────────────────
-
-  async handlePayPalPayment(amount: number, competition: Competition): Promise<PaymentResult> {
-    const formattedAmount = amount.toFixed(2);
-    const note = encodeURIComponent(`Pickuplay - ${competition.name}`);
-
-    // paypal.me deep link works both as app link (if installed) and web fallback
-    const paypalAppUrl = `paypal://paypalme/${PAYPAL_RECIPIENT}/${formattedAmount}`;
-    const paypalWebUrl = `https://www.paypal.me/${PAYPAL_RECIPIENT}/${formattedAmount}?description=${note}`;
-
-    return this.openPaymentLink("paypal", amount, paypalAppUrl, paypalWebUrl, "payment.paypal.failedToOpen");
-  }
-
-  // ── Stripe ───────────────────────────────────────────────
-
-  /**
-   * Creates a PaymentIntent on your backend and returns the clientSecret so
-   * the caller can hand it to @stripe/stripe-react-native's
-   * `useConfirmPayment` / `initPaymentSheet` flow. Stripe requires an
-   * SDK-driven UI (card field or PaymentSheet), so this service only handles
-   * the intent creation, not URL opening.
-   */
-  async handleStripePayment(amount: number, competition: Competition): Promise<{ clientSecret: string }> {
-    if (!this.api) {
-      throw new Error("PaymentService is not configured with an API client.");
-    }
-
-    if (amount <= 0) {
-      throw new Error("Amount must be greater than zero.");
-    }
-
-    try {
-      return await this.api.createStripePaymentIntent(round2(amount), competition.id);
-    } catch (error) {
-      Alert.alert(
-        t("common.error") || "Error",
-        t("payment.stripe.failedToCreateIntent") || "Could not start the payment. Please try again."
-      );
-      throw error;
-    }
-  }
-
-  // ── Shared dispatch ──────────────────────────────────────
-
-  async pay(method: PaymentMethod, amount: number, competition: Competition) {
+  async pay(method: PaymentMethod, amount: number, competition: Competition): Promise<PaymentResult> {
     switch (method) {
       case "venmo":
-        return this.handleVenmoPayment(amount, competition);
+        return this.payWithVenmo(amount, competition);
       case "paypal":
-        return this.handlePayPalPayment(amount, competition);
+        return this.payWithPayPal(amount, competition);
       case "stripe":
-        return this.handleStripePayment(amount, competition);
+        return this.payWithStripe(amount, competition);
       default: {
         const exhaustiveCheck: never = method;
         throw new Error(`Unsupported payment method: ${exhaustiveCheck}`);
@@ -227,24 +240,114 @@ class PaymentService {
     }
   }
 
-  // ── Internal helpers ─────────────────────────────────────
+  // ── Venmo ────────────────────────────────────────────────
 
+  async payWithVenmo(amount: number, competition: Competition): Promise<PaymentResult> {
+    const note = encodeURIComponent(`${PAYMENT_NOTE_PREFIX} - ${competition.name}`);
+    const formatted = amount.toFixed(2);
+
+    const appUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_RECIPIENT}&amount=${formatted}&note=${note}`;
+    const webUrl = `https://venmo.com/${VENMO_RECIPIENT}?txn=pay&amount=${formatted}&note=${note}`;
+
+    return this.openPaymentLink("venmo", amount, webUrl, appUrl);
+  }
+
+  // ── PayPal ───────────────────────────────────────────────
+
+  async payWithPayPal(amount: number, competition: Competition): Promise<PaymentResult> {
+    const note = encodeURIComponent(`${PAYMENT_NOTE_PREFIX} - ${competition.name}`);
+
+    // paypal.me is a universal link: opens the PayPal app if installed, browser otherwise.
+    const webUrl = `https://paypal.me/${PAYPAL_RECIPIENT}/${amount.toFixed(2)}?note=${note}`;
+
+    return this.openPaymentLink("paypal", amount, webUrl);
+  }
+
+  // ── Stripe ───────────────────────────────────────────────
+
+  /**
+   * Full Stripe flow: create the PaymentIntent on the backend, initialise the
+   * PaymentSheet and present it. The secret key never touches the app.
+   */
+  async payWithStripe(amount: number, competition: Competition): Promise<PaymentResult> {
+    const method: PaymentMethod = "stripe";
+
+    if (amount <= 0) {
+      return this.fail(method, amount, "Amount must be greater than zero.");
+    }
+
+    try {
+      const { clientSecret, paymentIntentId } = await this.api.createStripePaymentIntent(
+        toCents(amount),
+        competition.id
+      );
+      
+      const init = await initPaymentSheet({
+        merchantDisplayName: MERCHANT_NAME,
+        paymentIntentClientSecret: clientSecret,
+      });
+      if (init.error) {
+        return this.fail(
+          method,
+          amount,
+          init.error.message,
+          tr("payment.stripe.failedToCreateIntent", "Could not start the payment. Please try again.")
+        );
+      }
+
+      const { error } = await presentPaymentSheet();
+      if (error) {
+        if (error.code === PaymentSheetError.Canceled) {
+          return { success: false, method, amount, canceled: true };
+        }
+        return this.fail(
+          method,
+          amount,
+          error.message,
+          tr("payment.stripe.failed", "Payment failed. Please try again.")
+        );
+      }
+
+      return { success: true, method, amount, paymentIntentId };
+    } catch (error: any) {
+      return this.fail(
+        method,
+        amount,
+        error?.message ?? "Unknown error",
+        tr("payment.stripe.failedToCreateIntent", "Could not start the payment. Please try again.")
+      );
+    }
+  }
+
+  // ── Internal ─────────────────────────────────────────────
+
+  /** Opens the app deep link when available (native only), otherwise the web URL. */
   private async openPaymentLink(
     method: "venmo" | "paypal",
     amount: number,
-    appUrl: string,
     webUrl: string,
-    errorKey: string
+    appUrl?: string
   ): Promise<PaymentResult> {
     try {
-      const supported = Platform.OS !== "web" && (await Linking.canOpenURL(appUrl));
-      await Linking.openURL(supported ? appUrl : webUrl);
+      const useApp = !!appUrl && Platform.OS !== "web" && (await Linking.canOpenURL(appUrl));
+      await Linking.openURL(useApp ? appUrl! : webUrl);
       return { success: true, method, amount };
-    } catch (error) {
-      const message = t(errorKey) || `Could not open ${method}.`;
-      Alert.alert(t("common.error") || "Error", message);
-      return { success: false, method, amount, error: message };
+    } catch (error: any) {
+      const label = method === "venmo" ? "Venmo" : "PayPal";
+      return this.fail(
+        method,
+        amount,
+        error?.message ?? "Unknown error",
+        tr(`payment.${method}.failedToOpen`, `Could not open ${label}.`)
+      );
     }
+  }
+
+  /** Logs the technical reason, shows a user-facing alert, and returns a failed result. */
+  private fail(method: PaymentMethod, amount: number, reason: string, userMessage?: string): PaymentResult {
+    console.warn(`[payment:${method}]`, reason);
+    Alert.alert(tr("common.error", "Error"), userMessage ?? reason);
+    return { success: false, method, amount, error: userMessage ?? reason };
   }
 }
 

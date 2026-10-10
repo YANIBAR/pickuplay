@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert, Linking } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
 import { Button, ConfirmModal, Icon, NotSignedInView } from '@components';
 import { JAVA_API } from '@env';
 import { COLORS, FONTS, icons,SIZES } from '@constants';
@@ -10,6 +10,13 @@ import { isStoredTokenExpired } from '@utils/api/auth';
 import PriceTag from '@components/PriceTag';
 import { useUserData } from '@services/useUserData';
 import NumericInput from '@components/NumericInput';
+import PaymentService, {
+  buildPriceBreakdownSafe,
+  PromoCodeError,
+  type Competition,
+  type PaymentMethod,
+  type PromoCode,
+} from '@services/payment';
 
   const getGameIcon = (type: string) => {
     const iconMap: Record<string, string> = {
@@ -41,25 +48,29 @@ import NumericInput from '@components/NumericInput';
     const [numPlayers, setNumPlayers] = useState(1);
     const [promoCode, setPromoCode] = useState('');
     const [isLogged, setIsLogged] = useState(false);
-    const [discountPrice, setDiscountPrice] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
     const [isJoining, setIsJoining] = useState(false);
     const { navigate } = useNavigation<Nav>();
     const { userData, error, refreshUserData } = useUserData(); 
-    const ApplyDiscount = (code: string) => {
-      const promoCodes: Record<string, number> = {
-        "PUP10%": 0.1,
-        "PUP20%": 0.2,
-        "PUP50%": 0.5,
-      };
+    const players = Number(numPlayers) || 1;
 
-      const discount = promoCodes[code];
-      const players = parseInt(numPlayers) || 1;
-      if (discount) {
-        const pricePerPlayer = game.price * (1 - discount);
-        setDiscountPrice((pricePerPlayer * players).toFixed(2)); // 👈 multiply by players
-      } else {
-        Alert.alert('Invalid promo code');
-        setDiscountPrice('');
+    const competition = useMemo<Competition>(
+      () => ({ id: String(game.id), name: game.title, entryFee: game.price || 0 }),
+      [game.id, game.title, game.price]
+    );
+
+    // Derived from state, so it stays correct when the player count or promo changes.
+    const breakdown = useMemo(
+      () => buildPriceBreakdownSafe(competition.entryFee * players, appliedPromo),
+      [competition.entryFee, players, appliedPromo]
+    );
+
+    const handleApplyPromo = async () => {
+      try {
+        setAppliedPromo(await PaymentService.validatePromoCode(promoCode, competition, players));
+      } catch (error) {
+        setAppliedPromo(null);
+        Alert.alert(error instanceof PromoCodeError ? error.message : t('games.invalidPromoCode'));
       }
     };
 
@@ -92,64 +103,37 @@ import NumericInput from '@components/NumericInput';
       }
     };
 
-    const handleVenmoPayment = async (amount: number) => {
-          const note = encodeURIComponent(`Pickuplay - ${game.title}`);
-          const recipient = 'yanibar'; // Venmo username, no @
-    
-          const venmoAppUrl = `venmo://paycharge?txn=pay&recipients=${recipient}&amount=${amount}&note=${note}`;
-          const venmoWebUrl = `https://venmo.com/${recipient}?txn=pay&amount=${amount}&note=${note}`;
-    
-          try {
-            const supported = await Linking.canOpenURL(venmoAppUrl);
-            await Linking.openURL(supported ? venmoAppUrl : venmoWebUrl);
-          } catch (error) {
-            Alert.alert(t('common.error'), t('game.venmo.failedToOpen') || 'Could not open Venmo.');
-          }
-        };
-    
-        const handlePaypalPayment = async (amount: number) => {
-          const note = encodeURIComponent(`Pickuplay - ${game.title}`);
-          const recipient = 'yanibar'; // PayPal.me username
-    
-          // paypal.me links open the PayPal app automatically if installed (universal link),
-          // otherwise fall back to the browser — no separate app/web URL needed.
-          const paypalUrl = `https://paypal.me/${recipient}/${amount}?note=${note}`;
-    
-          try {
-            await Linking.openURL(paypalUrl);
-          } catch (error) {
-            Alert.alert(t('common.error'), t('game.paypal.failedToOpen') || 'Could not open PayPal.');
-          }
-        };
-    
-        const handleConfirmJoin = async (paymentMethod?: 'venmo' | 'paypal') => {
-          try {
-            const players = parseInt(numPlayers) || 1;
-            const total = discountPrice
-              ? parseFloat(discountPrice)
-              : (game.price || 0) * players;
-    
-            if (total > 0 && paymentMethod) {
-              if (paymentMethod === 'venmo') {
-                await handleVenmoPayment(total);
-              } else if (paymentMethod === 'paypal') {
-                await handlePaypalPayment(total);
-              }
-            }
-    
-            const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers-1}`);
-    
-            if (response.status === 200) {
-              setJoinModalVisible(false);
-              setNumPlayers(1);
-              setPromoCode('');
-              Alert.alert(t('games.successJoined'));
-            }
-          } catch (error) {
-            const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
-            Alert.alert(errorMessage);
-          }
-        };
+    const joinGame = async (paymentIntentId?: string) => {
+      const response = await authenticatedApi.post(`games/${game.id}/join`, null, {
+        params: { guestNumber: players - 1, paymentIntentId },
+      });
+      if (response.status === 200) {
+        resetJoinForm();
+        onRefresh?.();
+        Alert.alert(t('games.successJoined'));
+      }
+    };
+
+    const handleConfirmJoin = async (method?: PaymentMethod) => {
+      if (isJoining) return;
+      setIsJoining(true);
+        let paymentIntentId: string | undefined;
+
+        if (breakdown.total > 0) {
+          if (!method) return;
+          const result = await PaymentService.pay(method, breakdown.total, competition);
+          
+          if (!result.success) return; // canceled or failed (PaymentService already alerted)
+
+          // TODO: Venmo/PayPal happen outside the app and can't be confirmed client-side.
+          // Join once the backend confirms the payment (webhook / manual approval).
+          if (method !== 'stripe') return;
+          paymentIntentId = result.paymentIntentId;
+        }
+
+        //await joinGame(paymentIntentId);
+      
+    };
 // Determine if join button should be hidden
   const isFull = game?.availableSpots == 0;
   const isCanceled = game?.status === 'CANCELED';
@@ -157,18 +141,19 @@ import NumericInput from '@components/NumericInput';
     (p) => String(p.userId) === String(userData?.id)
   );
   const shouldHideJoinButton = alreadyJoined || isFull || isCanceled;
-    const handleRedirectModal = (authType: 'login' | 'register') => {
+    const resetJoinForm = () => {
       setJoinModalVisible(false);
       setNumPlayers(1);
       setPromoCode('');
-      navigate(authType)
+      setAppliedPromo(null);
+    };
+ 
+    const handleRedirectModal = (authType: 'login' | 'register') => {
+      resetJoinForm();
+      navigate(authType);
     };
 
-    const handleCloseModal = () => {
-      setJoinModalVisible(false);
-      setNumPlayers(1);
-      setPromoCode('');
-    };
+    const handleCloseModal = resetJoinForm;
     useEffect(() => {
       const checkToken = async () => {
         const expired = await isStoredTokenExpired();
@@ -291,8 +276,9 @@ import NumericInput from '@components/NumericInput';
                     </View>
                   </View>
   
-                  {/* <View style={styles.fieldContainer}>
-                    <Text style={styles.fieldLabel}>{t('games.invalidPromoCode')}</Text>
+                  {/* Promo code UI: uncomment once the backend endpoint exists
+                  <View style={styles.fieldContainer}>
+                    <Text style={styles.fieldLabel}>{t('games.promoCode')}</Text>
                     <View style={styles.inputWrapper}>
                       <Icon type="materialCommunityIcons" name="ticket-percent" size={20} color={COLORS.primary} />
                       <TextInput
@@ -301,8 +287,9 @@ import NumericInput from '@components/NumericInput';
                         placeholderTextColor="#999"
                         value={promoCode}
                         onChangeText={setPromoCode}
+                        autoCapitalize="characters"
                       />
-                      <TouchableOpacity onPress={() => ApplyDiscount(promoCode)}> 
+                      <TouchableOpacity onPress={handleApplyPromo}>
                         <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Apply</Text>
                       </TouchableOpacity>
                     </View>
@@ -311,40 +298,59 @@ import NumericInput from '@components/NumericInput';
                   <View style={styles.priceInfo}>
                     <View style={styles.priceRow}>
                       <Text style={styles.priceLabel}>Price per player:</Text>
-                      <Text style={styles.discountedPriceText}>${game.price ? game.price.toFixed(2) : 0}</Text>
+                      <Text style={styles.discountedPriceText}>${(game.price || 0).toFixed(2)}</Text>
                     </View>
+                    {breakdown.discountAmount > 0 && (
+                      <View style={styles.priceRow}>
+                        <Text style={styles.priceLabel}>Discount ({breakdown.promoCode}):</Text>
+                        <Text style={styles.discountedPriceText}>-${breakdown.discountAmount.toFixed(2)}</Text>
+                      </View>
+                    )}
                     <View style={[styles.priceRow, { borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 8 }]}>
                       <Text style={[styles.priceLabel, { fontWeight: '700' }]}>
-                        Total ({numPlayers || 0} players):
+                        Total ({players} {players === 1 ? 'player' : 'players'}):
                       </Text>
-                      <Text style={styles.discountedPriceText}>
-                        ${discountPrice || (game.price * (numPlayers || 1)).toFixed(2)}
-                      </Text>
+                      <Text style={styles.discountedPriceText}>${breakdown.total.toFixed(2)}</Text>
                     </View>
                   </View>
-  
-                  <View style={styles.buttonContainer}>
 
-                    {(discountPrice ? parseFloat(discountPrice) : (game.price || 0) * (numPlayers || 1)) > 0 ? (
-                    <View style={{ width: '100%', marginTop: 12, gap: 10 }}>
+                  <View style={{ width: '100%', marginTop: 12, gap: 10 }}>
+                    {breakdown.total > 0 ? (
+                      <>
+                        <Button
+                          title={isJoining ? 'Processing...' : 'Pay with card'}
+                          icon="card"
+                          filled
+                          disabled={isJoining}
+                          style={{ backgroundColor: COLORS.primary, borderRadius: 32 }}
+                          onPress={() => handleConfirmJoin('stripe')}
+                        />
+                        <Button
+                          title="Pay with Venmo"
+                          icon="logo-venmo"
+                          filled
+                          disabled={isJoining}
+                          style={{ backgroundColor: '#3D95CE', borderRadius: 32 }}
+                          onPress={() => handleConfirmJoin('venmo')}
+                        />
+                        <Button
+                          title="Pay with PayPal"
+                          icon="logo-paypal"
+                          filled
+                          disabled={isJoining}
+                          style={{ backgroundColor: '#003087', borderRadius: 32 }}
+                          onPress={() => handleConfirmJoin('paypal')}
+                        />
+                      </>
+                    ) : (
                       <Button
-                        title="Pay with Venmo"
-                        icon="logo-venmo"
+                        title={isJoining ? 'Processing...' : 'Join for free'}
                         filled
-                        style={{ backgroundColor: '#3D95CE', borderRadius: 32 }}
-                        onPress={() => handleConfirmJoin('venmo')}
-                      />
-                    </View>
-                  ) : (
-                    <View style={styles.buttonContainer}>
-                      <Button
-                        title="Confirm"
-                        filled
-                        style={styles.confirmButton}
+                        disabled={isJoining}
+                        style={{ backgroundColor: COLORS.primary, borderRadius: 32 }}
                         onPress={() => handleConfirmJoin()}
                       />
-                    </View>
-                  )}
+                    )}
                   </View>
                 </View>
               ) : (

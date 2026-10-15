@@ -2,12 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.pickuplay.refresh</string>
+		<string>com.pickuplay.cleanup</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
 	<key>CFBundleDisplayName</key>
 	<string>pickuplay</string>
 	<key>CFBundleExecutable</key>
@@ -24,21 +27,25 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>whatsapp</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>pickuplay</string>
 			</array>
+			<key>REVERSED_CLIENT_ID</key>
+			<string>com.googleusercontent.apps.236406479353-7dkqddbqjou6h649lq3eoirq4s4d6j3r</string>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>venmo</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -54,27 +61,18 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.pickuplay.refresh</string>
-		<string>com.pickuplay.cleanup</string>
-	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to your camera to scan QR code</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PickuPlay uses your location to help you discover nearby games and activities, and to provide location-based features even when the app is running in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Pickuplay uses your location to help you discover nearby pickup games and sports activities in your city.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app does not use your photo library directly. Some features may require limited image access.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>This app uses notifications to alert you about new games and updates.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>PickuPlay uses your location to help you discover nearby games and activities, and to provide location-based features even when the app is running in the background.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>venmo</string>
-	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Feather.ttf</string>

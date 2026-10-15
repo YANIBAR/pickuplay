@@ -7,6 +7,7 @@ const icon = require('@assets/images/icon.png');
 const matchups = require('@assets/images/matchups.png');
 const competitionCover = require('@assets/images/competition-cover.png');
 const avatar = require('@assets/images/avatar.png');
+const welcome = require('@assets/images/welcome.png');
 
 const images = {
   logo,
@@ -15,7 +16,8 @@ const images = {
   icon,
   matchups,
   competitionCover,
-  avatar
+  avatar,
+  welcome
 };
 
 export default images;

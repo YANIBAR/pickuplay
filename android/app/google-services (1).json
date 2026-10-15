@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "236406479353",
+    "firebase_url": "https://pickuplay-8557b-default-rtdb.firebaseio.com",
+    "project_id": "pickuplay-8557b",
+    "storage_bucket": "pickuplay-8557b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:236406479353:android:70e1fc1e1cc43bdd050528",
+        "android_client_info": {
+          "package_name": "com.pickuplay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "236406479353-g9o64bepo3uoomr0sh04ubon7qaae4uc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pickuplay",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "236406479353-p1slt0582licq30jj73vcn2nq255kdg2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqe-opm4yfQdxRsIoKHGi0a8Y0JmaiHfE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "236406479353-p1slt0582licq30jj73vcn2nq255kdg2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "236406479353-7dkqddbqjou6h649lq3eoirq4s4d6j3r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pickuplay.pickuplay"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

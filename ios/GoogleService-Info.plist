@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>236406479353-7dkqddbqjou6h649lq3eoirq4s4d6j3r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.236406479353-7dkqddbqjou6h649lq3eoirq4s4d6j3r</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBtIzRPudBekFbJ_Ph-yC8uHcSicN6O_Zo</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.pickuplay.app</string>
+	<string>com.pickuplay.pickuplay</string>
 	<key>PROJECT_ID</key>
 	<string>pickuplay-8557b</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:236406479353:ios:7573f91c54b10586050528</string>
+	<string>1:236406479353:ios:c01efdc0c6173e46050528</string>
+	<key>DATABASE_URL</key>
+	<string>https://pickuplay-8557b-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

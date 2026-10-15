@@ -11,6 +11,7 @@ export {
   CreateNewPasswordScreen,
   ChangePasswordScreen,
   VerifyIdentityScreen,
+  SignupScreen
 } from './auth';
 export { default as ProfileScreen } from './profile';
 export { default as OnboardingScreen } from './onboarding';

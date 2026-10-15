@@ -9,6 +9,7 @@ import OTPVerificationScreen from './otpverification';
 import CreateNewPasswordScreen from './createnewpassword';
 import ChangePasswordScreen from './changepassword';
 import VerifyIdentityScreen from './verifyIdentity';
+import SignupScreen from './signup';
 
 export {
   LoginScreen,
@@ -21,5 +22,6 @@ export {
   OTPVerificationScreen,
   CreateNewPasswordScreen,
   VerifyIdentityScreen,
-  ChangePasswordScreen
+  ChangePasswordScreen,
+  SignupScreen
 };

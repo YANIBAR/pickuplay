@@ -16,6 +16,7 @@ import {
   ForgotPasswordPhoneScreen,
   ForgotPasswordEmailScreen,
   CreateNewPasswordScreen,
+  SignupScreen,
   TeamsScreen,
   CompetitionsScreen,
   AddCompetitionsScreen,
@@ -90,6 +91,7 @@ const AppNavigator = ({ initialRouteName = 'onboarding' }) => {
       <Stack.Screen name="forgotpasswordphone"component={ForgotPasswordPhoneScreen}/>
       <Stack.Screen name="otpverification" component={OTPVerificationScreen} />
       <Stack.Screen name="createnewpassword" component={CreateNewPasswordScreen} />
+      <Stack.Screen name="signup" component={SignupScreen} />
       <Stack.Screen name="changepassword" component={ChangePasswordScreen} />
       <Stack.Screen name="notifications" component={NotificationScreen} />
     </Stack.Navigator>

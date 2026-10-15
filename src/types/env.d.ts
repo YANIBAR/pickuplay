@@ -6,6 +6,7 @@ declare module '@env' {
   export const JAVA_API: string;
   export const OTP_API_KEY: string;
   export const pickuplay_facebook_URL: string; 
-  export const STREAM_API_KEY: string; 
+  export const STREAM_API_KEY: string;
+  export const webClientId: string;
   export const REWARD_PER_KG: number; 
 }

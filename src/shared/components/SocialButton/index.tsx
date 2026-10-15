@@ -41,7 +41,7 @@ const SocialButton: FC<SocialButtonProps> = ({
         ]}
       />
       {text && (
-        <Text size="h4" align="left">
+        <Text size="h4" align="left" style={styles.text}>
           {text}
         </Text>
       )}

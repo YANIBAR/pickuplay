@@ -304,7 +304,7 @@ const Login = () => {
         {/* Register Button */}
         <Button
           title={t('c.signUp')}
-          onPress={() => navigation.navigate('register')}
+          onPress={() => navigation.navigate('signup')}
           style={styles.button}
         />
         

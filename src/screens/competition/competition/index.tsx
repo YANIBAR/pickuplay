@@ -38,18 +38,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// Mock: teams already registered in this com, available for a player to request to join
-const COMPETITION_TEAMS: CompetitionTeam[] = [
-  
-];
-
-// Teams from COMPETITION_TEAMS with no players yet — the only ones eligible to be
-// registered as a new team entry (already-populated teams are simply hidden here).
-const EMPTY_COMPETITION_TEAMS: CompetitionTeam[] = COMPETITION_TEAMS.filter(t => t.playersCount === 0);
-
-
-
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const SectionHeader = ({ label }: { label: string }) => (
@@ -60,7 +48,7 @@ const SectionHeader = ({ label }: { label: string }) => (
 
 // ─── Registration popup sub-components ────────────────────────────────────────
 
-type RegisterStep = 'choose' | 'teamPick' | 'teamCreate' | 'teamDetails' | 'playerPick' | 'playerMessage' | 'success';
+type RegisterStep = 'choose' | 'teamPick' | 'teamDetails' | 'playerPick' | 'playerMessage' | 'success';
 type RegisterMode = 'team' | 'player' | null;
 type PlayerLevel = 'beginner' | 'intermediate' | 'advanced';
 
@@ -176,12 +164,6 @@ const RandomTeamRow = ({ selected, onPress }: { selected: boolean; onPress: () =
   </TouchableOpacity>
 );
 
-const VISIBILITY_ICONS: Record<string, string> = {
-  public: 'earth',
-  private: 'lock',
-  'invite-only': 'account-group',
-};
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function CompetitionDetailScreen({ route }: { route: any }) {
@@ -202,7 +184,6 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
   const [joinMessage, setJoinMessage] = useState('');
   const [guestCount, setGuestCount] = useState('');
   const [successText, setSuccessText] = useState('');
-  const [errorText, setErrorText] = useState('');
 
   // Match result popup state
   const [resultVisible, setResultVisible] = useState(false);
@@ -249,7 +230,7 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
     setRegisterMode('team');
     setGuestCount(competition?.teamSize);
     setIsTeam(true);
-    setRegisterStep(EMPTY_COMPETITION_TEAMS.length > 0 ? 'teamPick' : 'teamCreate');
+    setRegisterStep('teamPick');
   };
 
   const choosePlayerMode = () => {
@@ -260,14 +241,13 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
 
   const confirmRegistration = async () => {
 
-    const teams = EMPTY_COMPETITION_TEAMS.find(t => t.id === selectedMyTeamId);
+    const selectedTeam = teams.find(t => t.id === selectedMyTeamId);
     
     try {
       const UpdateUserResponse = await authenticatedApi.patch(`profile`, {
       phone: phoneNumber,
       skillLevel: skillLevel,
     });
-    console.log("selectedMyTeaew ew mId", selectedMyTeamId);
       const response = await authCompetitionsdApi.post(
         `competitions/${competition_id}/join`,
         {
@@ -280,7 +260,7 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
         }
       );
 
-      setSuccessText(`${teams?.name ?? 'Your team'} has been registered for ${competition?.name}.`);
+      setSuccessText(`${selectedTeam?.name ?? 'Your team'} has been registered for ${competition?.name}.`);
       setRegisterStep('success');
 
     } catch (error) {
@@ -306,8 +286,6 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
         return 'Register';
       case 'teamPick':
         return 'Choose Your Team';
-      case 'teamCreate':
-        return 'Create a Team';
       case 'playerPick':
         return 'Join as Player';
       case 'playerMessage':
@@ -322,7 +300,7 @@ export default function CompetitionDetailScreen({ route }: { route: any }) {
   const canGoBack = registerStep !== 'choose' && registerStep !== 'success';
 
   const handleBack = () => {
-    if (registerStep === 'teamPick' || registerStep === 'teamCreate' || registerStep === 'playerPick') {
+    if (registerStep === 'teamPick' || registerStep === 'playerPick') {
       setRegisterStep('choose');
       setRegisterMode(null);
       return;

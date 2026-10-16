@@ -229,65 +229,48 @@ const AddCompetitionScreen = () => {
   // ─── Submit ──────────────────────────────────────────────────────────────────
 
   const onSubmit = async (data: FormData) => {
-    const body = new FormData();
-    body.append('name', data.competitionName);
-    body.append('city', data.city);
-    body.append('address', data.address);
-    body.append('sportTypeId', data.sport);
-    body.append('dateTime', data.startDate);
-    body.append('startRegistration', data.registrationOpen);
-    body.append('endRegistration', data.registrationClose);
-    body.append('nbrOfTeams', data.teamsNumber);
-    body.append('teamSize', data.teamSize);
-    body.append('nbrOfSubs', data.nbrOfSubs);
-    body.append('format', FORMAT_API_MAP[data.format]);
-    body.append('pricePlayer', data.pricePlayer || '0');
-    body.append('description', data.description);
-    body.append('gender', data.gender);
-    body.append('minimumAge', data.minimumAge || '0');
-    body.append('referee', data.enableReferees ? 1 : 0);
-    body.append('prize', data.enablePrize ? 1 : 0);
-    body.append('pennies', data.enablePennies ? 1 : 0);
-    body.append('organizerId', 1);
-    body.append('teamNamingScheme', data.teamNamingScheme);
+  const body = new FormData();
+  body.append('name', data.competitionName);
+  body.append('city', data.city);
+  body.append('address', data.address);
+  body.append('sportTypeId', String(data.sport));
+  body.append('StartDate', data.startDate);
+  body.append('startRegistration', data.registrationOpen);
+  body.append('endRegistration', data.registrationClose);
+  body.append('nbrOfTeams', String(data.teamsNumber));
+  body.append('TeamSize', String(data.teamSize));
+  body.append('NbrOfSubs', String(data.nbrOfSubs));
+  body.append('format', FORMAT_API_MAP[data.format]);
+  body.append('pricePlayer', String(data.pricePlayer || 0));
+  body.append('gender', data.gender);
+  body.append('minimumAge', String(data.minimumAge || 0));
+  body.append('comment', data.description);
+  body.append('referee', String(!!data.enableReferees));
+  body.append('prize', String(!!data.enablePrize));
+  body.append('Pennies', String(!!data.enablePennies));
 
   if (logoImage) {
-    body.append('logo', {
-      uri: logoImage.uri,
-      name: logoImage.fileName || 'logo.jpg',
-      type: logoImage.type || 'image/jpeg',
-    } as any);
+    body.append('logo', { uri: logoImage.uri, name: logoImage.fileName || 'logo.jpg', type: logoImage.type || 'image/jpeg' } as any);
   }
   if (bannerImage) {
-    body.append('coverphoto', {
-      uri: bannerImage.uri,
-      name: bannerImage.fileName || 'coverphoto.jpg',
-      type: bannerImage.type || 'image/jpeg',
-    } as any);
+    body.append('coverphoto', { uri: bannerImage.uri, name: bannerImage.fileName || 'coverphoto.jpg', type: bannerImage.type || 'image/jpeg' } as any);
   }
+
   try {
+    const token = await AsyncStorage.getItem('access_token');
+    const response = await fetch('https://competition.pickuplay.com/api/competitions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      body,
+    });
 
-      const token = await AsyncStorage.getItem('access_token');
-    const response = await fetch(`http://localhost:3000/competition/`, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: 'application/json',
-            },
-            body: body,
-          });
+    const text = await response.text();
+    console.log('status:', response.status, 'raw response:', text);
 
-    const text = await response.data;
-    console.log('raw response:', JSON.stringify(text));
+    if (!response.ok) throw new Error(text || `Request failed with status ${response.status}`);
 
-    if (!response.ok) {
-      throw new Error(text || `Request failed with status ${response.status}`);
-    }
-
-    // Handle success responses with an empty body (e.g. 201/204, no JSON returned)
-    const json = text.trim().length > 0 ? JSON.parse(text) : null;
+    const json = text.trim() ? JSON.parse(text) : null;
     const league = json?.result?.data ?? json;
-
     Alert.alert('Success', 'League created successfully!');
     navigate('competition', { competition_id: league?.id });
   } catch (error) {
@@ -295,7 +278,6 @@ const AddCompetitionScreen = () => {
     Alert.alert('Error', (error as any).message || 'Failed to create league.');
   }
 };
-
   // ─── Shared render helpers ───────────────────────────────────────────────────
 
   const renderDateButton = (label: string, fieldName: keyof FormData, onPress: () => void) => (
@@ -413,7 +395,7 @@ const AddCompetitionScreen = () => {
     <View>
       <View style={styles.sectionHeader}>
         <Icon name="info" type="materialIcons" size={20} color={COLORS.primary} />
-        <Text style={styles.sectionTitle}>Basic Information</Text>
+        <Text style={styles.sectionTitle}>Basic Informationss</Text>
       </View>
       
       {renderTextInput('competitionName', 'Competition Name *', 'Enter competition name', {

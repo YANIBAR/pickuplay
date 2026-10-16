@@ -10,9 +10,12 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  ScrollView,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decodeToken } from '@services/auth/auth.utils';
 import { useNavigation } from '@react-navigation/native';
@@ -44,7 +47,35 @@ type Competition = {
   prize: boolean;
   pennies: boolean;
   teams: Record<string, string>;
+  logo?: string;
 };
+
+type FilterKey = 'city' | 'sportType' | 'teamSize' | 'format' | 'gender';
+type Filters = Record<FilterKey, string | null>;
+
+const EMPTY_FILTERS: Filters = {
+  city: null,
+  sportType: null,
+  teamSize: null,
+  format: null,
+  gender: null,
+};
+
+const FILTERS: { key: FilterKey; labelKey: string; fallback: string }[] = [
+  { key: 'city', labelKey: 'filters.city', fallback: 'City' },
+  { key: 'sportType', labelKey: 'filters.sport', fallback: 'Sport' },
+  { key: 'teamSize', labelKey: 'filters.teamSize', fallback: 'Team size' },
+  { key: 'format', labelKey: 'filters.format', fallback: 'Format' },
+  { key: 'gender', labelKey: 'filters.gender', fallback: 'Gender' },
+];
+
+function getFilterValue(c: Competition, key: FilterKey): string {
+  return String(c[key] ?? '');
+}
+
+function getOptionLabel(key: FilterKey, value: string) {
+  return key === 'teamSize' ? `${value}v${value}` : value;
+}
 
 const SPORT_ICONS: Record<string, string> = {
   Soccer: '⚽',
@@ -71,6 +102,45 @@ export default function NoCompetitionPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
+
+  const activeFilterCount = useMemo(
+    () => Object.values(filters).filter(Boolean).length,
+    [filters]
+  );
+
+  const filteredCompetitions = useMemo(
+    () =>
+      competitions.filter((c) =>
+        (Object.keys(filters) as FilterKey[]).every(
+          (key) => !filters[key] || getFilterValue(c, key) === filters[key]
+        )
+      ),
+    [competitions, filters]
+  );
+
+  // Options are built from the loaded data so users only see values that exist.
+  const filterOptions = useMemo(() => {
+    const result = {} as Record<FilterKey, string[]>;
+    FILTERS.forEach(({ key }) => {
+      const unique = Array.from(
+        new Set(competitions.map((c) => getFilterValue(c, key)).filter(Boolean))
+      );
+      result[key] =
+        key === 'teamSize'
+          ? unique.sort((a, b) => Number(a) - Number(b))
+          : unique.sort((a, b) => a.localeCompare(b));
+    });
+    return result;
+  }, [competitions]);
+
+  const selectFilter = (key: FilterKey, value: string | null) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setOpenFilter(null);
+  };
+
+  const clearFilters = () => setFilters(EMPTY_FILTERS);
 
   const fetchCompetitions = useCallback(async () => {
     setLoading(true);
@@ -182,6 +252,107 @@ export default function NoCompetitionPage() {
     );
   };
 
+  const renderFilterBar = () => (
+    <View style={styles.filterBarWrap}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterBar}
+      >
+        {FILTERS.map(({ key, labelKey, fallback }) => {
+          const value = filters[key];
+          const label = t(labelKey, { defaultValue: fallback });
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[styles.chip, value && styles.chipActive]}
+              activeOpacity={0.8}
+              onPress={() => setOpenFilter(key)}
+            >
+              <Text style={[styles.chipText, value && styles.chipTextActive]}>
+                {value ? getOptionLabel(key, value) : label}
+              </Text>
+              <Icon
+                type="feather"
+                name="chevron-down"
+                size={14}
+                color={value ? COLORS.primary : '#777'}
+              />
+            </TouchableOpacity>
+          );
+        })}
+        {activeFilterCount > 0 && (
+          <TouchableOpacity
+            style={styles.clearChip}
+            activeOpacity={0.8}
+            onPress={clearFilters}
+          >
+            <Text style={styles.clearChipText}>
+              {t('filters.clear', { defaultValue: 'Clear' })} ({activeFilterCount})
+            </Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+    </View>
+  );
+
+  const renderFilterModal = () => {
+    const activeConfig = FILTERS.find((f) => f.key === openFilter);
+    const options = openFilter ? filterOptions[openFilter] : [];
+    const selected = openFilter ? filters[openFilter] : null;
+
+    return (
+      <Modal
+        visible={openFilter !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setOpenFilter(null)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setOpenFilter(null)} />
+        <View style={styles.sheet}>
+          <View style={styles.sheetHandle} />
+          <Text style={styles.sheetTitle}>
+            {activeConfig
+              ? t(activeConfig.labelKey, { defaultValue: activeConfig.fallback })
+              : ''}
+          </Text>
+          <ScrollView style={styles.sheetList}>
+            <TouchableOpacity
+              style={styles.optionRow}
+              onPress={() => openFilter && selectFilter(openFilter, null)}
+            >
+              <Text style={[styles.optionText, !selected && styles.optionTextActive]}>
+                {t('filters.all', { defaultValue: 'All' })}
+              </Text>
+              {!selected && (
+                <Icon type="feather" name="check" size={18} color={COLORS.primary} />
+              )}
+            </TouchableOpacity>
+            {options.map((option) => {
+              const isSelected = selected === option;
+              return (
+                <TouchableOpacity
+                  key={option}
+                  style={styles.optionRow}
+                  onPress={() => openFilter && selectFilter(openFilter, option)}
+                >
+                  <Text
+                    style={[styles.optionText, isSelected && styles.optionTextActive]}
+                  >
+                    {openFilter ? getOptionLabel(openFilter, option) : option}
+                  </Text>
+                  {isSelected && (
+                    <Icon type="feather" name="check" size={18} color={COLORS.primary} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title={t('menu.competitions')}>
@@ -196,6 +367,8 @@ export default function NoCompetitionPage() {
           </TouchableOpacity>
         )}
       </Header>
+
+      {!error && competitions.length > 0 && renderFilterBar()}
 
       {loading ? (
         <View style={styles.centerState}>
@@ -216,9 +389,25 @@ export default function NoCompetitionPage() {
           <Text style={styles.mainTitle}>{t('competition.emptyTitle')}</Text>
           <Text style={styles.description}>{t('competition.emptyDescription')}</Text>
         </View>
+      ) : filteredCompetitions.length === 0 ? (
+        <View style={styles.centerState}>
+          <Text style={styles.mainTitle}>
+            {t('filters.noResultsTitle', { defaultValue: 'No competitions match' })}
+          </Text>
+          <Text style={styles.description}>
+            {t('filters.noResultsDescription', {
+              defaultValue: 'Try removing a filter to see more results.',
+            })}
+          </Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={clearFilters}>
+            <Text style={styles.primaryButtonText}>
+              {t('filters.clearAll', { defaultValue: 'Clear filters' })}
+            </Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
-          data={competitions}
+          data={filteredCompetitions}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderCompetition}
           contentContainerStyle={styles.scrollContent}
@@ -227,6 +416,7 @@ export default function NoCompetitionPage() {
           refreshing={loading}
         />
       )}
+      {renderFilterModal()}
     </SafeAreaView>
   );
 }
@@ -331,4 +521,60 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tagText: { fontSize: 11, color: '#666', fontWeight: '600' },
-}); 
+
+  filterBarWrap: { flexGrow: 0 },
+  filterBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 4,
+    gap: 8,
+    alignItems: 'center',
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e3e3e3',
+  },
+  chipActive: { backgroundColor: '#E8FFFA', borderColor: COLORS.primary },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#333' },
+  chipTextActive: { color: COLORS.primary },
+  clearChip: { paddingHorizontal: 10, paddingVertical: 8 },
+  clearChipText: { fontSize: 13, fontWeight: '600', color: '#E05A5A' },
+
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 32,
+    maxHeight: '60%',
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#ddd',
+    marginBottom: 14,
+  },
+  sheetTitle: { fontSize: 18, fontWeight: '700', color: '#111', marginBottom: 8 },
+  sheetList: { flexGrow: 0 },
+  optionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e3e3e3',
+  },
+  optionText: { fontSize: 16, color: '#333' },
+  optionTextActive: { color: COLORS.primary, fontWeight: '700' },
+});

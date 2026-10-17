@@ -48,7 +48,6 @@ export interface PriceBreakdown {
 export interface PaymentResult {
   success: boolean;
   method: PaymentMethod;
-  amount: number;
   /** Stripe only: id of the PaymentIntent, to send to the backend when joining. */
   paymentIntentId?: string;
   /** True when the user dismissed the payment UI themselves (not an error). */
@@ -167,7 +166,8 @@ const defaultApiClient: PaymentApiClient = {
 
   async createStripePaymentIntent(amountInCents) {
     // Backend responds: { type, message, data: "pi_xxx_secret_yyy" }
-    const response = await authPaymentApi.post("create-intent", { amountInCents });
+    
+    const response = await authPaymentApi.post("create-intent", {"ItemType":"game","ItemId":"3","amountInCents":amountInCents});
     const clientSecret: string | undefined = response?.data?.data;
 
     if (!clientSecret) {
@@ -231,8 +231,6 @@ class PaymentService {
         return this.payWithVenmo(amount, competition);
       case "paypal":
         return this.payWithPayPal(amount, competition);
-      case "stripe":
-        return this.payWithStripe(amount, competition);
       default: {
         const exhaustiveCheck: never = method;
         throw new Error(`Unsupported payment method: ${exhaustiveCheck}`);
@@ -269,19 +267,11 @@ class PaymentService {
    * Full Stripe flow: create the PaymentIntent on the backend, initialise the
    * PaymentSheet and present it. The secret key never touches the app.
    */
-  async payWithStripe(amount: number, competition: Competition): Promise<PaymentResult> {
+  async payWithStripe(clientSecret: string): Promise<PaymentResult> {
     const method: PaymentMethod = "stripe";
-
-    if (amount <= 0) {
-      return this.fail(method, amount, "Amount must be greater than zero.");
-    }
-
     try {
-      const { clientSecret, paymentIntentId } = await this.api.createStripePaymentIntent(
-        toCents(amount),
-        competition.id
-      );
-      
+      const paymentIntentId = clientSecret.split("_secret_")[0];
+      console.log(`[payment:${method}] Starting payment with intent ${paymentIntentId}...`);
       const init = await initPaymentSheet({
         merchantDisplayName: MERCHANT_NAME,
         paymentIntentClientSecret: clientSecret,
@@ -289,7 +279,6 @@ class PaymentService {
       if (init.error) {
         return this.fail(
           method,
-          amount,
           init.error.message,
           tr("payment.stripe.failedToCreateIntent", "Could not start the payment. Please try again.")
         );
@@ -298,21 +287,15 @@ class PaymentService {
       const { error } = await presentPaymentSheet();
       if (error) {
         if (error.code === PaymentSheetError.Canceled) {
-          return { success: false, method, amount, canceled: true };
+          return { success: false, method, canceled: true } as PaymentResult; // silent, no alert
         }
-        return this.fail(
-          method,
-          amount,
-          error.message,
-          tr("payment.stripe.failed", "Payment failed. Please try again.")
-        );
+        return this.fail(method, error.message, error.message);
       }
 
-      return { success: true, method, amount, paymentIntentId };
+      return { success: true, method, paymentIntentId };
     } catch (error: any) {
       return this.fail(
         method,
-        amount,
         error?.message ?? "Unknown error",
         tr("payment.stripe.failedToCreateIntent", "Could not start the payment. Please try again.")
       );

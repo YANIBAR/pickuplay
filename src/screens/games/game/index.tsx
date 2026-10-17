@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Pressable, Linking, Image, Share, Alert, Clipboard, ImageSourcePropType } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ImageSlider from './ImageSlider';
 import InfoRow from './InfoRow';
-import { Button, Header, Icon, NotSignedInView } from '@components';
+import { Button, Header, Icon, NotSignedInView, SuccessModal } from '@components';
 import PriceTag from '@components/PriceTag';
 import { COLORS, FONTS, icons, images, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,14 @@ import { decodeToken } from '@services/auth/auth.utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
 import NumericInput from '@components/NumericInput';
+import PaymentService, {
+  buildPriceBreakdownSafe,
+  PromoCodeError,
+  type Competition,
+  type PaymentMethod,
+  type PromoCode,
+} from '@services/payment';
+import { set } from 'react-hook-form';
 
 interface Game {
   id: number;
@@ -77,17 +85,14 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   const [isLogged, setIsLogged] = useState(false);
   const { userData, error, refreshUserData } = useUserData(); 
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
-
+  const [isJoining, setIsJoining] = useState(false);
+  
   const handleImageError = (id: string) => {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
   // Generate multiple images for the slider using our AI API
   const [expandedDay, setExpandedDay] = useState<string | null>('all');
 
-  // Generate multiple images for the slider using our AI API
-  const toggleDay = (day: string) => {
-    setExpandedDay(expandedDay === day ? null : day);
-  };
 
   // Determine if join button should be hidden
   const isFull = game?.availableSpots == 0;
@@ -166,6 +171,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   
 
   const [joinModalVisible, setJoinModalVisible] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
 
   const [numPlayers, setNumPlayers] = useState(1);
   const [promoCode, setPromoCode] = useState('');
@@ -190,63 +196,39 @@ export default function GameDetailsScreen({ route }: { route: any }) {
       setNumPlayers(1);
       setPromoCode('');
     };
-    // Redirect to Venmo to complete payment for the join
-    const handleVenmoPayment = async (amount: number) => {
-      const note = encodeURIComponent(`Pickuplay - ${game.title}`);
-      const recipient = 'yanibar'; // Venmo username, no @
+    // Derived from state, so it stays correct when the player count or promo changes.
+    const breakdown = useMemo(
+      () => buildPriceBreakdownSafe(game.price * numPlayers, promoCode),
+      [game.price, numPlayers, promoCode]
+    );
+    const handleConfirmJoin = async (method?: PaymentMethod) => {
+      if (isJoining) return;
 
-      const venmoAppUrl = `venmo://paycharge?txn=pay&recipients=${recipient}&amount=${amount}&note=${note}`;
-      const venmoWebUrl = `https://venmo.com/${recipient}?txn=pay&amount=${amount}&note=${note}`;
+      // Paid game requires a chosen method
+      if (breakdown.total > 0 && !method) return;
 
+      setIsJoining(true);
       try {
-        const supported = await Linking.canOpenURL(venmoAppUrl);
-        await Linking.openURL(supported ? venmoAppUrl : venmoWebUrl);
-      } catch (error) {
-        Alert.alert(t('common.error'), t('game.venmo.failedToOpen') || 'Could not open Venmo.');
-      }
-    };
-
-    const handlePaypalPayment = async (amount: number) => {
-      const note = encodeURIComponent(`Pickuplay - ${game.title}`);
-      const recipient = 'yanibar'; // PayPal.me username
-
-      // paypal.me links open the PayPal app automatically if installed (universal link),
-      // otherwise fall back to the browser — no separate app/web URL needed.
-      const paypalUrl = `https://paypal.me/${recipient}/${amount}?note=${note}`;
-
-      try {
-        await Linking.openURL(paypalUrl);
-      } catch (error) {
-        Alert.alert(t('common.error'), t('game.paypal.failedToOpen') || 'Could not open PayPal.');
-      }
-    };
-
-    const handleConfirmJoin = async (paymentMethod?: 'venmo' | 'paypal') => {
-      try {
-        const players = parseInt(numPlayers) || 1;
-        const total = discountPrice
-          ? parseFloat(discountPrice)
-          : (game.price || 0) * players;
-
-        if (total > 0 && paymentMethod) {
-          if (paymentMethod === 'venmo') {
-            await handleVenmoPayment(total);
-          } else if (paymentMethod === 'paypal') {
-            await handlePaypalPayment(total);
-          }
+        // 1. Join first: backend creates the participant + PaymentIntent
+        const response = await authenticatedApi.post(`games/${game.id}/join`, null, {
+        params: { guestNumber: numPlayers - 1 },
+      });
+      if (response.status === 200) {
+        
+        const clientSecret = response?.result?.data?.clientSecret;
+        if(clientSecret) {
+          // 2. Paid game: pay with the chosen method
+          const result = await PaymentService.payWithStripe(clientSecret);
+          if (!result.success) return;
         }
-
-        const response = await authenticatedApi.post(`games/${game.id}/join?guestNumber=${numPlayers-1}`);
-
-        if (response.status === 200) {
-          setJoinModalVisible(false);
-          setNumPlayers(1);
-          setPromoCode('');
-          Alert.alert(t('games.successJoined'));
-        }
-      } catch (error) {
-        const errorMessage = error?.response?.data?.message || t('games.failedToJoin');
-        Alert.alert(errorMessage);
+        setJoinModalVisible(false);
+        setSuccessVisible(true);
+      }
+      } catch (e) {
+        console.error("Join failed:", e);
+        // show error toast/alert
+      } finally {
+        setIsJoining(false); // your original early returns left this stuck on true
       }
     };
     const ApplyDiscount = (code: string) => {
@@ -267,6 +249,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
           }
         };
         const handleJoinGame = (e: any) => {
+          console.log('Join button pressed');
           e.stopPropagation();
           setJoinModalVisible(true);
         };
@@ -375,25 +358,25 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               <View style={styles.playersContainer}>
                 <View style={styles.playersGrid}>
                   {game?.participants?.map((player, index) => (
-                    <TouchableOpacity key={index} style={styles.playerCard} onPress={() => navigate('profile', { userId: player.userId })}>
-                      <Image
-                        source={
-                          imageErrors[player.userId]
-                            ? images.avatar
-                            : { uri: `${JAVA_API}profile/${player?.userId}/image` }
-                        } 
-                        onError={() => handleImageError(player.userId)}
-                        style={styles.playerImage}
-                      />
-                        <Text style={styles.playerName} numberOfLines={2}>
-                        {toTitleCase(player.userName)}
-                      </Text>
-                      {player.number_guest > 0 && (
-                        <Text style={styles.playerName} numberOfLines={2}>
-                          + {player.number_guest} guests
+                      <TouchableOpacity key={index} style={[styles.playerCard, { opacity: player.status == 'PENDING_APPROVAL' ? 0.5 : 1 }]} onPress={() => navigate('profile', { userId: player.userId })}>
+                        <Image
+                          source={
+                            imageErrors[player.userId]
+                              ? images.avatar
+                              : { uri: `${JAVA_API}profile/${player?.userId}/image` }
+                          }
+                          onError={() => handleImageError(player.userId)}
+                          style={styles.playerImage}
+                        />
+                        <Text style={[styles.playerName]} numberOfLines={2}>
+                          {toTitleCase(player.userName)}
                         </Text>
-                      )}
-                    </TouchableOpacity>
+                        {player.number_guest > 0 && (
+                          <Text style={styles.playerName} numberOfLines={2}>
+                            + {player.number_guest} guests
+                          </Text>
+                        )}
+                      </TouchableOpacity>
                   ))}
                 </View>
               </View>
@@ -407,17 +390,11 @@ export default function GameDetailsScreen({ route }: { route: any }) {
             title={t('games.joinGameTitle')}
             filled
             onPress={handleJoinGame}
+            style={{ height: SIZES.InputHeight, borderRadius: 32 }}
           />
         </View>
       )}
-      {/* {((userData?.id == game?.creatorId || role === 'ADMIN') && isLogged)  && (
-        <View style={styles.joinButton}>
-          <Button
-            title={t('game.invite')}
-            onPress={handleInviteGame}
-          />
-        </View>
-      )}
+
       Share Game Modal */}
       <Modal
         animationType="fade"
@@ -586,26 +563,15 @@ export default function GameDetailsScreen({ route }: { route: any }) {
   
                   <View style={styles.buttonContainer}>
 
-                    {(discountPrice ? parseFloat(discountPrice) : (game.price || 0) * (numPlayers || 1)) > 0 ? (
-                    <View style={{ width: '100%', marginTop: 12, gap: 10 }}>
-                      <Button
-                        title="Pay with Venmo"
-                        icon="logo-venmo"
-                        filled
-                        style={{ backgroundColor: '#3D95CE', borderRadius: 32 }}
-                        onPress={() => handleConfirmJoin('venmo')}
-                      />
-                    </View>
-                  ) : (
+
                     <View style={styles.buttonContainer}>
                       <Button
                         title="Confirm"
                         filled
                         style={styles.confirmButton}
-                        onPress={() => handleConfirmJoin()}
+                        onPress={() => handleConfirmJoin(game.price > 0 ? 'stripe' : undefined)}
                       />
                     </View>
-                  )}
                   </View>
                 </View>
               ) : (
@@ -628,6 +594,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               )}
             </View>
           </Modal>
+          <SuccessModal visible={successVisible} onClose={() => setSuccessVisible(false)} message="Successfully joined the game!" />
     </>
   );
 }

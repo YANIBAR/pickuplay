@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Modal, Pressable, TextInput, Alert } from 'react-native';
-import { Button, ConfirmModal, Icon, NotSignedInView } from '@components';
+import { Button, ConfirmModal, Icon, NotSignedInView, SuccessModal } from '@components';
 import { JAVA_API } from '@env';
 import { COLORS, FONTS, icons,SIZES } from '@constants';
 import { useNavigation } from '@react-navigation/native';
@@ -12,8 +12,6 @@ import { useUserData } from '@services/useUserData';
 import NumericInput from '@components/NumericInput';
 import PaymentService, {
   buildPriceBreakdownSafe,
-  PromoCodeError,
-  type Competition,
   type PaymentMethod,
   type PromoCode,
 } from '@services/payment';
@@ -44,35 +42,23 @@ import PaymentService, {
     const navigation = useNavigation();
     const { t } = useTranslation();
     const [joinModalVisible, setJoinModalVisible] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
     const [unjoinModalVisible, setUnjoinModalVisible] = useState(false);
     const [numPlayers, setNumPlayers] = useState(1);
     const [promoCode, setPromoCode] = useState('');
     const [isLogged, setIsLogged] = useState(false);
-    const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
     const [isJoining, setIsJoining] = useState(false);
     const { navigate } = useNavigation<Nav>();
     const { userData, error, refreshUserData } = useUserData(); 
     const players = Number(numPlayers) || 1;
 
-    const competition = useMemo<Competition>(
-      () => ({ id: String(game.id), name: game.title, entryFee: game.price || 0 }),
-      [game.id, game.title, game.price]
-    );
 
     // Derived from state, so it stays correct when the player count or promo changes.
     const breakdown = useMemo(
-      () => buildPriceBreakdownSafe(competition.entryFee * players, appliedPromo),
-      [competition.entryFee, players, appliedPromo]
+      () => buildPriceBreakdownSafe(game.price * players, promoCode),
+      [game.price, players, promoCode]
     );
 
-    const handleApplyPromo = async () => {
-      try {
-        setAppliedPromo(await PaymentService.validatePromoCode(promoCode, competition, players));
-      } catch (error) {
-        setAppliedPromo(null);
-        Alert.alert(error instanceof PromoCodeError ? error.message : t('games.invalidPromoCode'));
-      }
-    };
 
     const handleGamePress = (gameId: gameId) => {
       navigation.navigate('game', { game_id: game.id});
@@ -103,36 +89,39 @@ import PaymentService, {
       }
     };
 
-    const joinGame = async (paymentIntentId?: string) => {
-      const response = await authenticatedApi.post(`games/${game.id}/join`, null, {
-        params: { guestNumber: players - 1, paymentIntentId },
-      });
-      if (response.status === 200) {
-        resetJoinForm();
-        onRefresh?.();
-        Alert.alert(t('games.successJoined'));
-      }
-    };
+
 
     const handleConfirmJoin = async (method?: PaymentMethod) => {
       if (isJoining) return;
+
+      // Paid game requires a chosen method
+      if (breakdown.total > 0 && !method) return;
+
       setIsJoining(true);
-        let paymentIntentId: string | undefined;
-
-        if (breakdown.total > 0) {
-          if (!method) return;
-          const result = await PaymentService.pay(method, breakdown.total, competition);
-          
-          if (!result.success) return; // canceled or failed (PaymentService already alerted)
-
-          // TODO: Venmo/PayPal happen outside the app and can't be confirmed client-side.
-          // Join once the backend confirms the payment (webhook / manual approval).
-          if (method !== 'stripe') return;
-          paymentIntentId = result.paymentIntentId;
+      try {
+        // 1. Join first: backend creates the participant + PaymentIntent
+        const response = await authenticatedApi.post(`games/${game.id}/join`, null, {
+        params: { guestNumber: players - 1 },
+      });
+      if (response.status === 200) {
+        
+        const clientSecret = response?.result?.data?.clientSecret;
+        if(clientSecret) {
+          // 2. Paid game: pay with the chosen method
+          const result = await PaymentService.payWithStripe(clientSecret);
+          if (!result.success) return;
         }
 
-        //await joinGame(paymentIntentId);
-      
+        resetJoinForm();
+        onRefresh?.();
+      }
+      } catch (e) {
+        console.error("Join failed:", e);
+        // show error toast/alert
+      } finally {
+        setSuccessVisible(true);
+        setIsJoining(false); // your original early returns left this stuck on true
+      }
     };
 // Determine if join button should be hidden
   const isFull = game?.availableSpots == 0;
@@ -145,7 +134,6 @@ import PaymentService, {
       setJoinModalVisible(false);
       setNumPlayers(1);
       setPromoCode('');
-      setAppliedPromo(null);
     };
  
     const handleRedirectModal = (authType: 'login' | 'register') => {
@@ -315,42 +303,13 @@ import PaymentService, {
                   </View>
 
                   <View style={{ width: '100%', marginTop: 12, gap: 10 }}>
-                    {breakdown.total > 0 ? (
-                      <>
-                        <Button
-                          title={isJoining ? 'Processing...' : 'Pay with card'}
-                          icon="card"
-                          filled
-                          disabled={isJoining}
-                          style={{ backgroundColor: COLORS.primary, borderRadius: 32 }}
-                          onPress={() => handleConfirmJoin('stripe')}
-                        />
-                        <Button
-                          title="Pay with Venmo"
-                          icon="logo-venmo"
-                          filled
-                          disabled={isJoining}
-                          style={{ backgroundColor: '#3D95CE', borderRadius: 32 }}
-                          onPress={() => handleConfirmJoin('venmo')}
-                        />
-                        <Button
-                          title="Pay with PayPal"
-                          icon="logo-paypal"
-                          filled
-                          disabled={isJoining}
-                          style={{ backgroundColor: '#003087', borderRadius: 32 }}
-                          onPress={() => handleConfirmJoin('paypal')}
-                        />
-                      </>
-                    ) : (
                       <Button
-                        title={isJoining ? 'Processing...' : 'Join for free'}
+                        title={isJoining ? 'Processing...' : 'Join'}
                         filled
                         disabled={isJoining}
                         style={{ backgroundColor: COLORS.primary, borderRadius: 32 }}
-                        onPress={() => handleConfirmJoin()}
+                        onPress={() => handleConfirmJoin(breakdown.total > 0 ? 'stripe' : undefined)}
                       />
-                    )}
                   </View>
                 </View>
               ) : (
@@ -381,6 +340,8 @@ import PaymentService, {
           title="Unjoin Game"
           message="Are you sure you want to unjoin this game?"
         />
+
+        <SuccessModal visible={successVisible} onClose={() => setSuccessVisible(false)} message="Successfully joined the game!" />
       </>
     );
   }

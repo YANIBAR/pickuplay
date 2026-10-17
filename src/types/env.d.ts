@@ -8,4 +8,6 @@ declare module '@env' {
   export const pickuplay_facebook_URL: string; 
   export const STREAM_API_KEY: string; 
   export const REWARD_PER_KG: number; 
+  export const STRIPE_PUBLISHABLE_KEY: string;
+  export const PAYMENT_BACKEND_URL: string;
 }

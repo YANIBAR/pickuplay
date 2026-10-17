@@ -11,6 +11,8 @@ import { notifications as initialNotifications } from '@data';
 import messaging, { getMessaging, requestPermission } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StripeProvider } from '@stripe/stripe-react-native';
+import { STRIPE_PUBLISHABLE_KEY } from '@env';
 
 const navigationRef = createNavigationContainerRef();
 
@@ -118,16 +120,19 @@ const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) =>
   return (
     <QueryClientProvider client={queryClient}>
       <NavigationContainer linking={linking} ref={navigationRef}>
-        <AuthProvider>
-          <AppStack initialRouteName={initialRoute} />
+        <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} urlScheme="pickuplay">
 
-          {toast && (
-            <View style={styles.toast}>
-              <Text style={styles.toastTitle}>{toast.title}</Text>
-              <Text style={styles.toastBody}>{toast.body}</Text>
-            </View>
-          )}
-        </AuthProvider>
+          <AuthProvider>
+            <AppStack initialRouteName={initialRoute} />
+              {toast && (
+                <View style={styles.toast}>
+                  <Text style={styles.toastTitle}>{toast.title}</Text>
+                  <Text style={styles.toastBody}>{toast.body}</Text>
+                </View>
+              )}
+            
+          </AuthProvider>
+        </StripeProvider>
       </NavigationContainer>
     </QueryClientProvider>
   );

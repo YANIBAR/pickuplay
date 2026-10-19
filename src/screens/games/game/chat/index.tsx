@@ -1,150 +1,160 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
+  View, Text, StyleSheet, TextInput, FlatList, Pressable,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Header, Icon } from '@components';
 import { COLORS, SIZES } from '@constants';
 import { useTranslation } from 'react-i18next';
-import firestore from '@react-native-firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUserData } from '@services/useUserData';
+import {
+  getFirestore, collection, addDoc, query, orderBy, limit,
+  onSnapshot, serverTimestamp,
+} from '@react-native-firebase/firestore';
+import { getAuth, signInAnonymously, onAuthStateChanged } from '@react-native-firebase/auth';
+import { useRoute } from '@react-navigation/native';
+
 const RESTRICTED_PATTERNS = {
-  email: /[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/g,
-  phone: /[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}/g,
-  social: /[@][a-zA-Z0-9._]+/g,
+  email: /[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/,
+  phone: /[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}/,
+  social: /@[a-zA-Z0-9._]+/,
 };
 
-const ChatComponent = () => {
+const formatTime = (timestamp) =>
+  new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+const MessageBubble = ({ item, isMine }) => (
+  <View
+    style={[
+      styles.messageContainer,
+      styles.messageBubble,
+      isMine
+        ? [styles.sentContainer, styles.sent, { backgroundColor: COLORS.primary }]
+        : [styles.receivedContainer, styles.received, { backgroundColor: '#f0f0f0' }],
+    ]}
+  >
+    {!isMine && <Text style={styles.senderName}>{item.senderName}</Text>}
+    <Text style={[styles.messageText, { color: isMine ? '#fff' : '#000' }]}>{item.text}</Text>
+    <Text style={[styles.timestamp, isMine ? styles.sentTimestamp : styles.receivedTimestamp]}>
+      {formatTime(item.createdAt)}
+    </Text>
+  </View>
+);
+
+export default function ChatComponent() {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [showError, setShowError] = useState(false);
-  const flatListRef = useRef(null);
+  const [authReady, setAuthReady] = useState(false);
+  const { userData } = useUserData();
+  const route = useRoute<any>();
+  const gameId = String(route.params?.game_id ?? '');
 
-  const checkRestrictions = (text) => {
-    for (const [key, pattern] of Object.entries(RESTRICTED_PATTERNS)) {
-      if (pattern.test(text)) {
-        return true;
-      }
+  const checkRestrictions = (text) =>
+    Object.values(RESTRICTED_PATTERNS).some(p => p.test(text));
+
+  // 1) Make sure Firebase has some signed-in user
+  useEffect(() => {
+    const auth = getAuth();
+    const unsub = onAuthStateChanged(auth, user => setAuthReady(!!user));
+    if (!auth.currentUser) {
+      signInAnonymously(auth).catch(e =>
+        console.warn('Anon sign-in failed:', e.code, e.message)
+      );
     }
-    return false;
-  };
+    return unsub;
+  }, []);
 
-  const handleSend = () => {
-    if (inputText.trim() === '') return;
-    
-    if (checkRestrictions(inputText)) {
+  // 2) Listen to messages only after auth is ready
+  useEffect(() => {
+    const q = query(
+      collection(getFirestore(), 'games', String(gameId), 'messages'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    return onSnapshot(
+      q,
+      snap =>
+        setMessages(
+          snap.docs.map(d => {
+            const data = d.data({ serverTimestamps: 'estimate' });
+            return { id: d.id, ...data, createdAt: data.createdAt?.toMillis?.() ?? Date.now() };
+          })
+        ),
+      err => console.warn('Chat listener error', err)
+    );
+  }, [gameId, authReady]);
+
+  const handleSend = async () => {
+    const text = inputText.trim();
+    if (!text) return;
+    const senderId = userData?.id;
+    if (!senderId) {
+      console.warn('User not loaded yet');
+      return;
+    }
+
+    if (checkRestrictions(text)) {
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
       return;
     }
 
-    const newMessage = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      timestamp: Date.now(),
-      isSent: true,
-      status: 'sent'
-    };
-
-    setMessages(prev => [...prev, newMessage]);
     setInputText('');
-    
-    // Simulate received message
-    setTimeout(() => {
-      const response = {
-        id: (Date.now() + 1).toString(),
-        text: "Thanks for your message! 😊",
-        timestamp: Date.now(),
-        isSent: false,
-        status: 'read'
-      };
-      setMessages(prev => [...prev, response]);
-    }, 1000);
+      await addDoc(collection(getFirestore(), 'games', String(gameId), 'messages'), {
+        text,
+        senderId: String(senderId),
+        senderName: `${userData?.firstName ?? ''} ${userData?.lastName ?? ''}`.trim() || 'Player',
+        createdAt: serverTimestamp(),
+      });
   };
-
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const MessageBubble = ({ item }) => (
-    <View style={[styles.messageContainer, item.isSent ? styles.sentContainer : styles.receivedContainer]}>
-        <Text style={[styles.messageText, item.isSent ? styles.sentText : styles.receivedText]}>
-          {item.text}
-        </Text>
-        <View style={styles.messageFooter}>
-          <Text style={[styles.timestamp, item.isSent ? styles.sentTimestamp : styles.receivedTimestamp]}>
-            {formatTime(item.timestamp)}
-          </Text>
-          {item.isSent && (
-            <Icon type="ionicons"
-              name={item.status === 'read' ? 'checkmark-done' : 'checkmark'}
-              size={16}
-              color={item.status === 'read' ? '#0084ff' : '#8e8e8e'}
-              style={styles.statusIcon}
-            />
-          )}
-        </View>
-    </View>
-  );
 
   return (
-    
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-        <SafeAreaView style={styles.area}>
-
-      <Header title={t('viewShipment.Chat')} />
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={({ item }) => <MessageBubble item={item} />}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.messagesList}
-      />
-
-      {showError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            Sharing contact information is not allowed
-          </Text>
-        </View>
-      )}
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Type a message..."
-          multiline
-          maxLength={500}
+      <SafeAreaView style={styles.area}>
+        <Header title={t('viewShipment.Chat')} />
+        <FlatList
+          data={messages}
+          inverted
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <MessageBubble item={item} isMine={item.senderId === String(userData?.id)} />
+          )}
+          contentContainerStyle={styles.messagesList}
         />
-        <Pressable
-          onPress={handleSend}
-          style={({ pressed }) => [
-            styles.sendButton,
-            pressed && styles.sendButtonPressed
-          ]}
-        >
-          <Icon type="ionicons" name="send" size={24} color="white" />
-        </Pressable>
-      </View></SafeAreaView>
+
+        {showError && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Sharing contact information is not allowed</Text>
+          </View>
+        )}
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Type a message..."
+            multiline
+            maxLength={500}
+          />
+          <Pressable
+            onPress={handleSend}
+            style={({ pressed }) => [styles.sendButton, pressed && styles.sendButtonPressed]}
+          >
+            <Icon type="ionicons" name="send" size={24} color="white" />
+          </Pressable>
+        </View>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
-};
-
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -264,4 +274,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatComponent;

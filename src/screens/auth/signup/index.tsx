@@ -8,6 +8,7 @@ import SocialButton from '@components/SocialButton';
 import OrSeparator from '@components/OrSeparator';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithGoogle } from '@services/googleSignIn';
+import publicApi from '@services/api';
 
 type Nav = {
   navigate: (value: string) => void
@@ -34,7 +35,6 @@ const LetsYouIn = () => {
   
 const handleGoogleSignIn = async () => {
   try {
-    console.log('Starting Google Sign-In...');
 
     const googleUser = await signInWithGoogle();
 
@@ -42,8 +42,6 @@ const handleGoogleSignIn = async () => {
       console.log('Google Sign-In cancelled');
       return;
     }
-
-    console.log('Google Sign-In successful:', googleUser);
 
     // Next step: send googleUser.idToken to your Java API.
   } catch (error: any) {

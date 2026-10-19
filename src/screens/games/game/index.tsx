@@ -310,6 +310,15 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               >
                 <Icon type="feather" name="edit" />
               </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigate("chat", { game_id:game.id })} 
+                style={styles.iconBtn}
+                activeOpacity={0.75}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              >
+                <Icon type="feather" name="message-circle" />
+              </TouchableOpacity>
             
             </>
           )}

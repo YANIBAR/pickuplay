@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { AppStack } from '@navigation';
 import { withProviders } from '@hocs';
@@ -8,11 +8,19 @@ import i18n from '@services/localisation';
 import { Linking, PermissionsAndroid, Platform, StyleSheet, Text, View } from 'react-native';
 import { NotificationProvider, useNotifications } from '@contexts/NotificationContext';
 import { notifications as initialNotifications } from '@data';
-import messaging, { getMessaging, requestPermission } from '@react-native-firebase/messaging';
-import { getApp } from '@react-native-firebase/app';
+import {
+  getMessaging,
+  onMessage,
+  onNotificationOpenedApp,
+  getInitialNotification,
+  requestPermission,
+  registerDeviceForRemoteMessages,
+  getToken,
+} from '@react-native-firebase/messaging';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { STRIPE_PUBLISHABLE_KEY } from '@env';
+
 
 const navigationRef = createNavigationContainerRef();
 
@@ -37,16 +45,29 @@ const queryClient = new QueryClient({
   },
 });
 
+// ✅ Centralized navigation logic
+const handleNavigationFromNotification = (remoteMessage: any) => {
+  const screen = remoteMessage?.data?.screen;
+  const attributes = parseAttributes(remoteMessage?.data?.attributes);
+
+  if (!navigationRef.isReady()) return;
+
+  if (screen === 'game' && attributes?.game_id) {
+    navigationRef.navigate('game' as never, { game_id: attributes.game_id } as never);
+  }
+
+  if (screen === 'matchups') {
+    navigationRef.navigate('matchups' as never);
+  }
+};
+
 const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) => {
   const { addNotification } = useNotifications();
   const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
 
   // ✅ Deep linking ONLY for URLs (not notifications)
   const linking = {
-    prefixes: [
-      'http://162.222.205.74:3000',
-      'pickuplay://',
-    ],
+    prefixes: ['http://162.222.205.74:3000', 'pickuplay://'],
     config: {
       screens: {
         game: 'game/:game_id',
@@ -54,11 +75,33 @@ const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) =>
       },
     },
   };
+  
+  const requestNotificationPermission = useCallback(async () => {
+  try {
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+    }
+
+    const messagingInstance = getMessaging();
+    const authStatus = await requestPermission(messagingInstance);
+
+    // Optional: iOS auto-registers by default, so only call this if you disabled auto-registration
+    // await registerDeviceForRemoteMessages(messagingInstance);
+
+    const token = await getToken(messagingInstance);
+    // send token to backend
+  } catch (error) {
+    console.error('Permission error:', error);
+  }
+}, []);
 
   // ✅ Handle notifications (ALL cases)
   useEffect(() => {
+    const messagingInstance = getMessaging();
+    let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
     // 🔹 Foreground notifications (app open)
-    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+    const unsubscribeForeground = onMessage(messagingInstance, async remoteMessage => {
       const { messageId, notification } = remoteMessage;
 
       addNotification({
@@ -66,7 +109,7 @@ const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) =>
         title: notification?.title ?? '',
         body: notification?.body ?? '',
         date: new Date().toLocaleDateString(),
-        type: remoteMessage.data?.type ?? 'general',
+        type: (remoteMessage.data?.type as string) ?? 'general',
         isNew: true,
       });
 
@@ -76,46 +119,30 @@ const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) =>
         body: notification?.body ?? '',
       });
 
-      setTimeout(() => setToast(null), 5000);
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => setToast(null), 5000);
     });
 
     // 🔹 When app is in background and user taps notification
-    const unsubscribeBackground = messaging().onNotificationOpenedApp(remoteMessage => {
+    const unsubscribeBackground = onNotificationOpenedApp(messagingInstance, remoteMessage => {
       handleNavigationFromNotification(remoteMessage);
     });
 
     // 🔹 When app is opened from quit state via notification
-    messaging()
-      .getInitialNotification()
+    getInitialNotification(messagingInstance)
       .then(remoteMessage => {
         if (remoteMessage) {
           handleNavigationFromNotification(remoteMessage);
         }
-      });
+      })
+      .catch(e => console.warn('getInitialNotification failed:', e));
 
     return () => {
       unsubscribeForeground();
       unsubscribeBackground();
+      if (toastTimer) clearTimeout(toastTimer);
     };
   }, []);
-
-  // ✅ Centralized navigation logic
-  const handleNavigationFromNotification = (remoteMessage: any) => {
-    const screen = remoteMessage?.data?.screen;
-    const attributes = parseAttributes(remoteMessage?.data?.attributes);
-
-    if (!navigationRef.isReady()) return;
-
-    if (screen === 'game' && attributes?.game_id) {
-      navigationRef.navigate('game', {
-        game_id: attributes.game_id,
-      });
-    }
-
-    if (screen === 'matchups') {
-      navigationRef.navigate('matchups');
-    }
-  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -124,13 +151,13 @@ const AppWithNotifications: FC<{ initialRoute: string }> = ({ initialRoute }) =>
 
           <AuthProvider>
             <AppStack initialRouteName={initialRoute} />
-              {toast && (
-                <View style={styles.toast}>
-                  <Text style={styles.toastTitle}>{toast.title}</Text>
-                  <Text style={styles.toastBody}>{toast.body}</Text>
-                </View>
-              )}
-            
+
+            {toast && (
+              <View style={styles.toast}>
+                <Text style={styles.toastTitle}>{toast.title}</Text>
+                <Text style={styles.toastBody}>{toast.body}</Text>
+              </View>
+            )}
           </AuthProvider>
         </StripeProvider>
       </NavigationContainer>
@@ -144,25 +171,26 @@ const App: FC = () => {
   const [initialRoute, setInitialRoute] = useState<string>('login');
 
   // 🔹 Request notification permission
-  function requestNotificationPermission() {
+  const requestNotificationPermission = useCallback(async () => {
     try {
       if (Platform.OS === 'android' && Platform.Version >= 33) {
-        PermissionsAndroid.request(
+        const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        ).then(granted => {
-          console.log('Android POST_NOTIFICATIONS:', granted);
-        });
+        );
+        console.log('Android POST_NOTIFICATIONS:', granted);
       }
+
+      const messagingInstance = getMessaging();
+
       // Register for remote messages before requesting permission or getting token
-      getMessaging(getApp()).registerDeviceForRemoteMessages().then(() => {
-        requestPermission(getMessaging(getApp())).then(authStatus => {
-          console.log('Firebase auth status:', authStatus);
-        });
-      });
+      await registerDeviceForRemoteMessages(messagingInstance);
+
+      const authStatus = await requestPermission(messagingInstance);
+      console.log('Firebase auth status:', authStatus);
     } catch (error) {
       console.error('Permission error:', error);
     }
-  }
+  }, []);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -195,7 +223,7 @@ const App: FC = () => {
 
   useEffect(() => {
     requestNotificationPermission();
-  }, []);
+  }, [requestNotificationPermission]);
 
   if (!isReady) return null;
 

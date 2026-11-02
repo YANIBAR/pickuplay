@@ -28,7 +28,7 @@ interface FormData {
   description: string;
   sportType: number;
   address: string;
-  city: string;
+  cityId: string;
   startTime: string;
   endTime: string;
   numPlayers: string;
@@ -46,7 +46,6 @@ const AddGameScreen = () => {
   const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [sportType, setSportType] = useState("");
-  const [isCity, setCity] = useState(""); 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedImage, setSelectedImage] = useState<any>(null);
   const [sports, setSports] = useState<{ label: string; value: string }[]>([]);
@@ -66,7 +65,7 @@ const AddGameScreen = () => {
       description: '',
       sportType: 0, 
       address: '',
-      city: '', 
+      cityId: '', 
       startTime: '',
       endTime: '',
       numPlayers: '',
@@ -117,7 +116,7 @@ const AddGameScreen = () => {
       const cityList = response.result.data;
       setCities(
         cityList
-          .map((city: any) => ({ label: city.name, value: city.name }))
+          .map((city: any) => ({ label: city.name, value: city.id }))
           .sort((a: any, b: any) => a.label.localeCompare(b.label))
       );
     } catch (error) {
@@ -274,7 +273,7 @@ const AddGameScreen = () => {
       title: data.title.trim(),
       description: data.description,
       sportType: sportType,
-      city: data.city,
+      cityId: data?.cityId,
       address: data.address.trim(),
       date: formatDateForAPI(selectedDate),
       startTime: formatTimeForAPI(data.startTime),
@@ -282,6 +281,7 @@ const AddGameScreen = () => {
       nbrSpots: parseInt(data.numPlayers, 10),
       price: parseFloat(data.pricePerPlayer) || 0,
     };
+    console.log(payload);
     try {
       const response = await authenticatedApi.post('games/create', payload);
       const game = response.result.data;
@@ -559,13 +559,12 @@ const AddGameScreen = () => {
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>{t('add_game.city')} *</Text>
                 <Controller
-                  name="city"
+                  name="cityId"
                   control={control}
-                  rules={{ required: 'City is required' }}
                   render={({ field: { onChange, value } }) => (
                     <View>
                       <Dropdown
-                        style={[styles.dropdown, errors?.city && { borderColor: 'red' }]}
+                        style={[styles.dropdown, errors?.cityId && { borderColor: 'red' }]}
                         placeholderStyle={styles.placeholderStyle}
                         selectedTextStyle={styles.selectedTextStyle}
                         inputSearchStyle={styles.inputSearchStyle}
@@ -578,10 +577,10 @@ const AddGameScreen = () => {
                         placeholder={t('add_game.select_city')}
                         searchPlaceholder={t('schedule.search')}
                         value={value || ''} // always controlled
-                        onBlur={async () => await trigger('city')}
+                        onBlur={async () => await trigger('cityId')}
                         onChange={item => onChange(item.value)}
                       />
-                      {errors?.city && <Text style={styles.errorText}>{errors.city.message}</Text>}
+                      {errors?.cityId && <Text style={styles.errorText}>{errors.cityId.message}</Text>}
                     </View>
                   )}
                 />

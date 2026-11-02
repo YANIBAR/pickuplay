@@ -169,6 +169,7 @@ export default StyleSheet.create({
 
   // Sport icon cards row
   sportsIconBar: {
+    flexGrow: 0,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -190,12 +191,13 @@ export default StyleSheet.create({
   sportIconCardActive: {
     // no bg change on card, only circle changes
   },
-sportsIconBarCompact: {
-  backgroundColor: COLORS.white,
-  borderBottomWidth: 1,
-  borderBottomColor: '#eee',
-  maxHeight: 100,  // reduced from 120
-},
+  sportsIconBarCompact: {
+    flexGrow: 0,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    maxHeight: 100,  // reduced from 120
+  },
   sportIconCircle: {
     width: 56,
     height: 56,

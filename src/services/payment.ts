@@ -7,6 +7,7 @@ import {
 } from "@stripe/stripe-react-native";
 import { authenticatedApi } from "@services/api";
 import { authPaymentApi } from "./paymentApi";
+import { COLORS } from "@constants";
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -271,10 +272,39 @@ class PaymentService {
     const method: PaymentMethod = "stripe";
     try {
       const paymentIntentId = clientSecret.split("_secret_")[0];
-      console.log(`[payment:${method}] Starting payment with intent ${paymentIntentId}...`);
       const init = await initPaymentSheet({
-        merchantDisplayName: MERCHANT_NAME,
+        merchantDisplayName: "PickuPlay",
         paymentIntentClientSecret: clientSecret,
+
+        appearance: {
+          colors: {
+            primary: COLORS.primary,
+            background: COLORS.white,
+            componentBackground: "#F7F9FA",
+            componentBorder: "#E1E7E9",
+            componentDivider: "#E1E7E9",
+            primaryText: "#172B2A",
+            secondaryText: "#657371",
+            componentText: "#172B2A",
+            placeholderText: "#929D9B",
+            icon: "#657371",
+            error: "#D92D20",
+          },
+          shapes: {
+            borderRadius: 12,
+            borderWidth: 1,
+          },
+          primaryButton: {
+            colors: {
+              background: "#22BB9C",
+              text: "#FFFFFF",
+              border: "#22BB9C",
+            },
+            shapes: {
+              borderRadius: 12,
+            },
+          },
+        },
       });
       if (init.error) {
         return this.fail(

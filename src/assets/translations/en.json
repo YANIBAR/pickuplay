@@ -16,8 +16,8 @@
     "tryAgain": "Try Again",
     "divider": "OR",
     "skip": "Skip",
-    "later": "Later"
-
+    "later": "Later",
+    "processing": "Processing..."
   },
   "AvailableLanguages": "Available Languages",
   "CustomerService": "Customer Survice",
@@ -390,6 +390,8 @@
   },
   "games": {
     "joinButton": "Join",
+    "payButton": "Pay",
+    "payWithVenmo": "Pay with Venmo",
     "unjoinButton": "Unjoin",
     "joinGameTitle": "Join Game",
     "guests": "Add Guests",
@@ -586,6 +588,7 @@
     "gameCanceled": "Game canceled",
     "gameFull": "Game is full",
     "Organizer": "Organizer",
+    "organizedBy": "Organized by",
     "location": "Location",
     "isprivate": "Privacy",
     "time": "Time",

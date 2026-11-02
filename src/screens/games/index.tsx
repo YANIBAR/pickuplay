@@ -1,13 +1,13 @@
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, Alert, Image, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Game, extractCity } from './GameCard';
+import { Game } from './GameCard';
 import GameGrid from './GamesGrid';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Checkbox, Icon } from '@components';
+import { Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS, icons, images } from '@constants';
-import { publicApi, authenticatedApi } from '@services/api';
+import { publicApi,  authDevApi } from '@services/api';
 import { useUserData } from '@services/useUserData';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
@@ -27,7 +27,10 @@ type Sport = {
 };
  
 type City = {
+  id: number;
   name: string;
+  stateCode?: string;
+  countryCode?: string;
 };
  
 type SportOption = {
@@ -84,7 +87,7 @@ export default function HomeScreen() {
   const [currentCity, setCurrentCity] = useState<string | null>(null);
   // Filter states
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
-  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState<number | undefined>();
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
 
@@ -95,13 +98,21 @@ export default function HomeScreen() {
   const weekDays = getWeekDays();
 
   const onRefresh = () => {
-    setRefreshing(true);
-    fetchGames();
-  };
-  const fetchGames = async () => {
-      const response = await publicApi.get(`games`, { params: { date: new Date().toISOString().split('T')[0] } });
-      setGames(response.result.data.games);
-  };
+  setRefreshing(true);
+  const cityId = selectedCity ?? currentCityId;
+  if (cityId != null) fetchGames(cityId);
+};
+
+const requestId = useRef(0);
+
+const fetchGames = async (cityId: number) => {
+  const id = ++requestId.current;
+  const response = await publicApi.get('games', {
+    params: { cityId, date: toLocalDateString(new Date()) },
+  });
+  if (id !== requestId.current) return; // a newer request exists
+  setGames(response.result.data.games);
+};
 
   const getSports = async (): Promise<void> => {
     try {
@@ -115,36 +126,16 @@ export default function HomeScreen() {
       setSports([]); // fallback to empty array
     }
   };
-    // Get unique cities from games
-  // Add this near your other state declarations
-  const [cities, setCities] = useState<string[]>([]);
+
+  const currentCityId = userData?.cityId != null ? Number(userData.cityId) : undefined;
+  const [cities, setCities] = useState<City[]>([]);  
 
   // Replace your getCities function with this
   const getCities = async (): Promise<void> => {
     try {
       const response = await publicApi.get('cities');
-      const cityList: City[] = response.result.data;
-
-      const dbCities = cityList.map((city) => city.name);
-
-      let updatedCities = [...dbCities];
-
-      if (currentCity) {
-        const userCity = extractCity(currentCity);
-
-        if (!dbCities.includes(userCity)) {
-          updatedCities.unshift(userCity);
-        } else {
-          updatedCities = [
-            userCity,
-            ...dbCities.filter((c) => c !== userCity),
-          ];
-        }
-
-        setSelectedCities([userCity]);
-      }
-
-      setCities(updatedCities);
+      setCities(response.result.data);
+      // no setSelectedCities here anymore
     } catch (error) {
       const errorMessage = (error as any).response?.data?.message;
       Alert.alert('Error', errorMessage);
@@ -160,13 +151,9 @@ export default function HomeScreen() {
       filtered = filtered.filter(game => game.sportType.id === selectedSports[0]);
     }
     // Use selected cities, or default to user's city if no city filter is active
-    const citiesToFilter = selectedCities.length > 0 
-      ? selectedCities 
-      : cities;
-    if (citiesToFilter.length > 0) {
-      filtered = filtered.filter(game => 
-        citiesToFilter.includes(extractCity(game.city))
-      );
+    const cityToFilter = selectedCity ?? currentCityId;
+    if (cityToFilter != null) {
+      filtered = filtered.filter(game => game.city.id === cityToFilter);
     }
     
     // Filter by selected weekdays
@@ -185,16 +172,16 @@ export default function HomeScreen() {
         
       );
     }
-    setFilteredGames(filtered);
+    setFilteredGames(filtered); 
+
   };
 
   useFocusEffect(
     useCallback(() => {
-      if (currentCity) {
-        fetchGames();
-      }
-    }, [currentCity])
-  ); 
+      const cityId = selectedCity ?? currentCityId;
+      if (cityId != null) fetchGames(cityId);
+    }, [currentCityId, selectedCity])
+  );
 
   // Apply filters whenever filter state changes
   useEffect(() => {
@@ -206,13 +193,14 @@ export default function HomeScreen() {
       checkToken();
     applyFilters();
     setRefreshing(false);
-  }, [selectedSports, selectedCities, selectedDays, selectedPlayers, games]);
+  }, [selectedSports, selectedCity, selectedDays, selectedPlayers, games]);
 
   useEffect(() => {
     const fetchCity = async () => {
       try {
         const city = await getCurrentCity();
-        setCurrentCity("Kansas City");
+        setSelectedCity(city?.id);
+        setCurrentCity(city.id);
       } catch (error) {
         console.error('Failed to get city:', error);
       }
@@ -243,7 +231,8 @@ export default function HomeScreen() {
         const alreadyShown = await AsyncStorage.getItem(promptKey);
         if (alreadyShown) return;
 
-        const response: any = await authenticatedApi.get(`profile/${userData.id}`);
+        const response: any = await authDevApi.get(
+          `profile/${userData.id}`);
         const data = response.result?.data ?? response.data ?? null;
         const hasImage = !!(data?.image || data?.picture || data?.profileImage);
 
@@ -268,11 +257,20 @@ export default function HomeScreen() {
     checkAndPrompt();
   }, [userData?.id]);
 
-  useEffect(() => {
-    fetchGames();
+  useEffect(() => { 
     getCities();
     getSports();
-  }, [currentCity]);
+  }, []);
+
+  useEffect(() => {
+    if (!currentCityId) return;
+    setCurrentCity(userData?.cityId);
+    setSelectedCity(prev => prev ?? currentCityId);
+
+    
+    fetchGames(userData?.cityId);
+    onRefresh();
+  }, [currentCityId]);
 
   const handleSportToggle = (sport: string) => {
     setSelectedSports(prev =>
@@ -280,12 +278,10 @@ export default function HomeScreen() {
     );
   };
 
-  const handleCityToggle = (city: string) => {
-    setSelectedCities(prev =>
-      prev.includes(city)
-        ? prev.filter(c => c !== city)
-        : [...prev, city]
-    );
+  const handleCityToggle = (cityId: number) => {
+    fetchGames(cityId);
+    setSelectedCity(cityId);
+    setCityModalVisible(false); 
   };
 
   const handleDayToggle = (dateString: string) => {
@@ -302,12 +298,11 @@ export default function HomeScreen() {
 
   const clearAllFilters = () => {
     setSelectedSports([]);
-    setSelectedCities([]);
+    setSelectedCity(currentCityId ? currentCityId : 0);
     setSelectedDays([]); 
     setSelectedPlayers([]);
   };
 
-  const hasActiveFilters = selectedSports.length > 0 || selectedCities.length > 0;
   const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
 
   useEffect(() => {
@@ -387,6 +382,10 @@ const FilterPillRow = ({
     </ScrollView>
   </View>
 );
+const currentCityName =
+  cities.find(c => c.id === currentCityId)?.name;
+
+const selectedCityName = cities.find(c => c.id === selectedCity)?.name;
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -423,7 +422,7 @@ const FilterPillRow = ({
           <TouchableOpacity style={styles.locationPill} onPress={() => setCityModalVisible(true)}>
             <Icon type="materialCommunityIcons" name="map-marker-outline" size={16} color={COLORS.primary} />
             <Text style={styles.locationText} numberOfLines={1}>
-              {selectedCities.length > 0 ? selectedCities.join(', ') : (currentCity ? extractCity(currentCity) : 'Select City')}
+              {selectedCityName ?? currentCityName ?? 'Select City'}
             </Text>
             <Icon type="fontAwesome" name="caret-down" size={14} color={COLORS.gray} />
           </TouchableOpacity>
@@ -472,10 +471,10 @@ const FilterPillRow = ({
         {filteredGames.length === 0 && !refreshing ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              {selectedCities.length > 0
-                ? `No games found in ${selectedCities.join(', ')}`
+              {selectedCity != null
+                ? `No games found in ${selectedCityName}`
                 : currentCity
-                ? `No games found near ${extractCity(currentCity)}`
+                ? `No games found nearby ${selectedCityName}`
                 : 'No games available'}
             </Text>
           </View>
@@ -561,19 +560,26 @@ const FilterPillRow = ({
               </TouchableOpacity>
             </View>
             
-            {cities.map(city => (
-              <TouchableOpacity
-                key={city}
-                style={styles.filterOption}
-                onPress={() => handleCityToggle(city)}
-              >
-                <Checkbox
-                  checked={selectedCities.includes(city)}
-                  onValueChange={() => handleCityToggle(city)}
-                />
-                <Text style={styles.filterOptionText}>{city==currentCity ? "Nearby (" + currentCity + ")" : city}</Text>
-              </TouchableOpacity>
-            ))}
+            {cities.map(city => {
+              const isSelected = selectedCity === city.id;
+              return (
+                <TouchableOpacity
+                  key={city.id}
+                  style={styles.filterOption}
+                  onPress={() => handleCityToggle(city.id)}
+                >
+                  <Icon
+                    type="materialCommunityIcons"
+                    name={isSelected ? 'radiobox-marked' : 'radiobox-blank'}
+                    size={22}
+                    color={isSelected ? COLORS.primary : COLORS.gray}
+                  />
+                  <Text style={styles.filterOptionText}>
+                    {city.id === currentCityId ? `Nearby (${city.name})` : city.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       </Modal> 

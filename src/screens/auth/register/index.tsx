@@ -11,6 +11,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@utils/validators';
 import styles from './styles';
 import { publicApi } from '@services/api';
+import { getCurrentCity } from '@utils/helpers';
 type Nav = {
   navigate: (value: string, params?: any) => void;
 };
@@ -37,9 +38,11 @@ const SignUp = () => {
 
   const onSubmit = async (formData: any) => {
     setApiError(null); // Reset error
+    const city = await getCurrentCity();
     const payload = {
       ...formData,
-      ...(formData.phone ? { phone: `${callingCode}${formData.phone}` } : {})
+      ...(formData.phone ? { phone: `${callingCode}${formData.phone}` } : {}),
+      ...(city?.id != null ? { cityId: city.id } : {}),
     };
 
     try {
@@ -50,6 +53,7 @@ const SignUp = () => {
         action: "register",
         password: payload.password,
       });
+
     } catch (error: any) {
       // Axios error: error.response?.data?.message or similar
       const message =

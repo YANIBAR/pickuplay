@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
 import { Icon } from '@components';
 import { COLORS, FONTS } from '@constants';
 
@@ -9,9 +9,22 @@ interface InfoRowProps {
   value: string;
   isAddress?: boolean;
   isHost?: boolean;
+  phoneNumber?: string;
+  isLoggedIn?: boolean;
+  onLoginPress?: () => void;
 }
 
-export default function InfoRow({ icon, label, value, isAddress, isHost }: InfoRowProps) {
+export default function InfoRow({
+  icon,
+  label,
+  value,
+  isAddress,
+  isHost,
+  phoneNumber,
+  isLoggedIn = false,
+  onLoginPress,
+}: InfoRowProps) {
+  const hideAddress = isAddress && !isLoggedIn;
   const handleGetDirections = () => {
     const address = encodeURIComponent(value);
     const url = Platform.OS === 'ios'
@@ -27,40 +40,70 @@ export default function InfoRow({ icon, label, value, isAddress, isHost }: InfoR
     });
   };
   const handleGetWhatsapp = async () => {
-    const phoneNumber = '18162102864'; // Include country code
-    const message = encodeURIComponent(`Join the game: ${label} at ${value}`);
+    if (!phoneNumber) return;
 
-    const appUrl = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
-    const webUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    // WhatsApp expects digits only: no +, spaces, dashes, or parentheses
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    const message = encodeURIComponent(`Hi ${value}, I'd like to join your game!`);
+    const appUrl = `whatsapp://send?phone=${cleanPhone}&text=${message}`;
+    const webUrl = `https://wa.me/${cleanPhone}?text=${message}`;
 
-    try {
       const supported = await Linking.canOpenURL(appUrl);
-
-      if (supported) {
-        await Linking.openURL(appUrl);
-      } else {
-        await Linking.openURL(webUrl);
-      }
-    } catch (error) {
-      console.error('Unable to open WhatsApp', error);
-    }
+      await Linking.openURL(supported ? appUrl : webUrl);
   };
 
   return (
     <View style={styles.container}>
-      <Icon type="materialCommunityIcons" name={icon as any} size={24} color={COLORS.secondary} />
+      <Icon
+        type="materialCommunityIcons"
+        name={icon as any}
+        size={24}
+        color={COLORS.secondary}
+      />
+
       <View style={styles.textContainer}>
         <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
+
+        {hideAddress ? (
+          <TouchableOpacity
+            onPress={onLoginPress}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+            activeOpacity={0.7}
+          >
+            <Icon
+              type="materialCommunityIcons"
+              name="lock-outline"
+              size={18}
+              color={COLORS.primary}
+            />
+            <Text style={[styles.value, { marginLeft: 6, color: COLORS.primary }]}>
+              Log in to view the exact location
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.value}>{value}</Text>
+        )}
       </View>
-      {isHost && (
+
+      {isHost && phoneNumber && (
         <TouchableOpacity onPress={handleGetWhatsapp}>
-            <Icon type="materialCommunityIcons" name="whatsapp" size={28} color={COLORS.primary}/>
+          <Icon
+            type="materialCommunityIcons"
+            name="whatsapp"
+            size={28}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
       )}
-      {isAddress && (
+
+      {isAddress && isLoggedIn && (
         <TouchableOpacity onPress={handleGetDirections}>
-            <Icon type="materialCommunityIcons" name="directions" size={28} color={COLORS.primary}/>
+          <Icon
+            type="materialCommunityIcons"
+            name="directions"
+            size={28}
+            color={COLORS.primary}
+          />
         </TouchableOpacity>
       )}
     </View>

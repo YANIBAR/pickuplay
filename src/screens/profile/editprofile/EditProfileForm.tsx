@@ -1,110 +1,146 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Button, Icon, Text } from '@components';
-import { COLORS, screens, SIZES } from '@constants';
+import { Button, Text } from '@components';
+import { COLORS, SIZES } from '@constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { authenticatedApi } from '@services/api';
+import publicApi, { authenticatedApi } from '@services/api';
 import { useUserData } from '@services/useUserData';
 import { Dropdown } from 'react-native-element-dropdown';
 import RBSheet from 'react-native-raw-bottom-sheet';
 
-const EditProfileForm = ({ onShowgame }) => {
-  const { userData, error, refreshUserData } = useUserData();
+type UserForm = {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  cityId: string;
+  skillLevel: string;
+};
 
-  const refRBSheet = useRef<any>(null);
+const SKILL_LEVELS = [
+  { label: 'Beginner', value: 'BEGINNER' },
+  { label: 'Intermediate', value: 'INTERMEDIATE' },
+  { label: 'Advanced', value: 'ADVANCED' },
+  { label: 'Pro', value: 'PRO' },
+];
+
+const EditProfileForm = ({ route }: { route?: any }) => {
+  // Route params hold the id; fall back to the logged-in user's id
+  const { userData, refreshUserData } = useUserData();
+  const userId = route?.params?.userId ?? userData?.id;
+
+  const [cities, setCities] = useState<{ label: string; value: string }[]>([]);
   const refDeleteSheet = useRef<any>(null);
-  const [user, setUser] = useState({
+  const [user, setUser] = useState<UserForm>({
     userId: '',
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    city: '',
+    cityId: '',
     skillLevel: '',
   });
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
-  const { navigate } = useNavigation();
+  const { navigate } = useNavigation<any>();
 
-
-  const handleChange = (field, value) => {
+  const handleChange = (field: keyof UserForm, value: string) => {
     setUser(prev => ({ ...prev, [field]: value }));
   };
-  const city = [
-    { label: 'Kansas City', value: 'kansas_city' },
-    { label: 'St. Louis', value: 'st_louis' },
-    { label: 'Springfield', value: 'springfield' },
-    { label: 'Columbia', value: 'columbia' },
-    { label: 'Independence', value: 'independence' },
-    { label: 'Lee\'s Summit', value: 'lees_summit' },
-    { label: 'Olathe', value: 'olathe' },
-    { label: 'Overland Park', value: 'overland_park' },
-    { label: 'Blue Springs', value: 'blue_springs' },
-    { label: 'Liberty', value: 'liberty' },  
-  ];
 
-  const SkillLevel = [
-    { label: 'Beginner', value: 'beginner' },
-    { label: 'Intermediate', value: 'intermediate' },
-    { label: 'Advanced', value: 'advanced' },
-    { label: 'Pro', value: 'pro' },
-  ];
-  const handleDeleteAccount = async () => {
+  const getCities = useCallback(async () => {
     try {
-
-
-      // Call your delete-account endpoint
-      await authenticatedApi.delete(`profile`);
-
-      // Clear all local storage just like logout
-      const keysToRemove = [
-        'access_token', "refresh_token", 'id', 'firstName', 'lastName', 'email',
-        'phone', 'role', 'preferredLanguage', 'profileImage', 'gameId',
-      ];
-      await AsyncStorage.multiRemove(keysToRemove);
-      await refreshUserData();
-      refDeleteSheet.current?.close();
-      navigate("welcome");
-    } catch (e) {
-      console.error('Failed to delete account', e);
-      Alert.alert('Error', 'Failed to delete account. Please try again.');
+      const response = await publicApi.get('cities');
+      const cityList = response.result.data;
+      setCities(
+        cityList
+          .map((city: any) => ({ label: city.name, value: String(city.id) }))
+          .sort((a: any, b: any) => a.label.localeCompare(b.label))
+      );
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.message ?? 'Failed to load cities');
+      setCities([]);
     }
-  };
-  useEffect(() => {
-    if (userData) {
+  }, []);
+
+  const getUser = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const response = await authenticatedApi.get(`profile/${userId}`);
+      const profile = response.result.data;
       setUser({
-        userId: userData.id ?? "",
-        firstName: userData.firstName ?? "",
-        lastName: userData.lastName ?? "",
-        email: userData.email ?? "",
-        phone: userData.phone ?? "",
-        city: userData.city ?? "",
+        userId: String(profile.id ?? ''),
+        firstName: profile.firstname ?? '',
+        lastName: profile.lastname ?? '',
+        email: profile.email ?? '',
+        phone: profile.phone ?? '',
+        cityId: profile.city?.id != null ? String(profile.city.id) : '',
+        skillLevel: profile.skillLevel ?? '',
       });
+    } catch (e: any) {
+      console.error('Failed to load profile', e);
+      Alert.alert('Error', e?.response?.data?.message ?? 'Failed to load profile');
     }
-  }, [userData]);
+  }, [userId]);
+
+  useEffect(() => {
+    getCities();
+  }, [getCities]);
+
+  useEffect(() => {
+    getUser();
+  }, [getUser]);
 
   const handleUpdateUser = async () => {
-    try {     
-      // Format birthday properly if needed
-      const response = await authenticatedApi.patch(`profile`, user);
-      await AsyncStorage.setItem("firstName", user.firstName);
-      await AsyncStorage.setItem("lastName", user.lastName);
-      await AsyncStorage.setItem("email", user.email);
-      await AsyncStorage.setItem("phone", user.phone);
-      await AsyncStorage.setItem("city", user.city);
-      navigate("myProfile");
-      if (response.status === 200 || response.status === 201) {
-        Alert.alert('Success', 'Profile updated successfully');
-      } else {
-        Alert.alert('Error', 'Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Error updating user profile:', error);
+    setLoading(true);
+    try {
+      // Map to the field names the API uses (firstname / lastname)
+      const payload = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        cityId: user.cityId,
+        skillLevel: user.skillLevel,
+      };
+      console.log(payload);
+      await authenticatedApi.patch('profile', payload);
+
+      // Only cache locally after the update succeeded
+      await AsyncStorage.multiSet([
+        ['firstName', user.firstName],
+        ['lastName', user.lastName],
+        ['email', user.email],
+        ['phone', user.phone],
+        ['cityId', user.cityId],
+      ]);
+      await refreshUserData();
+
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (e) {
+      console.error('Error updating user profile:', e);
       Alert.alert('Error', 'Failed to update profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await authenticatedApi.delete('profile');
+
+      await AsyncStorage.multiRemove([
+        'access_token', 'refresh_token', 'id', 'firstName', 'lastName', 'email',
+        'phone', 'cityId', 'role', 'preferredLanguage', 'profileImage', 'gameId',
+      ]);
+      await refreshUserData();
+      refDeleteSheet.current?.close();
+      navigate('welcome');
+    } catch (e) {
+      console.error('Failed to delete account', e);
+      Alert.alert('Error', 'Failed to delete account. Please try again.');
     }
   };
 
@@ -116,7 +152,7 @@ const EditProfileForm = ({ onShowgame }) => {
           <TextInput
             style={styles.input}
             value={user.firstName}
-            onChangeText={(text) => handleChange('firstName', text)}
+            onChangeText={text => handleChange('firstName', text)}
             placeholder="Enter first name"
           />
         </View>
@@ -126,7 +162,7 @@ const EditProfileForm = ({ onShowgame }) => {
           <TextInput
             style={styles.input}
             value={user.lastName}
-            onChangeText={(text) => handleChange('lastName', text)}
+            onChangeText={text => handleChange('lastName', text)}
             placeholder="Enter last name"
           />
         </View>
@@ -134,12 +170,11 @@ const EditProfileForm = ({ onShowgame }) => {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.disabledInput]}
             value={user.email}
-            onChangeText={(text) => handleChange('email', text)}
             placeholder="Enter email"
             keyboardType="email-address"
-            editable={false} // Email shouldn't be editable as it's the identifier
+            editable={false} // Email is the identifier, so it isn't editable
           />
         </View>
 
@@ -148,7 +183,7 @@ const EditProfileForm = ({ onShowgame }) => {
           <TextInput
             style={styles.input}
             value={user.phone}
-            onChangeText={(text) => handleChange('phone', text)}
+            onChangeText={text => handleChange('phone', text)}
             placeholder="Enter phone number"
             keyboardType="phone-pad"
           />
@@ -157,34 +192,32 @@ const EditProfileForm = ({ onShowgame }) => {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>City</Text>
           <Dropdown
-              data={city}
-              labelField="label"
-              valueField="value"
-              search={true}
-              placeholder={t('edit_game.select_city') }
-              value={user.city}
-              onChange={item => handleChange('city', item.value)}
-              style={[styles.dropdown ]}
-            />
+            data={cities}
+            labelField="label"
+            valueField="value"
+            search
+            placeholder={t('edit_game.select_city')}
+            value={user.cityId}
+            onChange={item => handleChange('cityId', String(item.value))}
+            style={styles.dropdown}
+          />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Skill level</Text>
           <Dropdown
-              data={SkillLevel}
-              labelField="label"
-              valueField="value"
-              search={true}
-              placeholder={t('edit_game.select_skill') }
-              value={user.skillLevel}
-              onChange={item => handleChange('skillLevel', item.value)}
-              style={[styles.dropdown ]}
-            />
+            data={SKILL_LEVELS}
+            labelField="label"
+            valueField="value"
+            search
+            placeholder={t('edit_game.select_skill')}
+            value={user.skillLevel}
+            onChange={item => handleChange('skillLevel', item.value)}
+            style={styles.dropdown}
+          />
         </View>
 
-
-        
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, loading && styles.disabledButton]}
           onPress={handleUpdateUser}
           disabled={loading}
@@ -194,33 +227,37 @@ const EditProfileForm = ({ onShowgame }) => {
           </Text>
         </TouchableOpacity>
 
-
-
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.desactivateBotton, loading && styles.disabledButton]}
-          onPress={() => refDeleteSheet.current?.open()} 
+          onPress={() => refDeleteSheet.current?.open()}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>
-            {loading ? t('editProfile.updating') : t('editProfile.deleteMyAccount')}
-          </Text>
+          <Text style={styles.buttonText}>{t('editProfile.deleteMyAccount')}</Text>
         </TouchableOpacity>
-
       </View>
+
       <RBSheet
         ref={refDeleteSheet}
-        closeOnPressMask={true}
+        closeOnPressMask
         height={260}
         customStyles={{
           wrapper: { backgroundColor: 'rgba(0,0,0,0.5)' },
           draggableIcon: { backgroundColor: COLORS.grayscale200, height: 4 },
-          container: { borderTopRightRadius: 32, borderTopLeftRadius: 32, height: 260, backgroundColor: COLORS.white },
+          container: {
+            borderTopRightRadius: 32,
+            borderTopLeftRadius: 32,
+            height: 260,
+            backgroundColor: COLORS.white,
+          },
         }}
       >
         <Text style={styles.bottomTitle}>Delete Account</Text>
         <View style={[styles.separateLine, { backgroundColor: COLORS.grayscale200 }]} />
         <Text style={[styles.bottomSubtitle, { color: COLORS.black }]}>
-          {t('settings.deleteAccountConfirmation', 'This will permanently delete your account and all associated data. This action cannot be undone.')}
+          {t(
+            'settings.deleteAccountConfirmation',
+            'This will permanently delete your account and all associated data. This action cannot be undone.'
+          )}
         </Text>
         <View style={styles.bottomContainer}>
           <Button
@@ -231,7 +268,12 @@ const EditProfileForm = ({ onShowgame }) => {
           />
           <Button
             title={t('c.cancel')}
-            style={{ width: (SIZES.width - 32) / 2 - 8, backgroundColor: COLORS.transparentPrimary, borderRadius: 32, borderColor: COLORS.transparentPrimary }}
+            style={{
+              width: (SIZES.width - 32) / 2 - 8,
+              backgroundColor: COLORS.transparentPrimary,
+              borderRadius: 32,
+              borderColor: COLORS.transparentPrimary,
+            }}
             textColor={COLORS.primary}
             onPress={() => refDeleteSheet.current?.close()}
           />
@@ -239,19 +281,12 @@ const EditProfileForm = ({ onShowgame }) => {
       </RBSheet>
     </ScrollView>
   );
-  
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  form: {
-    padding: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
+  container: { flex: 1 },
+  form: { padding: 16 },
+  inputGroup: { marginBottom: 16 },
   label: {
     fontSize: 16,
     fontWeight: '600',
@@ -266,15 +301,9 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     fontSize: 16,
   },
-  dateButton: {
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  disabledInput: {
+    backgroundColor: '#f5f5f5',
+    color: '#888',
   },
   button: {
     backgroundColor: COLORS.primary,
@@ -295,9 +324,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  disabledButton: {
-    backgroundColor: '#aaa',
-  },
+  disabledButton: { backgroundColor: '#aaa' },
   dropdown: {
     width: '100%',
     paddingHorizontal: SIZES.padding,
@@ -309,51 +336,38 @@ const styles = StyleSheet.create({
     height: SIZES.InputHeight,
     alignItems: 'center',
   },
-  disabledDropdown: {
-    backgroundColor: '#f5f5f5',
-    borderColor: '#e0e0e0',
-    opacity: 0.6,
-  },   
-  deleteButton: {
-    backgroundColor: COLORS.red,
-    borderColor: COLORS.error,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 24,
-  },
   confirmDelete: {
     width: (SIZES.width - 32) / 2 - 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 32
+    borderRadius: 32,
   },
   bottomContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginVertical: 12,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
   },
   bottomTitle: {
     fontSize: 24,
-    fontFamily: "semiBold",
+    fontFamily: 'semiBold',
     color: COLORS.primary,
-    textAlign: "center",
-    marginTop: 12
+    textAlign: 'center',
+    marginTop: 12,
   },
   bottomSubtitle: {
     fontSize: 20,
-    fontFamily: "semiBold",
+    fontFamily: 'semiBold',
     color: COLORS.grayscale900,
-    textAlign: "center",
-    marginVertical: 28
+    textAlign: 'center',
+    marginVertical: 28,
   },
   separateLine: {
     width: SIZES.width,
     height: 1,
     backgroundColor: COLORS.grayscale200,
-    marginTop: 12
-  }  
+    marginTop: 12,
+  },
 });
 
 export default EditProfileForm;

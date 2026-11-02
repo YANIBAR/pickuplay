@@ -1,5 +1,5 @@
 
-import { PAYMENT_BACKEND_URL } from "@env";
+import { PAYMENT_API } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
 import { Alert } from "react-native";
@@ -7,7 +7,7 @@ import { Alert } from "react-native";
 const createApi = (requiresAuth: boolean) => {
 
   const instance = axios.create({
-    baseURL: PAYMENT_BACKEND_URL,
+    baseURL: PAYMENT_API,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',

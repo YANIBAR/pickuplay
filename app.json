@@ -60,7 +60,8 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.pickuplay.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan QR codes."
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes.",
+        "LSApplicationQueriesSchemes": ["whatsapp"]
       }
     }
   }

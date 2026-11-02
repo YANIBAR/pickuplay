@@ -9,5 +9,7 @@ declare module '@env' {
   export const STREAM_API_KEY: string; 
   export const REWARD_PER_KG: number; 
   export const STRIPE_PUBLISHABLE_KEY: string;
-  export const PAYMENT_BACKEND_URL: string;
+  export const PAYMENT_API: string;
+  export const DEV_JAVA_API: string;
+
 }

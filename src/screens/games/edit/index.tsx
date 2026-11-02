@@ -51,7 +51,7 @@ const EditGameScreen = ({ route }) => {
     id: game?.id || '',
     title: game?.title || '',
     sportTypeId: game?.sportType.id || '',
-    city: game?.city || '',
+    cityId: game?.city.id || '',
     availableSpots: game?.availableSpots || '',
     nbrSpots: game?.nbrSpots || '',
     description: game?.description || '',
@@ -85,7 +85,7 @@ const EditGameScreen = ({ route }) => {
       const cityList: City[] = response.result.data;
       setCities(
         cityList
-          .map((city) => ({ label: city.name, value: city.name }))
+          .map((city) => ({ label: city.name, value: city.id }))
           .sort((a, b) => a.label.localeCompare(b.label))
       );
     } catch (error) {
@@ -127,6 +127,7 @@ const EditGameScreen = ({ route }) => {
         startTime: (formData.startTime.getHours().toString().padStart(2, "0")) + ":" + formData.startTime.getMinutes().toString().padStart(2, "0"),
         endTime: (formData.endTime.getHours().toString().padStart(2, "0")) + ":" + formData.endTime.getMinutes().toString().padStart(2, "0"),
       };
+      console.log(formData);
       const gameId = formData.id;
       const response = await authenticatedApi.patch(`games/${gameId}`, gameData);
       uploadImage(game.id, selectedImage);
@@ -315,8 +316,8 @@ const EditGameScreen = ({ route }) => {
               labelField="label"
               valueField="value"
               placeholder={t('edit_game.select_city')}
-              value={formData.city}
-              onChange={item => handleChange('city', item.value)}
+              value={formData.cityId}
+              onChange={item => handleChange('cityId', item.value)}
               style={[styles.dropdown, fieldsDisabled && styles.disabledDropdown]}
               disable={fieldsDisabled}
             />

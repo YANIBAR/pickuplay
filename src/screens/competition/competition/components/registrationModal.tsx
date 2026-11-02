@@ -26,12 +26,6 @@ import { useUserData } from '@services/useUserData';
   };
 
 
-  export function extractCity(location: string): string {
-    // Extracts city from full address (e.g., "New York" from "1100 Avenue of the Americas, New York")
-    const parts = location.split(',').map(p => p.trim());
-    return parts[parts.length - 1] || location;
-  }
-
   export default function GameCard({ game , onRefresh }: GameCardProps) {
     const navigation = useNavigation();
     const { t } = useTranslation();

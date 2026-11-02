@@ -1,29 +1,26 @@
-import { JAVA_API } from "@env";
+import { JAVA_API, PAYMENT_API, DEV_JAVA_API } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
 import { Alert } from "react-native";
 
-const createApi = (requiresAuth: boolean) => {
-  let isRefreshing = false;
-  let failedQueue: { resolve: (token: string) => void; reject: (err: any) => void }[] = [];
+// ✅ Shared across ALL instances so only one refresh runs at a time
+let isRefreshing = false;
+let failedQueue: { resolve: (token: string) => void; reject: (err: any) => void }[] = [];
 
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => (error ? prom.reject(error) : prom.resolve(token!)));
+  failedQueue = [];
+};
+
+const createApi = (requiresAuth: boolean, baseURL?: string | null) => {
   const instance = axios.create({
-    baseURL: JAVA_API,
+    baseURL: baseURL ?? JAVA_API,   // null/undefined -> JAVA_API
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
   });
 
-  const processQueue = (error: any, token: string | null = null) => {
-    failedQueue.forEach(prom => {
-      if (error) prom.reject(error);
-      else prom.resolve(token!);
-    });
-    failedQueue = [];
-  };
-
-  // ✅ Auth header injection (only for authenticated instances)
   if (requiresAuth) {
     instance.interceptors.request.use(async (config) => {
       try {
@@ -39,18 +36,13 @@ const createApi = (requiresAuth: boolean) => {
     });
   }
 
-  // ✅ Single response interceptor — handles both 401 refresh and normal responses
   instance.interceptors.response.use(
-    (response: AxiosResponse) => ({
-      ...response,
-      result: response.data,
-    }),
+    (response: AxiosResponse) => ({ ...response, result: response.data }),
 
     async (error) => {
       const originalRequest = error.config;
 
       if (error.response?.status === 401 && !originalRequest._retry) {
-        // Queue up requests that come in while refresh is in progress
         if (isRefreshing) {
           return new Promise<string>((resolve, reject) => {
             failedQueue.push({ resolve, reject });
@@ -64,30 +56,24 @@ const createApi = (requiresAuth: boolean) => {
         isRefreshing = true;
 
         try {
-          // ✅ Use refresh_token from AsyncStorage to get a new access token
           const refreshToken = await AsyncStorage.getItem('refresh_token');
           if (!refreshToken) throw new Error('No refresh token');
-
-          const response = await axios.post(`${JAVA_API}/auth/refresh`, {
-            refresh_token: refreshToken,
+          const response = await axios.post(`${JAVA_API}auth/refresh`, {
+            "refresh_token": refreshToken
           });
-
-          const newAccessToken: string = response.data.access_token;
+          console.log(response);
+          const newAccessToken: string = response.data?.token ?? response.data.access_token;
+          if (!newAccessToken) throw new Error('Refresh response missing token');
           await AsyncStorage.setItem('access_token', newAccessToken);
 
-          // ✅ Unblock all queued requests with the new token
           processQueue(null, newAccessToken);
-
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return instance(originalRequest);
-
         } catch (err) {
-          // ✅ Refresh failed — clear tokens and force re-login
           processQueue(err, null);
           await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
           Alert.alert('Session expired', 'Please login again.');
           return Promise.reject(err);
-
         } finally {
           isRefreshing = false;
         }
@@ -100,8 +86,13 @@ const createApi = (requiresAuth: boolean) => {
   return instance;
 };
 
+// Default service (JAVA_API)
 export const authenticatedApi = createApi(true);
 export const publicApi = createApi(false);
 
-// ✅ Default export so `import api from '@services/api'` in auth.ts works
+// Other microservices
+export const paymentApi = createApi(true, PAYMENT_API);
+export const authDevApi = createApi(true, DEV_JAVA_API);
+export const publicDevApi = createApi(false, DEV_JAVA_API);
+
 export default publicApi;

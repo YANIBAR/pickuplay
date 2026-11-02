@@ -12,16 +12,20 @@ import { View, Button, TextInput, Text, ErrorModal } from '@components';
 import { COLORS, icons, images  } from '@constants';
 import { loginFormData } from '@types';
 import styles from './styles';
-import { JAVA_API } from '@env';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@services/localisation';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@utils/validators';
-import messaging from '@react-native-firebase/messaging';
+import {
+  getMessaging,
+  requestPermission,
+  getToken,
+  AuthorizationStatus,
+} from '@react-native-firebase/messaging';
 import DeviceInfo from 'react-native-device-info';
-import { authenticatedApi, publicApi } from '@services/api';
-import { decodeToken } from '@services/auth/auth.utils';
+import publicApi, { authenticatedApi } from '@services/api';
+import axios from 'axios';
+import { DEV_JAVA_API, JAVA_API } from '@env';
 
 const defaultValues = {
   identifier: '', // Changed from 'username' to 'email'
@@ -72,7 +76,6 @@ const Login = () => {
         setIsLoading(false);
         return;
       }
-
       const response = await axios.post(`${JAVA_API}auth/login`, {
         username: formData.identifier,
         password: formData.password
@@ -92,19 +95,9 @@ const Login = () => {
       await storeUser(userData);
       
       // Register device for notifications
-      try {
-        await messaging().registerDeviceForRemoteMessages();
-        const fcmToken = await messaging().getToken();
-        const deviceId = await DeviceInfo.getUniqueId();
-        await authenticatedApi.post('notifications/register-device', {
-            token: fcmToken,
-            device_id: deviceId
-        });
-      } catch (regErr) {
-        console.error('Device registration failed:', regErr);
-      }
+     
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      registerForPush();
       navigation.navigate("welcome", { screen: "Games"});
       
     } catch (error: any) {
@@ -162,12 +155,34 @@ const Login = () => {
     }
   };
   
-// { id: "123", email: "user@example.com", role: "admin", exp: 1234567890, ... }
+  const registerForPush = async () => {
+    try {
+      
 
+      const messaging = getMessaging();
+      const status = await requestPermission(messaging);
+      const enabled =
+        status === AuthorizationStatus.AUTHORIZED ||
+        status === AuthorizationStatus.PROVISIONAL;
+
+      if (!enabled) {
+        console.warn('Notification permission not granted');
+        return; // fine here, it only exits this helper
+      }
+      console.log('Notification permission granted.');
+      const fcmToken = await getToken(messaging);
+      const deviceId = await DeviceInfo.getUniqueId();
+      await authenticatedApi.post('notifications/register-device', {
+        token: fcmToken,
+        device_id: deviceId,
+      });
+    } catch (err) {
+      console.warn('Device registration failed:', err);
+    }
+  };
   // On successful login
   const storeToken = async (token: string, refreshToken: string) => {
     try {
-      console.log(token);
       await AsyncStorage.setItem('access_token', token);
       await AsyncStorage.setItem('refresh_token', refreshToken);
     } catch (error) {
@@ -184,7 +199,7 @@ const Login = () => {
         ['lastName', user.lastname || ''],
         ['email', user.email || ''],
         ['phone', user.phone || ''],
-        ['city', user.city || ''],
+        ['cityId', String(user.city.id) || ''],
         ['favoriteSport', user.favoriteSport.id?.toString() || ''],
         ['preferredLanguage', user.preferredLanguage || 'en'],
         ['role', user.role || ''],

@@ -53,7 +53,7 @@ const OTPVerification = () => {
         ['lastName', user.lastname || user.lastName || ''],
         ['email', user.email || ''],
         ['phone', user.phone || ''],
-        ['city', user.city || ''],
+        ['cityId', user.city.id || ''],
         ['preferredLanguage', user.preferredLanguage || 'en'],
         ['role', user.role || ''],
       ]);

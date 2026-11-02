@@ -69,7 +69,7 @@ const Profile = () => {
         
         // If successful, navigate to the OTP verification screen
         navigate(screens.otpverification, { email, action: 'resetPassword' });
-      } catch (error) {
+      } catch (error) { 
         // Handle any errors that occur during the request
         console.error('Error during forgot password request:', error);
         
@@ -89,6 +89,7 @@ const Profile = () => {
         'email',
         'phone',
         'role',
+        'cityId',
         'preferredLanguage',
         'profileImage',
         'gameId',
@@ -151,6 +152,7 @@ const Profile = () => {
   const renderSettings = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
 
+    const { userData, error, refreshUserData } = useUserData();
     return (
       <View style={[styles.settingsContainer, { backgroundColor: isDarkMode ? COLORS.black : COLORS.white }]}>
         {/* Profile Items */}      
@@ -160,7 +162,7 @@ const Profile = () => {
             <SettingsItem
               icon={icons.user}
               name={t('settings.editProfile')}
-              onPress={() => navigate('editProfile')}
+              onPress={() => navigate('editProfile', {userId: 1})}
               hasArrowRight={false}
             />
 

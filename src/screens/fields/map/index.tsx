@@ -49,7 +49,6 @@ export default function NoCompetitionPage() {
     try {
       const response = await publicApi.get('fields');
       setFields(response.result.data.fields) 
-      console.log('Fields state updasssted:', response.result.data.fields);
     } catch (error) {
       const errorMessage = (error as any).response?.data?.message;
       Alert.alert('Error', errorMessage);

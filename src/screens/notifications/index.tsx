@@ -20,8 +20,6 @@ export type Notification = {
 const Notifications = () => {
   const { notifications, addNotification, markAllAsRead, initializeNotifications, isLoading } = useNotifications();
   useEffect(() => {
-    requestPerm();
-    fetchToken();
     initializeNotifications();
     // Listen for foreground notifications and add to list
     const unsubscribe = onMessage(getMessaging(getApp()), remoteMessage => {
@@ -44,34 +42,7 @@ const Notifications = () => {
     return () => unsubscribe();
   }, []);
 
-  async function requestPerm() {
-    try {
-      if (Platform.OS === 'android' && Platform.Version >= 33) {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        );
-        console.log('Android POST_NOTIFICATIONS:', granted);
-      }
-      // Register for remote messages before requesting permission or getting token
-      await getMessaging(getApp()).registerDeviceForRemoteMessages();
-      const authStatus = await requestPermission(getMessaging(getApp()));
-      console.log('Firebase auth status:', authStatus);
-    } catch (error) {
-      console.error('Permission error:', error);
-    }
-  }
-
-  async function fetchToken() {
-    try {
-      // Register for remote messages before getting token (safe to call again)
-      await getMessaging(getApp()).registerDeviceForRemoteMessages();
-      const token = await getToken(getMessaging(getApp()));
-      // 🔥 Send this token to your backend
-    } catch (error) {
-      console.error('FCM Token error:', error);
-    }
-  }
-
+  
   return (
       <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
         <Header title='Notifications'/>

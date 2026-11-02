@@ -5,6 +5,7 @@ import storage from './storage';
 import { JAVA_API } from '@env';
 import Geolocation from '@react-native-community/geolocation';
 import { PermissionsAndroid, Platform } from 'react-native';
+import publicApi from '@services/api';
 
 export const getLocale = () => i18next.language || storage.getItem('lng');
 
@@ -46,10 +47,63 @@ const requestPermission = async () => {
 
   return true; // iOS handled via Info.plist
 };
+
+const US_STATE_CODES: Record<string, string> = {
+  Alabama: 'AL',
+  Alaska: 'AK',
+  Arizona: 'AZ',
+  Arkansas: 'AR',
+  California: 'CA',
+  Colorado: 'CO',
+  Connecticut: 'CT',
+  Delaware: 'DE',
+  Florida: 'FL',
+  Georgia: 'GA',
+  Hawaii: 'HI',
+  Idaho: 'ID',
+  Illinois: 'IL',
+  Indiana: 'IN',
+  Iowa: 'IA',
+  Kansas: 'KS',
+  Kentucky: 'KY',
+  Louisiana: 'LA',
+  Maine: 'ME',
+  Maryland: 'MD',
+  Massachusetts: 'MA',
+  Michigan: 'MI',
+  Minnesota: 'MN',
+  Mississippi: 'MS',
+  Missouri: 'MO',
+  Montana: 'MT',
+  Nebraska: 'NE',
+  Nevada: 'NV',
+  'New Hampshire': 'NH',
+  'New Jersey': 'NJ',
+  'New Mexico': 'NM',
+  'New York': 'NY',
+  'North Carolina': 'NC',
+  'North Dakota': 'ND',
+  Ohio: 'OH',
+  Oklahoma: 'OK',
+  Oregon: 'OR',
+  Pennsylvania: 'PA',
+  'Rhode Island': 'RI',
+  'South Carolina': 'SC',
+  'South Dakota': 'SD',
+  Tennessee: 'TN',
+  Texas: 'TX',
+  Utah: 'UT',
+  Vermont: 'VT',
+  Virginia: 'VA',
+  Washington: 'WA',
+  'West Virginia': 'WV',
+  Wisconsin: 'WI',
+  Wyoming: 'WY',
+};
+
 export const getCurrentCity = async () => {
   let city = 'Kansas City'; // default fallback
   const hasPermission = await requestPermission();
-  console.log('Location permission:', hasPermission);
   if (!hasPermission) {
     console.log('Permission denied');
     return city; // ← just return the string directly
@@ -70,7 +124,15 @@ export const getCurrentCity = async () => {
             data.address.town ||
             data.address.village ||
             data.address.county;
-          resolve(city);
+          const state = data.address.state as string | undefined;
+
+            const stateCode = state
+              ? US_STATE_CODES[state] ?? null
+              : null;
+
+            const res = await publicApi.get('cities/search?name=' + city + '&stateCode=' + stateCode);
+            let cityData = res.result.data[0];
+          resolve(cityData);
         } catch (err) {
           reject(err);
         }

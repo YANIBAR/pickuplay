@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Icon } from '@components';
 import { useTranslation } from 'react-i18next';
 import { COLORS, icons, images } from '@constants';
-import { publicApi,  authDevApi } from '@services/api';
+import { publicApi, authenticatedApi } from '@services/api';
 import { useUserData } from '@services/useUserData';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
@@ -17,6 +17,7 @@ import { getMessaging, onMessage } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import { isStoredTokenExpired } from '@utils/api/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import WhatsNewPopup from './WhatsNewPopup';
 type Nav = {
   navigate: (value: string) => void
 }
@@ -199,6 +200,7 @@ const fetchGames = async (cityId: number) => {
     const fetchCity = async () => {
       try {
         const city = await getCurrentCity();
+        console.log('Current city:', city);
         setSelectedCity(city?.id);
         setCurrentCity(city.id);
       } catch (error) {
@@ -231,7 +233,7 @@ const fetchGames = async (cityId: number) => {
         const alreadyShown = await AsyncStorage.getItem(promptKey);
         if (alreadyShown) return;
 
-        const response: any = await authDevApi.get(
+        const response: any = await authenticatedApi.get(
           `profile/${userData.id}`);
         const data = response.result?.data ?? response.data ?? null;
         const hasImage = !!(data?.image || data?.picture || data?.profileImage);
@@ -341,7 +343,7 @@ const fetchGames = async (cityId: number) => {
   const getSportIcon = (id: string): string => {
     const key = id;
     return sportIconMap[key] ?? 'trophy-outline';
-  };
+  }; 
 
   const allSportsSelected = selectedSports.length === 0;
 const FilterPillRow = ({
@@ -583,6 +585,7 @@ const selectedCityName = cities.find(c => c.id === selectedCity)?.name;
           </View>
         </View>
       </Modal> 
+      <WhatsNewPopup />
     </SafeAreaView>
   );
 }

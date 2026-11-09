@@ -11,5 +11,5 @@ declare module '@env' {
   export const STRIPE_PUBLISHABLE_KEY: string;
   export const PAYMENT_API: string;
   export const DEV_JAVA_API: string;
-
+  export const POPUP_VERSION: string;
 }

@@ -394,6 +394,7 @@
     "payWithVenmo": "Pay with Venmo",
     "unjoinButton": "Unjoin",
     "joinGameTitle": "Join Game",
+    "chooseTeam": "Choose Team",
     "guests": "Add Guests",
     "pleaseEnterPlayers": "Please enter number of players",
     "successJoined": "Successfully joined the game",
@@ -403,7 +404,9 @@
     "pricePerGuest": "Price per guest",
     "totalGuests": "Total ({{count}} guests)",
     "signInToJoin": "Sign in to join game",
-    "signInDescription": "Access your upcoming and past sessions when signed in."
+    "signInDescription": "Access your upcoming and past sessions when signed in.",
+    "hasBall": "Are you bringing a ball?"
+
   },
   "schedule": {
     "createGame": "Create Game",
@@ -584,6 +587,8 @@
       "title": "Game Details"
     },
     "invite": "Send Invitation",
+    "numberOfTeams": "Number of Teams",
+    "selectTeams": "Select Teams",
     "alreadyJoined": "You already joined",
     "gameCanceled": "Game canceled",
     "gameFull": "Game is full",

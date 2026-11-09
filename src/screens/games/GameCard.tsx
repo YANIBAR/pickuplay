@@ -76,7 +76,7 @@ export default function GameCard({ game, onRefresh }: GameCardProps) {
             <View
               style={[
                 styles.participantsBadgeBase,
-                game.nbrSpots >= game.participants.length
+                game.availableSpots >= 0
                   ? styles.participantsBadge
                   : styles.participantsBadgeFull,
               ]}
@@ -121,12 +121,12 @@ export default function GameCard({ game, onRefresh }: GameCardProps) {
             {join.isPendingPayment ? (
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
-                  style={[styles.joinButton, { paddingHorizontal: 24 }]}
+                  style={[styles.joinButton, { paddingHorizontal: 24, backgroundColor: "#008CFF", borderColor: "#008CFF" }]}
                   onPress={handleGetVenmo}
                   disabled={join.isJoining}
                 >
                   <Text style={styles.joinButtonText}>
-                    {join.isJoining ? t('common.processing') : t('games.payButton')}
+                    {join.isJoining ? t('common.processing') : t('games.payWithVenmo')}
                   </Text>
                 </TouchableOpacity>
 

@@ -22,6 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { JAVA_API } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
+import TeamsMultiSelect from '@components/Game//TeamsMultiSelect';
 
 interface FormData {
   title: string;
@@ -32,6 +33,7 @@ interface FormData {
   startTime: string;
   endTime: string;
   numPlayers: string;
+  numTeams: string[];
   isPrivate: boolean;
   pricePerPlayer: string;
   image?: string;
@@ -69,6 +71,7 @@ const AddGameScreen = () => {
       startTime: '',
       endTime: '',
       numPlayers: '',
+      numTeams: [], 
       isPrivate: true,
       pricePerPlayer: '',
       image: '',
@@ -77,7 +80,19 @@ const AddGameScreen = () => {
   });
 
   const isPrivate = watch('isPrivate');
-
+const TEAMS_OPTIONS = [
+    { label: 'skin', value: '0' },
+    { label: 'white', value: '1' },
+    { label: 'black', value: '2' },
+    { label: 'gray', value: '3' },
+    { label: 'yellow', value: '4' },
+    { label: 'red', value: '5' },
+    { label: 'green', value: '6' },
+    { label: 'blue', value: '7' },
+    { label: 'orange', value: '8' },
+    { label: 'purple', value: '9' },
+    { label: 'brown', value: '10' },
+  ];
   const PLAYER_OPTIONS = [
     { label: '4', value: '4' },
     { label: '6', value: '6' },
@@ -279,9 +294,10 @@ const AddGameScreen = () => {
       startTime: formatTimeForAPI(data.startTime),
       endTime: formatTimeForAPI(data.endTime),
       nbrSpots: parseInt(data.numPlayers, 10),
+      teamIds: data.numTeams.map(Number),
       price: parseFloat(data.pricePerPlayer) || 0,
     };
-    console.log(payload);
+    console.log('Submitting payload:', payload);
     try {
       const response = await authenticatedApi.post('games/create', payload);
       const game = response.result.data;
@@ -403,28 +419,26 @@ const AddGameScreen = () => {
                       )}
                     />
                   </View>
-
-                  {/* Price Per Player */}
+                  {/* Number of teams */}
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.formLabel}>{t('schedule.pricePerPlayer')}</Text>
+                    <Text style={styles.formLabel}>{t('game.numberOfTeams')} *</Text>
                     <Controller
-                      name="pricePerPlayer"
+                      name="numTeams"
                       control={control}
                       rules={{
-                        pattern: { value: /^\d+(\.\d{1,2})?$/, message: 'Invalid price format' },
+                        validate: v => (v && v.length > 0) || 'Select at least one team',
                       }}
-                      render={({ field: { onChange, onBlur, value } }) => (
+                      render={({ field: { onChange, value } }) => (
                         <View>
-                          <TextInput
+                          <TeamsMultiSelect
                             value={value}
-                            onBlur={async () => { onBlur(); await trigger('pricePerPlayer'); }}
-                            onChangeText={onChange}
-                            placeholder="0.00"
-                            placeholderTextColor={COLORS.black}
-                            keyboardType="decimal-pad"
-                            style={[styles.textInput, errors?.pricePerPlayer && { borderColor: 'red' }]}
+                            onChange={onChange}
+                            placeholder={t('game.selectTeams')}
+                            hasError={!!errors?.numTeams}
                           />
-                          {errors?.pricePerPlayer && <Text style={styles.errorText}>{errors.pricePerPlayer.message}</Text>}
+                          {errors?.numTeams && (
+                            <Text style={styles.errorText}>{errors.numTeams.message as string}</Text>
+                          )}
                         </View>
                       )}
                     />
@@ -432,9 +446,33 @@ const AddGameScreen = () => {
                 </View>
               </View>
 
+              {/* Price Per Player */}
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>{t('schedule.pricePerPlayer')}</Text>
+                <Controller
+                  name="pricePerPlayer"
+                  control={control}
+                  rules={{
+                    pattern: { value: /^\d+(\.\d{1,2})?$/, message: 'Invalid price format' },
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View>
+                      <TextInput
+                        value={value}
+                        onBlur={async () => { onBlur(); await trigger('pricePerPlayer'); }}
+                        onChangeText={onChange}
+                        placeholder="0.00"
+                        placeholderTextColor={COLORS.black}
+                        keyboardType="decimal-pad"
+                        style={[styles.textInput, errors?.pricePerPlayer && { borderColor: 'red' }]}
+                      />
+                      {errors?.pricePerPlayer && <Text style={styles.errorText}>{errors.pricePerPlayer.message}</Text>}
+                    </View>
+                  )}
+                />
+              </View>
 
-
-                  {/* sport Type */}
+              {/* sport Type */}
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>{t('schedule.sportType')}*</Text>
                 <Controller

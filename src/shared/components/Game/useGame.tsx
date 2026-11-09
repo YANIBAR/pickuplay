@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { GestureResponderEvent } from 'react-native';
+import { Alert, type GestureResponderEvent } from 'react-native';
 import { authenticatedApi } from '@services/api';
 import { authPaymentApi } from '@services/paymentApi';
 import PaymentService, {
@@ -12,14 +12,6 @@ import type { Game } from './types';
 
 const stop = (e?: GestureResponderEvent) => e?.stopPropagation?.();
 
-/**
- * Everything GameCard and the game details screen both need to join,
- * unjoin and pay for a game: modal state, price breakdown, participant
- * status and the API handlers.
- *
- * `onRefresh` is called after any action that changes the game
- * (card: parent list refresh, details screen: fetchGame).
- */
 export function useGameJoin(
   game: Partial<Game> | undefined,
   onRefresh?: () => void | Promise<void>
@@ -31,26 +23,41 @@ export function useGameJoin(
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const [unjoinModalVisible, setUnjoinModalVisible] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
+  const [hasBall, setHasBall] = useState(false);
   const [numPlayers, setNumPlayers] = useState(1);
   const [promoCode, setPromoCode] = useState('');
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
 
   const players = Number(numPlayers) || 1;
 
-  // logged in = stored token is NOT expired
   useEffect(() => {
     isStoredTokenExpired().then((expired: boolean) => setIsLogged(!expired));
   }, []);
 
-  // Derived from state, so it stays correct when the player count or promo changes.
   const breakdown = useMemo(
     () => buildPriceBreakdownSafe((game?.price ?? 0) * players, promoCode),
     [game?.price, players, promoCode]
   );
 
   // ── Participant / game status ─────────────────────────────────────────────
-  const myParticipant = game?.participants?.find(
-    (p) => String(p.userId) === String(userData?.id)
+  // Participants are nested inside teams now: find me + the team I'm on.
+  const { myParticipant, myTeam } = useMemo(() => {
+    const myId = String(userData?.id ?? '');
+    if (!myId) return { myParticipant: undefined, myTeam: undefined };
+
+    for (const team of game?.teams ?? []) {
+      const p = team.participants?.find((p) => String(p.userId) === myId);
+      if (p) return { myParticipant: p, myTeam: team };
+    }
+    return { myParticipant: undefined, myTeam: undefined };
+  }, [game?.teams, userData?.id]);
+
+  // Flat list, handy for counts / lists elsewhere
+  const allParticipants = useMemo(
+    () => (game?.teams ?? []).flatMap((t) => t.participants ?? []),
+    [game?.teams]
   );
+
   const myStatus = myParticipant?.status?.toUpperCase();
 
   const isParticipant = !!myParticipant;
@@ -68,6 +75,7 @@ export function useGameJoin(
 
   const closeJoinModal = useCallback(() => {
     setJoinModalVisible(false);
+    setSelectedTeamId(null);
     setNumPlayers(1);
     setPromoCode('');
   }, []);
@@ -82,32 +90,30 @@ export function useGameJoin(
   // ── API actions ───────────────────────────────────────────────────────────
   const confirmJoin = async (method?: PaymentMethod) => {
     if (isJoining || !game) return;
-    // Paid game requires a chosen method
     if (breakdown.total > 0 && !method) return;
-
     setIsJoining(true);
     try {
       // 1. Join first: backend creates the participant + PaymentIntent
-      const response = await authenticatedApi.post(`games/${game.id}/join`, null, {
-        params: { guestNumber: players - 1 },
+      const response = await authenticatedApi.post(`games/${game.id}/join`, {
+        guestNumber: players - 1,
+        teamId: selectedTeamId,
+        hasBall: hasBall,
       });
-      console.log('Join response:', response);
+
       if (response.status === 200) {
         // 2. Paid game: pay with the chosen method
-        const clientSecret = response?.result?.data?.clientSecret;
+        /*const clientSecret = response?.result?.data?.clientSecret;
         if (clientSecret) {
           const result = await PaymentService.payWithStripe(clientSecret);
           if (!result.success) return;
-        }
+        }*/
 
         closeJoinModal();
         setSuccessVisible(true);
         await onRefresh?.();
       }
-     setJoinModalVisible(false);
-     onRefresh?.();
-    } catch (e) {
-      console.error('Join failed:', e);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.message ?? 'Could not join the game.');
     } finally {
       setIsJoining(false);
     }
@@ -133,13 +139,13 @@ export function useGameJoin(
   // Pay for an existing pending participant
   const pay = async (e?: GestureResponderEvent) => {
     stop(e);
-    if (isJoining || !game) return;
+    if (isJoining || !game || !myParticipant) return;
 
     setIsJoining(true);
     try {
       const response = await authPaymentApi.post('create-intent', {
         ItemType: 'game',
-        ItemId: String(myParticipant?.id),
+        ItemId: String(myParticipant.id),
       });
       const clientSecret = response?.result?.data;
 
@@ -160,6 +166,9 @@ export function useGameJoin(
     isLogged,
     // status
     isParticipant,
+    myParticipant,
+    myTeam,
+    allParticipants,
     isJoined,
     isPendingPayment,
     isFull,
@@ -186,7 +195,11 @@ export function useGameJoin(
     confirmJoin,
     confirmUnjoin,
     pay,
+    selectedTeamId,
+    setSelectedTeamId,
+    hasBall,
+    setHasBall
   };
 }
 
-export type GameJoinState = ReturnType<typeof useGameJoin>;
+export type GameJoinState = ReturnType<typeof useGameJoin>; 

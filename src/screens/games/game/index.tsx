@@ -20,6 +20,7 @@ import { useGameJoin } from '@components/Game/useGame';
 import GameJoinModals from '@components/Game/GameJoinModals';
 import type { Game } from '@components/Game/types';
 import { isStoredTokenExpired } from '@utils/api/auth';
+import TeamJoinSection from '@components/Game/TeamJoinSection';
 
 export default function GameDetailsScreen({ route }: { route: any }) {
   const { t } = useTranslation();
@@ -41,6 +42,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
     try {
       const response = await publicApi.get(`games/${gameId}`);
       setGame(response.result.data);
+      console.log('Fetched game:', response.result.data);
       setSportType(response.result.data.sportType.name);
       setParticipants(response.result.data.participants);
     } catch (error) {
@@ -256,17 +258,22 @@ export default function GameDetailsScreen({ route }: { route: any }) {
             </View>
 
             {/* Players Section */}
-            <View style={styles.section}>
-              <Icon type="materialCommunityIcons" name="account-multiple" size={24} color={COLORS.secondary} />
-              <View style={styles.textContainer}>
-                <Text style={styles.label}>{t('game.players')} {game?.nbrSpots - game?.availableSpots} /{game.nbrSpots}</Text>
-                <TouchableOpacity
-                  onPress={() => setExpandedDay(expandedDay ? null : 'all')}
-                  style={styles.expandAllButton}
-                >
-                </TouchableOpacity>
-              </View>
+          <View style={styles.section}>
+            <Icon type="materialCommunityIcons" name="account-multiple" size={36} color={COLORS.secondary} />
+            <View style={styles.textContainer}>
+              <Text style={styles.label}>
+                {t('game.players')} {game?.nbrSpots - game?.availableSpots} /{game.nbrSpots}
+              </Text>
             </View>
+          </View>
+
+          <TeamJoinSection
+            teams={game?.teams ?? []}
+            canJoin={!!join.canJoin}
+            isJoined={!!join.isJoined}
+            isJoining={join.isJoining}
+            onJoinTeam={color => join.openJoin(color)}
+          />
             <View style={styles.playersContainer}>
               <View style={styles.playersGrid}>
                 {game?.participants?.map((player, index) => (
@@ -302,17 +309,24 @@ export default function GameDetailsScreen({ route }: { route: any }) {
         {join.isPendingPayment ? (
           <View style={[styles.joinButton, { flexDirection: 'row', gap: 12 }]}>
             <Button
-              title={join.isJoining ? t('common.processing') : t('games.payButton')}
+              title={join.isJoining ? t('common.processing') : t('games.payWithVenmo')}
               filled
               disabled={join.isJoining}
               onPress={handleGetVenmo}
-              style={{ flex: 1, height: SIZES.InputHeight, borderRadius: 32 }}
+              style={{ flex: 1, height: SIZES.InputHeight - 4, borderRadius: 32, backgroundColor: "#008CFF", borderColor: "#008CFF" }}
             />
             <Button
               title={t('games.unjoinButton')}
+              filled
               disabled={join.isJoining}
               onPress={join.openUnjoin}
-              style={{ flex: 1, height: SIZES.InputHeight, borderRadius: 32 }}
+              style={{
+                backgroundColor: COLORS.error,
+                borderColor: COLORS.error,
+                flex: 1,
+                height: SIZES.InputHeight - 4,
+                borderRadius: 32
+              }}
             />
           </View>
         ) : join.isJoined ? (
@@ -322,7 +336,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               filled
               onPress={join.openUnjoin}
               style={{
-                height: SIZES.InputHeight,
+                height: SIZES.InputHeight - 4,
                 borderRadius: 32,
                 borderColor: COLORS.error,
                 backgroundColor: COLORS.error,
@@ -335,7 +349,7 @@ export default function GameDetailsScreen({ route }: { route: any }) {
               title={t('games.joinGameTitle')}
               filled
               onPress={join.openJoin}
-              style={{ height: SIZES.InputHeight, borderRadius: 32 }}
+              style={{ height: SIZES.InputHeight - 4, borderRadius: 32 }}
             />
           </View>
         ) : null}
@@ -519,8 +533,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 14,
-    color: '#666',
+    ...FONTS.h2,
+    color: COLORS.secondary,
+    fontWeight: '600',
   },
   section: {
     flexDirection: 'row',

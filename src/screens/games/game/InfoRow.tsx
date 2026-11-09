@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform,  Clipboard, Alert } from 'react-native';
 import { Icon } from '@components';
 import { COLORS, FONTS } from '@constants';
 
@@ -51,6 +51,10 @@ export default function InfoRow({
       const supported = await Linking.canOpenURL(appUrl);
       await Linking.openURL(supported ? appUrl : webUrl);
   };
+  const handleCopyAddress = () => {
+    Clipboard.setString(value);
+    Alert.alert('Copied!', 'Address copied to clipboard.');
+  };
 
   return (
     <View style={styles.container}>
@@ -66,7 +70,7 @@ export default function InfoRow({
 
         {hideAddress ? (
           <TouchableOpacity
-            onPress={onLoginPress}
+            onPress={handleCopyAddress}
             style={{ flexDirection: 'row', alignItems: 'center' }}
             activeOpacity={0.7}
           >
@@ -81,7 +85,7 @@ export default function InfoRow({
             </Text>
           </TouchableOpacity>
         ) : (
-          <Text style={styles.value}>{value}</Text>
+            <Text style={styles.value}>{value}</Text>
         )}
       </View>
 
@@ -97,14 +101,28 @@ export default function InfoRow({
       )}
 
       {isAddress && isLoggedIn && (
-        <TouchableOpacity onPress={handleGetDirections}>
-          <Icon
-            type="materialCommunityIcons"
-            name="directions"
-            size={28}
-            color={COLORS.primary}
-          />
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity
+            onPress={handleCopyAddress}
+            activeOpacity={0.6}
+            style={{ padding: 8 }}
+          >
+            <Icon
+              type="materialCommunityIcons"
+              name="content-copy"
+              size={20}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+            <TouchableOpacity onPress={handleGetDirections}>
+              <Icon
+                type="materialCommunityIcons"
+                name="directions"
+                size={28}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+        </>
       )}
     </View>
   );

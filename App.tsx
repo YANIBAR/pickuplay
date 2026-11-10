@@ -20,7 +20,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { STRIPE_PUBLISHABLE_KEY } from '@env';
-
+import UpdateGate from './src/shared/components/UpdateGate';
 
 const navigationRef = createNavigationContainerRef();
 
@@ -228,9 +228,11 @@ const App: FC = () => {
   if (!isReady) return null;
 
   return (
-    <NotificationProvider initialData={initialNotifications}>
-      <AppWithNotifications initialRoute={initialRoute} />
-    </NotificationProvider>
+    <UpdateGate>
+      <NotificationProvider initialData={initialNotifications}>
+        <AppWithNotifications initialRoute={initialRoute} />
+      </NotificationProvider>
+    </UpdateGate>
   );
 };
 

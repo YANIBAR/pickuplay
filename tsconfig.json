@@ -13,6 +13,7 @@
     "paths": {
       "@assets/*": ["./src/assets/*"],
       "@constants": ["./src/constants"],
+      "@config": ["./src/config"],
       "@components": ["./src/shared/components"],
       "@components/*": ["./src/shared/components/*"],
       "@services/*": ["./src/services/*"],

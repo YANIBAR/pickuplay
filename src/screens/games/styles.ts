@@ -107,7 +107,7 @@ export default StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: COLORS.white,
@@ -124,7 +124,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 160,
+    width: 240,
     height: 30,
     alignSelf: 'center',
     justifyContent: 'center',

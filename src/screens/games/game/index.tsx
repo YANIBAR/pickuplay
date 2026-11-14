@@ -274,35 +274,6 @@ export default function GameDetailsScreen({ route }: { route: any }) {
             isJoining={join.isJoining}
             onJoinTeam={color => join.openJoin(color)}
           />
-            <View style={styles.playersContainer}>
-              <View style={styles.playersGrid}>
-                {game?.participants?.map((player, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.playerCard, { opacity: player.status == 'PENDING_APPROVAL' ? 0.5 : 1 }]}
-                    onPress={() => navigate('profile', { userId: player.userId })}
-                  >
-                    <Image
-                      source={
-                        imageErrors[player.userId]
-                          ? images.avatar
-                          : { uri: `${JAVA_API}profile/${player?.userId}/image` }
-                      }
-                      onError={() => handleImageError(player.userId)}
-                      style={styles.playerImage}
-                    />
-                    <Text style={styles.playerName} numberOfLines={2}>
-                      {toTitleCase(player.userName)}
-                    </Text>
-                    {(player.number_guest ?? 0) > 0 && (
-                      <Text style={styles.playerName} numberOfLines={2}>
-                        + {player.number_guest} guests
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
           </View>
         </ScrollView>
 
@@ -535,14 +506,14 @@ const styles = StyleSheet.create({
   label: {
     ...FONTS.h2,
     color: COLORS.secondary,
-    fontWeight: '600',
+    fontWeight: '400',
   },
   section: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.grayscale200,
   },
   expandAllButton: {
     padding: 5,

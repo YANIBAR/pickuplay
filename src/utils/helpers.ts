@@ -129,8 +129,9 @@ export const getCurrentCity = async () => {
             const stateCode = state
               ? US_STATE_CODES[state] ?? null
               : null;
-            console.log('Detected city:', data);
+              console.log('cities/search?name=' + city + '&stateCode=' + stateCode);
             const res = await publicApi.get('cities/search?name=' + city + '&stateCode=' + stateCode);
+            console.log('Detected city:', res);
             let cityData = res.result.data[0];
           resolve(cityData);
         } catch (err) {

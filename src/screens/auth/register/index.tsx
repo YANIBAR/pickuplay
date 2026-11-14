@@ -1,100 +1,114 @@
-import  { useState, useEffect } from 'react';
-import { View, Image, SafeAreaView } from 'react-native';
-import { Text, Header, TextInput, Button, Row, Column, Phone } from '@components';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Image, SafeAreaView, Alert } from 'react-native';
+import { Text, Header, TextInput, Button, Row, Column } from '@components';
 import { Controller, useForm } from 'react-hook-form';
-import {  useNavigation } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import { authSelector } from '../../../app/slices/auth';
-import { COLORS, icons, images, screens  } from '@constants';
+import { COLORS, icons, images, screens } from '@constants';
 import { useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@utils/validators';
 import styles from './styles';
 import { publicApi } from '@services/api';
 import { getCurrentCity } from '@utils/helpers';
+import { Dropdown } from 'react-native-element-dropdown';
+
 type Nav = {
   navigate: (value: string, params?: any) => void;
 };
 
+type CityOption = { label: string; value: string };
+
 const SignUp = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const { isLoading } = useSelector(authSelector);
-  const [callingCode, setCallingCode] = useState('+1'); // default US
-
   const { navigate } = useNavigation<Nav>();
 
+  const [callingCode] = useState('+1'); // default US
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const {
-    reset,
     control,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitSuccessful, isValid  },
-  }  = useForm({
+    formState: { errors, isValid },
+  } = useForm({
     resolver: yupResolver(registerSchema),
     mode: 'onChange',
   });
- const [apiError, setApiError] = useState<string | null>(null);
 
   const onSubmit = async (formData: any) => {
-    setApiError(null); // Reset error
-    const city = await getCurrentCity();
+    setApiError(null);
+
+    // Use the city the user selected; fall back to detected city only if none chosen
+    let cityId = formData.cityId;
+    if (!cityId) {
+      const city = await getCurrentCity();
+      if (city?.id != null) cityId = String(city.id);
+    }
+
     const payload = {
       ...formData,
       ...(formData.phone ? { phone: `${callingCode}${formData.phone}` } : {}),
-      ...(city?.id != null ? { cityId: city.id } : {}),
+      ...(cityId ? { cityId } : {}),
     };
 
     try {
-      await publicApi.post("auth/register", payload);
+      await publicApi.post('auth/register', payload);
       navigate(screens.otpverification, {
         email: payload.email,
         phone: payload.phone,
-        action: "register",
+        action: 'register',
         password: payload.password,
       });
-
     } catch (error: any) {
-      // Axios error: error.response?.data?.message or similar
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
-        "Registration failed. Please try again.";
+        'Registration failed. Please try again.';
 
-      // Option 1: Show as a general error
       setApiError(message);
 
-      // Option 2: Set field-specific error (if backend returns which field is duplicated)
-      if (message.toLowerCase().includes("email")) {
-        setError("email", { type: "manual", message });
+      const lower = message.toLowerCase();
+      if (lower.includes('email')) {
+        setError('email', { type: 'manual', message });
       }
-      if (message.toLowerCase().includes("phone")) {
-        setError("phone", { type: "manual", message });
+      if (lower.includes('phone')) {
+        setError('phone', { type: 'manual', message });
       }
     }
   };
 
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      //reset();
+  const getCities = useCallback(async () => {
+    try {
+      const response = await publicApi.get('cities');
+      const cityList = response?.result?.data ?? [];
+      setCities(
+        cityList
+          .map((city: any) => ({ label: city.name, value: String(city.id) }))
+          .sort((a: CityOption, b: CityOption) => a.label.localeCompare(b.label))
+      );
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.message ?? 'Failed to load cities');
+      setCities([]);
     }
-  }, [isSubmitSuccessful, reset]);
+  }, []);
 
-  /*useFocusEffect(
-    useCallback(() => {
-      return () => reset();
-    }, [reset])
-  );*/
+  useEffect(() => {
+    getCities();
+  }, [getCities]);
 
   return (
     <SafeAreaView style={[styles.area, { backgroundColor: COLORS.white }]}>
       <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-      
         <Header title={t('c.signUp')} />
         <View style={styles.logoContainer}>
           <Image source={images.logo} resizeMode="contain" style={styles.logo} />
         </View>
-        <Text style={styles.title}>{t('signUp.createAccount')} </Text>
+        <Text style={styles.title}>{t('signUp.createAccount')}</Text>
+
         <Row>
           <Column style={{ flex: 0.5, marginRight: 5 }}>
             <Controller
@@ -129,6 +143,32 @@ const SignUp = () => {
             />
           </Column>
         </Row>
+
+        <Controller
+          name="cityId"
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <Dropdown
+                data={cities}
+                labelField="label"
+                valueField="value"
+                search
+                placeholder={t('edit_game.select_city')}
+                value={value}
+                onBlur={onBlur}
+                onChange={(item) => onChange(String(item.value))}
+                style={styles.dropdown}
+              />
+              {errors?.cityId?.message ? (
+                <Text style={{ color: COLORS.red ?? 'red' }}>
+                  {errors.cityId.message as string}
+                </Text>
+              ) : null}
+            </>
+          )}
+        />
+
         <Controller
           name="email"
           control={control}
@@ -139,80 +179,12 @@ const SignUp = () => {
               icon={icons.email}
               onChangeText={onChange}
               keyboardType="email-address"
+              autoCapitalize="none"
               placeholder={t('c.emailAddress')}
               errorText={errors?.email?.message}
             />
           )}
         />
-        
-        {/* Checkbox to show/hide store-related fields
-        <View style={styles.checkBoxContainer}>
-          <View style={{ flexDirection: 'row' }}>
-            <Checkbox
-              style={styles.checkbox}
-              value={isChecked}
-              color={isChecked ? COLORS.primary : 'gray'}
-              onValueChange={setChecked}  // Handle checkbox value change
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.privacy, { color: COLORS.black }]}>
-                Sign up as store
-              </Text>
-            </View>
-          </View>
-        </View> */}
-
-        {/* Conditionally render store fields if checkbox is checked 
-        {isChecked && (
-          <>
-            <Controller
-              name="storeName"
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  icon={icons.restaurant}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder={t('storeSignUp.storeName')}
-                  errorText={errors?.storeName?.message}
-                />
-              )}
-            />
-            {/* Store Category Dropdown 
-          <View>
-              <RNPickerSelect
-                placeholder={{ label: 'Select', value: '' }}
-                items={categoryOptions}
-                icon={icons.padlock}
-                onValueChange={(value) => handleCategoryChange(value)}
-                value={selectedCategory}
-                style={{
-                  inputIOS: {
-                    fontSize: 16,
-                    paddingHorizontal: 10,
-                    borderRadius: 4,
-                    color: COLORS.grayscale600,
-                    paddingRight: 30,
-                    height: 52,
-                    alignItems: 'center',
-                    backgroundColor: COLORS.grayscale500,
-                  },
-                  inputAndroid: {
-                    fontSize: 16,
-                    paddingHorizontal: 10,
-                    borderRadius: 8,
-                    color: COLORS.grayscale600,
-                    paddingRight: 30,
-                    height: 52,
-                    alignItems: 'center',
-                    backgroundColor: COLORS.grayscale500,
-                  },
-                }}
-              />
-            </View>
-          </>
-        )}*/}
 
         <Controller
           name="password"
@@ -226,7 +198,7 @@ const SignUp = () => {
               autoCapitalize="none"
               onChangeText={onChange}
               placeholder={t('c.passwordPlaceholder')}
-              secureTextEntry={true}
+              secureTextEntry
               errorText={errors?.password?.message}
             />
           )}
@@ -244,11 +216,15 @@ const SignUp = () => {
               autoCapitalize="none"
               onChangeText={onChange}
               placeholder={t('c.confirmPasswordPlaceholder')}
-              secureTextEntry={true}
+              secureTextEntry
               errorText={errors?.confirmPwd?.message}
             />
           )}
         />
+
+        {apiError ? (
+          <Text style={{ color: COLORS.red ?? 'red', marginBottom: 8 }}>{apiError}</Text>
+        ) : null}
 
         <Button
           filled
@@ -257,10 +233,9 @@ const SignUp = () => {
           title={t('signUp.createMyAccount')}
           onPress={handleSubmit(onSubmit)}
           style={styles.button}
-        />    
+        />
       </View>
     </SafeAreaView>
-    
   );
 };
 

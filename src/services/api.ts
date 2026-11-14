@@ -1,7 +1,7 @@
-import { JAVA_API, PAYMENT_API, DEV_JAVA_API } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
 import { Alert } from "react-native";
+import { JAVA_API, DEV_JAVA_API, PAYMENT_API } from "@env";
 
 // ✅ Shared across ALL instances so only one refresh runs at a time
 let isRefreshing = false;
@@ -11,10 +11,13 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(prom => (error ? prom.reject(error) : prom.resolve(token!)));
   failedQueue = [];
 };
+const BASE_URL = __DEV__ ? DEV_JAVA_API : JAVA_API;
 
 const createApi = (requiresAuth: boolean, baseURL?: string | null) => {
+
+  console.log('BASE_URL:', BASE_URL);
   const instance = axios.create({
-    baseURL: baseURL ?? JAVA_API,   // null/undefined -> JAVA_API
+    baseURL: baseURL ?? BASE_URL,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -58,7 +61,7 @@ const createApi = (requiresAuth: boolean, baseURL?: string | null) => {
         try {
           const refreshToken = await AsyncStorage.getItem('refresh_token');
           if (!refreshToken) throw new Error('No refresh token');
-          const response = await axios.post(`${JAVA_API}auth/refresh`, {
+          const response = await axios.post(`${BASE_URL}auth/refresh`, {
             "refresh_token": refreshToken
           });
           console.log(response);
@@ -92,7 +95,5 @@ export const publicApi = createApi(false);
 
 // Other microservices
 export const paymentApi = createApi(true, PAYMENT_API);
-export const authDevApi = createApi(true, DEV_JAVA_API);
-export const publicDevApi = createApi(false, DEV_JAVA_API);
 
 export default publicApi;

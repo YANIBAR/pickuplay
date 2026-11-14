@@ -97,6 +97,18 @@ export default StyleSheet.create({
     color: COLORS.grayscale900,
     marginLeft: 16
   },
+
+  dropdown: {
+    width: '100%',
+    paddingHorizontal: SIZES.padding,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: COLORS.grayscale300,
+    marginVertical: 5,
+    flexDirection: 'row',
+    height: SIZES.InputHeight,
+    alignItems: 'center',
+  },
   changeText: {
     fontSize: 16,
     fontFamily: "semiBold",

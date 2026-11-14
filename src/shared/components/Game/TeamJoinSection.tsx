@@ -150,43 +150,64 @@ export default function TeamJoinSection({ teams = [], maxPerTeam }: Props) {
                     {headcount === 0 ? (
                     <Text style={s.empty}>No players yet.</Text>
                     ) : (
-                    players.map(p => (
+                    players.map(p => {
+                      const isPending = p.status === 'PENDING_APPROVAL';
+
+                      return (
                         <View key={p.id} style={s.playerRow}>
-                        <TouchableOpacity onPress={() => navigate('profile', { userId: p.userId })} style={s.avatarWrap}>
+                          <TouchableOpacity
+                            onPress={() => navigate('profile', { userId: p.userId })}
+                            style={[s.avatarWrap, isPending && s.pending]}
+                          >
                             <Image
-                            source={
+                              source={
                                 failedImages[p.userId]
-                                ? images.avatar
-                                : { uri: `${JAVA_API}profile/${p.userId}/image` }
-                            }
-                            onError={() => setFailedImages(prev => ({ ...prev, [p.userId]: true }))}
-                            style={s.avatar}
+                                  ? images.avatar
+                                  : { uri: `${JAVA_API}profile/${p.userId}/image` }
+                              }
+                              onError={() => setFailedImages(prev => ({ ...prev, [p.userId]: true }))}
+                              style={s.avatar}
                             />
                             {!!p.hasBall && (
-                            <View style={s.ballBadge} accessibilityLabel="Has the ball">
+                              <View style={s.ballBadge} accessibilityLabel="Has the ball">
                                 <Icon
-                                type="materialCommunityIcons"
-                                name="soccer"
-                                size={14}
-                                color={COLORS.grayscale900}
+                                  type="materialCommunityIcons"
+                                  name="soccer"
+                                  size={14}
+                                  color={COLORS.grayscale900}
                                 />
-                            </View>
+                              </View>
                             )}
-                        </TouchableOpacity>
+                          </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => navigate('profile', { userId: s.userId })} style={s.playerInfo}>
+                          <TouchableOpacity
+                            onPress={() => navigate('profile', { userId: p.userId })}
+                            style={[s.playerInfo, isPending && s.pending]}
+                          >
                             <Text style={s.playerName} numberOfLines={1}>
-                            {toTitleCase(p.userName)}
+                              {toTitleCase(p.userName)}
                             </Text>
                             {!!p.number_guest && p.number_guest > 0 && (
-                            <Text style={s.guestText}>
+                              <Text style={s.guestText}>
                                 +{p.number_guest} {p.number_guest === 1 ? 'guest' : 'guests'}
-                            </Text>
+                              </Text>
                             )}
-                        </TouchableOpacity>
-                      </View>
-                    ))
-                    )}
+                          </TouchableOpacity>
+
+                          {isPending && (
+                            <View style={s.unpaidBadge} accessibilityLabel="Hasn't paid yet">
+                              <Icon
+                                type="materialCommunityIcons"
+                                name="cash-remove"
+                                size={20}
+                                color={COLORS.red}
+                              />
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })
+                  )}
                 </View>
             )}
           </View>
@@ -289,7 +310,7 @@ playerInfo: {
   justifyContent: 'center',
 },
 playerName: {
-  ...FONTS.h4,
+  ...FONTS.h3,
   textTransform: 'none',
   color: COLORS.grayscale900,
 },
@@ -297,5 +318,17 @@ guestText: {
   ...FONTS.body4,
   color: COLORS.grayscale600,
   marginTop: 4,
+},
+pending: { opacity: 0.5 },
+unpaidBadge: {
+  marginLeft: SIZES.base,
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: COLORS.white,
+  borderWidth: 1,
+  borderColor: COLORS.red,
 },
 });
